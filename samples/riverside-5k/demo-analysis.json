@@ -1,0 +1,207 @@
+{
+  "summary": "Dana's Mar 9 email raised the order to 150 shirts and moved the race to Sunday May 17, but neither the brief nor the design was updated. The design also shows last year's date and a different website, and uses a third ink color the 2-color price doesn't cover. Five issues block payment.",
+  "proposedSpec": [
+    {
+      "field": "product",
+      "value": "Gildan 64000 Softstyle unisex tee",
+      "confidence": "high"
+    },
+    {
+      "field": "quantity",
+      "value": "150",
+      "confidence": "high"
+    },
+    {
+      "field": "size_breakdown",
+      "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+      "confidence": "high"
+    },
+    {
+      "field": "garment_color",
+      "value": "Navy",
+      "confidence": "high"
+    },
+    {
+      "field": "ink_colors",
+      "value": "2 — white + safety orange",
+      "confidence": "medium"
+    },
+    {
+      "field": "print_text",
+      "value": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+      "confidence": "medium"
+    },
+    {
+      "field": "print_location",
+      "value": "Front center",
+      "confidence": "high"
+    },
+    {
+      "field": "print_dimensions",
+      "value": "11\" wide",
+      "confidence": "high"
+    },
+    {
+      "field": "due_date",
+      "value": "Pickup Saturday May 9, 2026",
+      "confidence": "high"
+    },
+    {
+      "field": "unit_price",
+      "value": "$9.50",
+      "confidence": "high"
+    },
+    {
+      "field": "total_price",
+      "value": "$1,425.00",
+      "confidence": "high"
+    },
+    {
+      "field": "shipping",
+      "value": "In-store pickup",
+      "confidence": "high"
+    }
+  ],
+  "findings": [
+    {
+      "field": "quantity",
+      "severity": "blocking",
+      "title": "Customer asked for 150 shirts; brief still says 120",
+      "explanation": "The Mar 9 email increases the order by 30 shirts. The brief and the confirmed total were never updated.",
+      "evidence": [
+        {
+          "sourceId": "brief",
+          "value": "120",
+          "quote": "Quantity: 120"
+        },
+        {
+          "sourceId": "msg-4",
+          "value": "150",
+          "quote": "we need 150 shirts now — please add the 30 extra as mediums"
+        }
+      ],
+      "suggestedValue": "150",
+      "customerQuestion": "Just confirming: final quantity is 150 shirts, with the extra 30 all in size M?"
+    },
+    {
+      "field": "size_breakdown",
+      "severity": "blocking",
+      "title": "Size breakdown doesn't include the 30 extra mediums",
+      "explanation": "Brief sizes sum to 120. With 30 more mediums the run is S 20 / M 70 / L 40 / XL 15 / 2XL 5 = 150.",
+      "evidence": [
+        {
+          "sourceId": "brief",
+          "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5",
+          "quote": "Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+        },
+        {
+          "sourceId": "msg-4",
+          "value": "+30 M",
+          "quote": "please add the 30 extra as mediums"
+        }
+      ],
+      "suggestedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+      "customerQuestion": "With the extra 30 mediums your sizes would be S 20, M 70, L 40, XL 15, 2XL 5. Does that look right?"
+    },
+    {
+      "field": "print_text",
+      "severity": "blocking",
+      "title": "Printed text on the design has 3 errors: year, race date, and website",
+      "explanation": "The artwork looks reused from last year: it says 2025 instead of 2026. It still prints Saturday, May 16 although the race moved to Sunday, May 17 (Mar 9 email). And it shows riversidefunrun.org while the brief and the customer's email use riverside5k.org.",
+      "evidence": [
+        {
+          "sourceId": "brief",
+          "value": "RIVERSIDE 5K FUN RUN 2026 / Saturday, May 16 / riverside5k.org",
+          "quote": "Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\""
+        },
+        {
+          "sourceId": "design-front",
+          "value": "RIVERSIDE 5K FUN RUN 2025 / SATURDAY, MAY 16 / riversidefunrun.org",
+          "quote": "Artwork reads \"RIVERSIDE 5K\", \"FUN RUN 2025\", \"SATURDAY, MAY 16\", \"riversidefunrun.org\""
+        },
+        {
+          "sourceId": "msg-4",
+          "value": "Sunday May 17",
+          "quote": "the race moved to SUNDAY May 17 because of the park permit"
+        },
+        {
+          "sourceId": "msg-1",
+          "value": "riverside5k.org",
+          "quote": "Dana Whitfield <dana@riverside5k.org>"
+        }
+      ],
+      "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+      "customerQuestion": "Your design file says \"FUN RUN 2025\", \"SATURDAY, MAY 16\" and riversidefunrun.org. Should it read 2026, SUNDAY, MAY 17, and riverside5k.org?"
+    },
+    {
+      "field": "ink_colors",
+      "severity": "blocking",
+      "title": "Design uses 3 ink colors; quote is for 2",
+      "explanation": "The sun and the website are yellow, in addition to white and orange. A third screen changes the price, or the yellow needs to become white/orange.",
+      "evidence": [
+        {
+          "sourceId": "brief",
+          "value": "2 — white + safety orange",
+          "quote": "Ink colors: 2 — white + safety orange"
+        },
+        {
+          "sourceId": "msg-2",
+          "value": "2-color at $9.50",
+          "quote": "For the 2-color front we can do $9.50 per shirt."
+        },
+        {
+          "sourceId": "design-front",
+          "value": "white, orange, yellow",
+          "quote": "Yellow half-sun and yellow URL text in addition to white and orange"
+        }
+      ],
+      "suggestedValue": "2 — white + safety orange (yellow elements switched to orange)",
+      "customerQuestion": "Your design has yellow in it, which would be a third ink color. Can we print the yellow parts in orange to keep the 2-color price, or would you like a 3-color quote?"
+    },
+    {
+      "field": "total_price",
+      "severity": "blocking",
+      "title": "Agreed total of $1,140.00 no longer matches 150 × $9.50 = $1,425.00",
+      "explanation": "The total was set before the quantity change.",
+      "evidence": [
+        {
+          "sourceId": "brief",
+          "value": "$1,140.00",
+          "quote": "total $1,140.00"
+        },
+        {
+          "sourceId": "msg-4",
+          "value": "150 shirts",
+          "quote": "we need 150 shirts now"
+        }
+      ],
+      "suggestedValue": "$1,425.00",
+      "customerQuestion": "With 150 shirts at $9.50 the new total is $1,425.00. OK to proceed at that amount?"
+    },
+    {
+      "field": "unit_price",
+      "severity": "info",
+      "title": "Customer initially asked for $8.50; later accepted $9.50",
+      "explanation": "No conflict remains, noted for the record.",
+      "evidence": [
+        {
+          "sourceId": "msg-1",
+          "value": "$8.50",
+          "quote": "Any chance we can do $8.50 a shirt like last year?"
+        },
+        {
+          "sourceId": "msg-3",
+          "value": "$9.50",
+          "quote": "Ah ok, $9.50 works."
+        }
+      ],
+      "suggestedValue": "$9.50",
+      "customerQuestion": "No question needed."
+    }
+  ],
+  "pricing": {
+    "quantity": 150,
+    "unitPrice": 9.5,
+    "currency": "USD"
+  }
+}
