@@ -2,8 +2,7 @@
 
 > **Status:**
 > - **Agreed:** MVP direction (§1.1–1.2, §1.4) and the role split (§1.3).
-> - **To sign off:** the five points in §2, as refined. Work on a task starts once the points it depends on are
->   initialled by both Dat and Dang.
+> - **Agreed (Oct 28):** the five points in §2, as refined. Work has started.
 
 **Deadline:** Nov 13, 2026 04:00 GMT+8 (= Thu Nov 12, 20:00 UTC).
 **Sprint window:** Wed Oct 28 → Tue Nov 10. Target submit Wed Nov 11; Thu Nov 12 is buffer only.
@@ -28,7 +27,7 @@ approval backend). Every other task has one named owner in §6.
   and shown, but **AI verification of them is not guaranteed**, and the UI labels them that way.
 - **PayPal in the MVP:** authorize, capture, void, webhooks. **Invoicing is out.**
 
-### 1.2 Error resolution and approval flow (agreed in principle; exact rules in §2 points 2–3)
+### 1.2 Error resolution and approval flow (agreed; exact rules in §2 points 2–3)
 1. **Spec errors** (e.g. quantity, price): the merchant confirms the final value.
 2. **Artwork errors** (e.g. wrong year on the design): the merchant **uploads a corrected artwork file** and the AI
    re-checks it. The finding clears only under the verification rule in §2 point 2. Typing a value can't clear it.
@@ -66,26 +65,25 @@ guarantee the AI read the image correctly. So the merchant confirms every value,
 actual artwork before paying. The README, video and Devpost use this wording and make no claim that the AI alone
 guarantees a correct print.
 
-## 2. Open points to settle before starting
+## 2. Detailed rules (agreed Oct 28)
 
-Each point has a proposal. Mark it **Agreed** (or write the alternative) and initial it. Work on the tasks it
-affects starts only after that.
+All five points below were agreed by Dat and Dang on Oct 28.
 
 | # | Point | Status | Dat | Dang |
 |---|---|---|---|---|
-| 1 | Who prepares corrected artwork | Proposed | ☐ | ☐ |
-| 2 | When an artwork error counts as corrected | Proposed | ☐ | ☐ |
-| 3 | What blocks approval: severities, invalid evidence, dismissals, failed checks | Proposed | ☐ | ☐ |
-| 4 | What the Nov 3 checkpoint demonstrates | Proposed | ☐ | ☐ |
-| 5 | Held-out eval cases | Proposed | ☐ | ☐ |
+| 1 | Who prepares corrected artwork | Agreed | ☑ | ☑ |
+| 2 | When an artwork error counts as corrected | Agreed | ☑ | ☑ |
+| 3 | What blocks approval: severities, invalid evidence, dismissals, failed checks | Agreed | ☑ | ☑ |
+| 4 | What the Nov 3 checkpoint demonstrates | Agreed | ☑ | ☑ |
+| 5 | Held-out eval cases | Agreed | ☑ | ☑ |
 
-### Point 1: who prepares the corrected artwork (proposal)
+### Point 1: who prepares the corrected artwork
 - **For the tuning samples and the demo, Dat prepares both the flawed and the corrected artwork file** (AI-6). For
   the held-out samples, Dang does (DG-12). A corrected file fixes exactly the planted artwork issues and nothing else.
 - **In the product, the shop's own designer prepares the corrected file outside ProofPay**, and the merchant
   uploads it. ProofPay never edits or generates images.
 
-### Point 2: when an artwork error counts as corrected (proposal)
+### Point 2: when an artwork error counts as corrected
 "The AI didn't flag it again" is not enough: the AI could miss it, or fail to read the file. An artwork finding
 moves to `resolved_by_artwork` only when **all** of these hold:
 
@@ -120,7 +118,7 @@ These checks confirm the right file was read and that the AI's reading contains 
 guarantee the AI read the image correctly**. That's why the customer still approves the artwork itself (§1.2 (4)),
 and why the product is described as AI-assisted verification (§1.5).
 
-### Point 3: what blocks approval (proposal)
+### Point 3: what blocks approval
 
 | Situation | Blocks approval? | How the merchant clears it |
 |---|---|---|
@@ -142,7 +140,7 @@ accept it" and is shown to the customer. Dismiss means "the problem doesn't exis
   "previously dismissed", not re-opened. A different claim is a new finding.
 - Not shown to the customer, since it isn't an exception to the order. Counted as a false positive in the eval.
 
-### Point 4: the Nov 3 checkpoint (proposal)
+### Point 4: the Nov 3 checkpoint
 The earlier draft asked for the full loop on Nov 3, but scheduled the re-check for Nov 4 and the findings UI for
 Nov 5–6. Proposal: **keep Nov 3, but define it as the minimum loop on the Riverside sample only, with basic UI.**
 
@@ -157,7 +155,7 @@ Nov 5–6. Proposal: **keep Nov 3, but define it as the minimum loop on the Rive
 - To make that possible, the schedule in §6.5 brings forward the basic re-check (AI-5a), basic merchant controls
   (AI-8a), the approval record (DG-5), the basic proof page (DG-7a) and void (DG-3).
 
-### Point 5: held-out eval cases (proposal)
+### Point 5: held-out eval cases
 The samples are an initial test suite, not proof of overall accuracy. Dat writes the tuning samples while tuning the
 prompt, so they can't also count as unseen cases. So:
 - **Dat** builds the **tuning set (6)**, including a prompt-injection case so defenses are developed during tuning.
