@@ -1,0 +1,34 @@
+# Render blueprint (DG-10). New → Blueprint → pick this repo, then fill in the secrets marked sync: false.
+# The persistent disk keeps orders and uploaded artwork across deploys; Render disks need a paid instance type.
+services:
+  - type: web
+    name: proofpay
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: proofpay-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /var/data
+      - key: PAYPAL_API_BASE
+        value: https://api-m.sandbox.paypal.com
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      # Read at build time by the browser bundle: redeploy after changing it.
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: APP_BASE_URL
+        sync: false

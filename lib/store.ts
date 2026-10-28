@@ -6,7 +6,8 @@ import { deriveStatus } from "./orders.ts";
 import type { ArtworkVersion, Order } from "./types.ts";
 
 // Prototype persistence: one JSON file plus an uploads folder. Swap for a database later.
-const DATA_DIR = path.join(process.cwd(), ".data");
+// On a host, point DATA_DIR at a persistent disk.
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
 const DB_FILE = path.join(DATA_DIR, "orders.json");
 export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 

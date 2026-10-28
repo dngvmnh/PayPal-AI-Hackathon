@@ -313,7 +313,12 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. **Registering the webhook needs DG-1 and a public URL** |
 | DG-9 | Done (basic): artwork upload, approval status, iterations with PayPal ids and events, capture / void buttons, history |
 | DG-12 | Done: 3 cases in `samples/heldout/` (format proposal `samples/FORMAT.md`, structural test `tests/samples.test.ts`) |
-| DG-7b, DG-10, DG-11 | Not started |
+| DG-7b | Done: receipt for paid orders, cancelled state, "approve again" notice after a reopen, revision label; no horizontal scroll at 375 px |
+| DG-10 | Prepared: `render.yaml` blueprint with a persistent disk, `DATA_DIR`, `/api/health`. **Deploying needs Dang's Render (or other host) account** |
+| DG-11 | Done: README rewritten (quickstart, sandbox setup, tools used, §1.5 wording, screenshots). **Hosted URL to add after DG-10** |
+| J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (taken against the PayPal stand-in; retake on the frozen build) |
+| J-5 | Prepared: recording checklist and shot list in `docs/VIDEO.md`. Recording is Nov 9–10 |
+| Extra | `npm run mock:paypal` + `npm run e2e`: 17 end-to-end checks of approve → pay → void & reopen → pay → webhook capture without sandbox keys |
 
 **Hand-offs to Dat** (data model is in place; the AI side fills it):
 - `Finding.checkGroup`, `requiresArtworkFix`, `evidenceValid`, `evidenceProblems` exist; the gate already enforces

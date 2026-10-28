@@ -79,3 +79,15 @@ th { font-size: 13px; color: var(--muted); font-weight: 600; }
 .source-text { white-space: pre-wrap; font-size: 13px; background: var(--bg); padding: 10px; border-radius: 8px; max-height: 220px; overflow: auto; }
 .error { color: var(--block); }
 .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.notice { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 8px 0; background: var(--info-bg); }
+.notice.ok { background: var(--ok-bg); border-color: transparent; }
+.receipt { margin-top: 8px; font-size: 13px; }
+.receipt th { width: 38%; }
+code { word-break: break-all; }
+@media (max-width: 480px) {
+  main { padding: 16px 12px 48px; }
+  h1 { font-size: 22px; }
+  .panel { padding: 14px; }
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 4px 12px; }
+  th, td { padding: 6px 4px; }
+}

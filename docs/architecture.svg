@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="560" viewBox="0 0 1040 560" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
+  <title>ProofPay architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44546a"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; rx: 10; }
+      .app { fill: #f2f7ff; stroke: #0070e0; }
+      .ai { fill: #fbf3ea; stroke: #c4733a; }
+      .pp { fill: #eef5fb; stroke: #003087; }
+      .h { font-weight: 700; font-size: 14px; fill: #16202c; }
+      .t { fill: #44546a; }
+      .line { stroke: #44546a; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .lbl { fill: #44546a; font-size: 12px; }
+    </style>
+  </defs>
+  <rect width="1040" height="560" fill="#ffffff"/>
+
+  <!-- people -->
+  <rect class="box" x="20" y="40" width="190" height="96"/>
+  <text class="h" x="36" y="66">Merchant (print shop)</text>
+  <text class="t" x="36" y="88">Brief, messages, artwork</text>
+  <text class="t" x="36" y="106">Confirms values, uploads</text>
+  <text class="t" x="36" y="124">corrected files, captures/voids</text>
+
+  <rect class="box" x="20" y="400" width="190" height="96"/>
+  <text class="h" x="36" y="426">Customer</text>
+  <text class="t" x="36" y="448">Proof page: approves the</text>
+  <text class="t" x="36" y="466">exact version, then pays</text>
+  <text class="t" x="36" y="484">with PayPal buttons (JS SDK)</text>
+
+  <!-- app -->
+  <rect class="box app" x="290" y="30" width="380" height="490"/>
+  <text class="h" x="306" y="56">ProofPay (Next.js app)</text>
+
+  <rect class="box" x="306" y="72" width="348" height="72"/>
+  <text class="h" x="320" y="94">AI check · lib/ai.ts</text>
+  <text class="t" x="320" y="114">All sources in one request; findings with quotes,</text>
+  <text class="t" x="320" y="132">severity, artwork flags; records artwork hashes read</text>
+
+  <rect class="box" x="306" y="160" width="348" height="90"/>
+  <text class="h" x="320" y="182">Resolution · lib/orders.ts</text>
+  <text class="t" x="320" y="202">Confirm value · require corrected artwork</text>
+  <text class="t" x="320" y="220">Waive (reason, shown to customer)</text>
+  <text class="t" x="320" y="238">Dismiss as AI error (reason, logged)</text>
+
+  <rect class="box" x="306" y="266" width="348" height="72"/>
+  <text class="h" x="320" y="288">Approval gate · lib/gate.ts</text>
+  <text class="t" x="320" y="308">Check succeeded on current artwork, nothing open,</text>
+  <text class="t" x="320" y="326">artwork fixed or dismissed, price set</text>
+
+  <rect class="box" x="306" y="354" width="348" height="72"/>
+  <text class="h" x="320" y="376">Saved approval</text>
+  <text class="t" x="320" y="396">versionHash = spec + artwork sha256 + amount</text>
+  <text class="t" x="320" y="414">+ exceptions; any change cancels it</text>
+
+  <rect class="box" x="306" y="442" width="348" height="62"/>
+  <text class="h" x="320" y="464">Payment iterations · lib/paypal.ts, webhooks.ts</text>
+  <text class="t" x="320" y="484">Authorize → capture, or void (cancel / reopen)</text>
+
+  <!-- external -->
+  <rect class="box ai" x="760" y="60" width="260" height="96"/>
+  <text class="h" x="776" y="86">Claude API</text>
+  <text class="t" x="776" y="108">claude-opus-5-5, vision,</text>
+  <text class="t" x="776" y="126">structured output (Zod),</text>
+  <text class="t" x="776" y="144">refusal fallback</text>
+
+  <rect class="box pp" x="760" y="360" width="260" height="150"/>
+  <text class="h" x="776" y="386">PayPal (sandbox)</text>
+  <text class="t" x="776" y="408">Orders v2: create (AUTHORIZE,</text>
+  <text class="t" x="776" y="426">custom_id = order:iter:hash),</text>
+  <text class="t" x="776" y="444">authorize</text>
+  <text class="t" x="776" y="462">Payments v2: capture, void</text>
+  <text class="t" x="776" y="480">Webhooks + signature check</text>
+
+  <rect class="box" x="760" y="210" width="260" height="72"/>
+  <text class="h" x="776" y="236">Storage</text>
+  <text class="t" x="776" y="256">orders.json + uploads in</text>
+  <text class="t" x="776" y="274">DATA_DIR (persistent disk)</text>
+
+  <!-- flows -->
+  <path class="line" d="M210 88 H300"/>
+  <path class="line" d="M654 108 H752"/>
+  <text class="lbl" x="664" y="100">text + images</text>
+  <path class="line" d="M210 448 H300"/>
+  <text class="lbl" x="222" y="438">approve, pay</text>
+  <path class="line" d="M654 470 H752"/>
+  <text class="lbl" x="676" y="462">REST calls</text>
+  <path class="line" d="M752 500 C700 530, 680 530, 660 500"/>
+  <text class="lbl" x="682" y="545">webhooks</text>
+  <path class="line" d="M654 246 H752"/>
+  <path class="line" d="M480 144 V156"/>
+  <path class="line" d="M480 250 V262"/>
+  <path class="line" d="M480 338 V350"/>
+  <path class="line" d="M480 426 V438"/>
+</svg>

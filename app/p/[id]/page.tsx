@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/store.ts";
 import { paymentGate, versionHash, waivedExceptions } from "@/lib/gate.ts";
-import { hasValidApproval } from "@/lib/orders.ts";
+import { currentPayment, hasValidApproval } from "@/lib/orders.ts";
 import { SPEC_FIELDS, SPEC_LABELS } from "@/lib/types.ts";
 import { ProofCheckout } from "@/app/components/ProofCheckout.tsx";
 
@@ -18,10 +18,59 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
   const hash = versionHash(order);
   const approved = hasValidApproval(order);
 
+  const payment = currentPayment(order);
+  const lastVoided = [...order.payments].reverse().find((p) => p.status === "voided");
+
   let panel: React.ReactNode;
-  if (order.status === "cancelled") panel = <p className="muted">This order was cancelled.</p>;
-  else if (order.status === "authorized" || order.status === "captured")
-    panel = <p className="pill ok">Approved and paid. Thank you!</p>;
+  if (order.status === "cancelled")
+    panel = (
+      <div className="notice">
+        <b>This order was cancelled.</b>
+        <p className="small">The PayPal authorization was voided, so no money was taken.</p>
+      </div>
+    );
+  else if ((order.status === "authorized" || order.status === "captured") && order.approval && payment)
+    panel = (
+      <div className="notice ok">
+        <b>{order.status === "captured" ? "Paid. Your order is in production." : "Approved and paid. Thank you!"}</b>
+        <table className="receipt">
+          <tbody>
+            <tr>
+              <th>Amount</th>
+              <td>
+                {order.approval.amount.toFixed(2)} {order.approval.pricing.currency}
+              </td>
+            </tr>
+            <tr>
+              <th>Payment</th>
+              <td>
+                {order.status === "captured"
+                  ? "Captured (production started)"
+                  : "Authorized: held by PayPal, taken when production starts"}
+              </td>
+            </tr>
+            <tr>
+              <th>Approved by</th>
+              <td>
+                {order.approval.approvedBy.name}, {new Date(order.approval.approvedAt).toLocaleString()}
+              </td>
+            </tr>
+            <tr>
+              <th>Version</th>
+              <td>
+                <code>{order.approval.versionHash.slice(0, 12)}</code>
+              </td>
+            </tr>
+            <tr>
+              <th>PayPal order</th>
+              <td>
+                <code>{payment.paypalOrderId}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
   else if (!gate.ok) panel = <p className="error small">This proof isn&apos;t ready yet. The shop is still finalizing it.</p>;
   else
     panel = (
@@ -103,7 +152,14 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
           </p>
           <p className="small muted">
             Version <code>{hash.slice(0, 12)}</code>
+            {order.iteration > 1 && <> · revision {order.iteration}</>}
           </p>
+          {lastVoided && order.iteration > lastVoided.iteration && !payment && (
+            <p className="notice small">
+              The order changed after your earlier payment, so that payment was released. Please check this
+              version and approve again.
+            </p>
+          )}
           {panel}
         </div>
       </div>
