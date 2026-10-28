@@ -35,6 +35,16 @@ export const SPEC_LABELS: Record<SpecField, string> = {
 
 export type SourceKind = "brief" | "message" | "design";
 
+export interface ArtworkVersion {
+  version: number;
+  /** Stored filename under .data/uploads/<orderId>/ */
+  file: string;
+  mimeType: string;
+  sha256: string;
+  uploadedAt: string;
+  note?: string;
+}
+
 export interface Source {
   id: string;
   kind: SourceKind;
@@ -42,9 +52,11 @@ export interface Source {
   name: string;
   /** Text content for briefs and messages */
   text?: string;
-  /** For design files: stored filename under .data/uploads/<orderId>/ */
+  /** For design files: the current version's stored filename (mirrors the last entry of `versions`) */
   file?: string;
   mimeType?: string;
+  /** For design files: every uploaded version, oldest first. The last one is current. */
+  versions?: ArtworkVersion[];
 }
 
 // ---------- AI output (structured) ----------
@@ -102,14 +114,55 @@ export type AIAnalysis = z.infer<typeof AIAnalysis>;
 
 // ---------- Stored order ----------
 
-export type FindingStatus = "open" | "resolved" | "waived";
+export type FindingStatus =
+  | "open"
+  | "resolved" // merchant confirmed a spec value
+  | "awaiting_artwork" // required artwork fields set, waiting for a verified corrected file
+  | "resolved_by_artwork" // corrected artwork verified by a re-check (PLAN §2 point 2)
+  | "waived" // real problem, accepted with a reason shown to the customer
+  | "dismissed_ai_error"; // problem doesn't exist; reason logged, not shown to the customer
+
+export type CheckGroup = "quantity_sizes" | "text_dates" | "colors" | "pricing";
+
+export type RequiredArtworkField = "year" | "date" | "name" | "url" | "text_line" | "ink_colors";
+
+export interface Dismissal {
+  at: string;
+  reason: string;
+  /** ranAt of the analysis the dismissed finding came from */
+  analysisRanAt: string;
+  /** sha256 of each design source's current version at the time of dismissal */
+  artworkHashes: Record<string, string>;
+  checkedArtworkMyself: boolean;
+}
 
 export interface Finding extends AIFinding {
   id: string;
   status: FindingStatus;
-  /** Value the merchant settled on */
+  checkGroup?: CheckGroup;
+  /** The artwork itself is wrong; only a verified corrected file or a dismissal clears it */
+  requiresArtworkFix?: boolean;
+  /** Set by evidence validation; false means at least one evidence item didn't check out */
+  evidenceValid?: boolean;
+  evidenceProblems?: string[];
+  /** Value the merchant settled on (status "resolved") */
   resolvedValue?: string;
-  resolutionNote?: string;
+  /** Merchant typed the value for a finding with invalid evidence */
+  acceptedDespiteInvalidEvidence?: boolean;
+  /** What the corrected artwork must show (status "awaiting_artwork") */
+  requiredFields?: { field: RequiredArtworkField; value: string }[];
+  waiveReason?: string;
+  dismissal?: Dismissal;
+}
+
+export interface ArtworkVerification {
+  findingId: string;
+  field: RequiredArtworkField;
+  expected: string;
+  observed: string | null;
+  matches: boolean;
+  codeCheck: "pass" | "fail";
+  reason?: string;
 }
 
 export interface Analysis {
@@ -117,17 +170,65 @@ export interface Analysis {
   model: string;
   /** true when the canned demo analysis was used because no API key is configured */
   demo: boolean;
+  /** A failed check keeps the order blocked until it is re-run */
+  status: "succeeded" | "failed";
+  error?: string;
+  /** sha256 of each design source's version that this check actually read, by source id */
+  artworkHashes: Record<string, string>;
+  /** Filled by the verified re-check (AI-5a) */
+  artworkReadings?: { sourceId: string; sha256: string; textElements: string[]; inkColors: string[] }[];
+  verifications?: ArtworkVerification[];
   summary: string;
   findings: Finding[];
 }
 
 export type OrderStatus =
   | "draft" // sources collected, not yet checked
-  | "needs_review" // AI found open issues
-  | "ready_for_proof" // all blocking issues settled
-  | "proof_sent" // customer link shared
-  | "authorized" // customer approved proof + PayPal authorization
-  | "captured"; // merchant captured funds (production started)
+  | "needs_review" // open issues, or the last check failed / is stale
+  | "ready_for_approval" // gate passes; waiting for the customer
+  | "approved" // customer approved this exact version (saved on the server)
+  | "authorized" // PayPal authorization held; order locked
+  | "captured" // funds captured; production started
+  | "cancelled"; // authorization voided without reopening
+
+export interface Approval {
+  id: string;
+  iteration: number;
+  versionHash: string;
+  spec: Partial<Record<SpecField, string>>;
+  pricing: { quantity: number; unitPrice: number; currency: string };
+  amount: number;
+  artworkHashes: Record<string, string>;
+  /** Exceptions shown to the customer before approving */
+  waived: { findingId: string; title: string; reason: string }[];
+  approvedAt: string;
+  approvedBy: { name: string; userAgent?: string };
+}
+
+export interface PaymentEvent {
+  at: string;
+  /** PayPal webhook event id, or "api" for responses to our own calls */
+  id: string;
+  type: string;
+  summary: string;
+}
+
+export interface PaymentIteration {
+  iteration: number;
+  approvalId: string;
+  versionHash: string;
+  paypalOrderId?: string;
+  authorizationId?: string;
+  captureId?: string;
+  status: "created" | "authorized" | "captured" | "voided";
+  events: PaymentEvent[];
+}
+
+export interface HistoryEntry {
+  at: string;
+  type: string;
+  summary: string;
+}
 
 export interface Order {
   id: string;
@@ -142,13 +243,14 @@ export interface Order {
   /** Final spec after AI proposal + merchant resolutions */
   spec: Partial<Record<SpecField, string>>;
   pricing: { quantity: number | null; unitPrice: number | null; currency: string };
-  /** Hash of spec+pricing the customer approved; sent to PayPal as custom_id */
-  approvedSpecHash?: string;
   status: OrderStatus;
-  paypal?: {
-    orderId?: string;
-    authorizationId?: string;
-    captureId?: string;
-    lastStatus?: string;
-  };
+  /** Payment iteration; increases by one each time an authorization is voided and the order reopened */
+  iteration: number;
+  /** The customer's current approval. Cleared as soon as the approved version changes. */
+  approval?: Approval;
+  /** Every approval ever given, including cancelled ones */
+  approvals: Approval[];
+  payments: PaymentIteration[];
+  cancelled?: boolean;
+  history: HistoryEntry[];
 }

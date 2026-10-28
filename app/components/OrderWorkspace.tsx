@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { GateResult } from "@/lib/gate.ts";
-import { SPEC_FIELDS, SPEC_LABELS, type Finding, type Order } from "@/lib/types.ts";
+import {
+  SPEC_FIELDS,
+  SPEC_LABELS,
+  type Finding,
+  type Order,
+  type RequiredArtworkField,
+} from "@/lib/types.ts";
 import { post } from "./api.ts";
 import { StatusPill } from "./status.tsx";
 
@@ -13,26 +19,33 @@ interface Props {
   gate: GateResult;
   aiConfigured: boolean;
   paypalConfigured: boolean;
+  /** true when the last check read different artwork than the current versions */
+  checkStale: boolean;
 }
 
-export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: Props) {
+const LOCKED = new Set(["authorized", "captured", "cancelled"]);
+const HANDLED = new Set(["resolved", "resolved_by_artwork", "waived", "dismissed_ai_error"]);
+
+export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, checkStale }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState<string>();
   const [error, setError] = useState<string>();
-  const locked = Boolean(order.paypal?.authorizationId);
+  const locked = LOCKED.has(order.status);
 
-  async function run(label: string, url: string, body?: unknown) {
+  async function run(label: string, fn: () => Promise<unknown>) {
     setBusy(label);
     setError(undefined);
     try {
-      await post(url, body);
+      await fn();
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      router.refresh();
     } finally {
       setBusy(undefined);
     }
   }
+  const api = (label: string, url: string, body?: unknown) => run(label, () => post(url, body));
 
   const findings = order.analysis?.findings ?? [];
   const openQuestions = findings.filter((f) => f.status === "open" && f.severity !== "info");
@@ -46,13 +59,14 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
           <div className="muted">
             {order.customerName} {order.customerEmail && `· ${order.customerEmail}`} ·{" "}
             <StatusPill status={order.status} />
+            {order.iteration > 1 && <span className="small"> · iteration {order.iteration}</span>}
           </div>
         </div>
         <div className="row">
           <button
-            className={order.analysis ? "" : "primary"}
+            className={!order.analysis || checkStale ? "primary" : ""}
             disabled={!!busy || locked}
-            onClick={() => run("analyze", `/api/orders/${order.id}/analyze`)}
+            onClick={() => api("analyze", `/api/orders/${order.id}/analyze`)}
           >
             {busy === "analyze" ? "Checking all sources…" : order.analysis ? "Re-run AI check" : "Run AI check"}
           </button>
@@ -68,11 +82,17 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
       {error && <p className="error">{error}</p>}
 
       <div className={`gate ${gate.ok ? "open" : "blocked"}`}>
-        <b>{gate.ok ? "Payment unlocked" : "Payment blocked"}</b>
-        {gate.ok ? (
-          <> — {gate.amount?.toFixed(2)} {order.pricing.currency} ready to collect via PayPal.</>
+        {locked ? (
+          <b>Order locked: {order.status === "cancelled" ? "cancelled" : "payment held or captured"}.</b>
         ) : (
-          <> — {gate.reasons.join(" ")}</>
+          <>
+            <b>{gate.ok ? "Ready for customer approval" : "Approval blocked"}</b>
+            {gate.ok ? (
+              <> — {gate.amount?.toFixed(2)} {order.pricing.currency}. Send the customer the proof link.</>
+            ) : (
+              <> — {gate.reasons.join(" ")}</>
+            )}
+          </>
         )}
       </div>
 
@@ -83,10 +103,11 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
               <div className="row spread">
                 <h2>AI findings</h2>
                 <span className="small muted">
-                  {order.analysis.demo ? "demo fixture" : order.analysis.model} ·{" "}
+                  {order.analysis.status === "failed" ? "last check FAILED" : order.analysis.demo ? "demo fixture" : order.analysis.model} ·{" "}
                   {new Date(order.analysis.ranAt).toLocaleString()}
                 </span>
               </div>
+              {order.analysis.status === "failed" && <p className="error small">{order.analysis.error}</p>}
               <p>{order.analysis.summary}</p>
               {findings.length === 0 && <p className="pill ok">All sources agree.</p>}
               {findings.map((f) => (
@@ -95,12 +116,14 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
                   finding={f}
                   sourceName={sourceName}
                   disabled={!!busy || locked}
-                  onAction={(body) => run(f.id, `/api/orders/${order.id}/findings/${f.id}`, body)}
+                  onAction={(body) => api(f.id, `/api/orders/${order.id}/findings/${f.id}`, body)}
                 />
               ))}
               {openQuestions.length > 0 && <ClarificationDraft order={order} findings={openQuestions} />}
             </div>
           )}
+
+          <ArtworkPanel order={order} disabled={!!busy || locked} checkStale={checkStale} run={run} />
 
           <div className="panel">
             <h2>Sources ({order.sources.length})</h2>
@@ -110,15 +133,6 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
                   <span className="pill info">{s.kind}</span> {s.name} <span className="small muted">({s.id})</span>
                 </summary>
                 {s.text && <div className="source-text">{s.text}</div>}
-                {s.file && s.mimeType?.startsWith("image/") && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={`/api/files/${order.id}/${s.file}`} alt={s.name} className="thumb" style={{ maxWidth: 320 }} />
-                )}
-                {s.file && s.mimeType === "application/pdf" && (
-                  <a href={`/api/files/${order.id}/${s.file}`} target="_blank" rel="noreferrer">
-                    Open PDF
-                  </a>
-                )}
               </details>
             ))}
           </div>
@@ -143,7 +157,7 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
                             style={{ padding: "0 6px" }}
                             onClick={() => {
                               const value = prompt(SPEC_LABELS[field], order.spec[field] ?? "");
-                              if (value != null) run(field, `/api/orders/${order.id}/spec`, { field, value });
+                              if (value != null) api(field, `/api/orders/${order.id}/spec`, { field, value });
                             }}
                           >
                             edit
@@ -157,61 +171,17 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
             )}
           </div>
 
+          <PaymentPanel order={order} gate={gate} paypalConfigured={paypalConfigured} disabled={!!busy} api={api} />
+
           <div className="panel">
-            <h2>Payment (PayPal)</h2>
-            {!paypalConfigured && <p className="error small">PayPal sandbox credentials are not set in .env.local.</p>}
-            <p className="small">
-              Amount: <b>{gate.amount != null ? `${gate.amount.toFixed(2)} ${order.pricing.currency}` : "—"}</b>
-              {order.approvedSpecHash && (
-                <>
-                  <br />
-                  Approved spec hash: <code>{order.approvedSpecHash}</code>
-                </>
-              )}
-              {order.paypal?.orderId && (
-                <>
-                  <br />
-                  PayPal order: <code>{order.paypal.orderId}</code> ({order.paypal.lastStatus})
-                </>
-              )}
-              {order.paypal?.authorizationId && (
-                <>
-                  <br />
-                  Authorization: <code>{order.paypal.authorizationId}</code>
-                </>
-              )}
-              {order.paypal?.captureId && (
-                <>
-                  <br />
-                  Capture: <code>{order.paypal.captureId}</code>
-                </>
-              )}
-            </p>
-            <div className="row">
-              {(order.status === "ready_for_proof" || order.status === "proof_sent") && (
-                <button
-                  className={order.status === "ready_for_proof" ? "primary" : ""}
-                  disabled={!!busy}
-                  onClick={() => run("proof", `/api/orders/${order.id}/spec`, { action: "send_proof" })}
-                >
-                  {order.status === "proof_sent" ? "Proof sent ✓" : "Send proof to customer"}
-                </button>
-              )}
-              {gate.ok && (
-                <Link href={`/p/${order.id}`} className="button" target="_blank">
-                  Open customer proof page ↗
-                </Link>
-              )}
-              {order.status === "authorized" && (
-                <button
-                  className="primary"
-                  disabled={!!busy}
-                  onClick={() => run("capture", `/api/orders/${order.id}/paypal/capture`)}
-                >
-                  Start production &amp; capture payment
-                </button>
-              )}
-            </div>
+            <h2>History</h2>
+            <ul className="evidence">
+              {[...order.history].reverse().slice(0, 30).map((h, i) => (
+                <li key={i}>
+                  <span className="muted">{new Date(h.at).toLocaleString()}</span> — {h.summary}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -219,6 +189,183 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured }: 
   );
 }
 
+function ArtworkPanel({
+  order,
+  disabled,
+  checkStale,
+  run,
+}: {
+  order: Order;
+  disabled: boolean;
+  checkStale: boolean;
+  run: (label: string, fn: () => Promise<unknown>) => Promise<void>;
+}) {
+  const designs = order.sources.filter((s) => s.kind === "design");
+  if (!designs.length) return null;
+  return (
+    <div className="panel">
+      <h2>Artwork</h2>
+      {checkStale && <p className="error small">Artwork changed since the last AI check. Re-run the check.</p>}
+      {designs.map((s) => {
+        const current = s.versions?.at(-1);
+        return (
+          <div key={s.id} style={{ marginBottom: 16 }}>
+            <h3>
+              {s.name} <span className="small muted">current: v{current?.version} · {current?.sha256.slice(0, 12)}</span>
+            </h3>
+            {current?.mimeType.startsWith("image/") && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/api/files/${order.id}/${current.file}`} alt={s.name} className="thumb" style={{ maxWidth: 320 }} />
+            )}
+            {current?.mimeType === "application/pdf" && (
+              <a href={`/api/files/${order.id}/${current.file}`} target="_blank" rel="noreferrer">
+                Open PDF
+              </a>
+            )}
+            {(s.versions?.length ?? 0) > 1 && (
+              <ul className="evidence">
+                {s.versions!.map((v) => (
+                  <li key={v.version}>
+                    <a href={`/api/files/${order.id}/${v.file}`} target="_blank" rel="noreferrer">
+                      v{v.version}
+                    </a>{" "}
+                    {new Date(v.uploadedAt).toLocaleString()} · {v.sha256.slice(0, 12)} {v.note && `· ${v.note}`}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!disabled && (
+              <form
+                className="row"
+                style={{ marginTop: 8 }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = new FormData(e.currentTarget);
+                  form.set("sourceId", s.id);
+                  run(`upload-${s.id}`, async () => {
+                    const res = await fetch(`/api/orders/${order.id}/artwork`, { method: "POST", body: form });
+                    const json = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(json.error ?? `Upload failed (${res.status})`);
+                  });
+                }}
+              >
+                <input name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" style={{ flex: 2, minWidth: 180 }} />
+                <input name="note" placeholder="What changed (optional)" style={{ flex: 2, minWidth: 140 }} />
+                <button>Upload corrected version</button>
+              </form>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PaymentPanel({
+  order,
+  gate,
+  paypalConfigured,
+  disabled,
+  api,
+}: {
+  order: Order;
+  gate: GateResult;
+  paypalConfigured: boolean;
+  disabled: boolean;
+  api: (label: string, url: string, body?: unknown) => Promise<void>;
+}) {
+  const current = order.payments.find((p) => p.iteration === order.iteration);
+  const askVoid = (reopen: boolean) => {
+    const reason = prompt(reopen ? "Why reopen this order? (the customer will need to approve again)" : "Why cancel this order?");
+    if (reason) api("void", `/api/orders/${order.id}/paypal/void`, { reopen, reason });
+  };
+  return (
+    <div className="panel">
+      <h2>Approval &amp; payment (PayPal)</h2>
+      {!paypalConfigured && <p className="error small">PayPal sandbox credentials are not set in .env.local.</p>}
+      <p className="small">
+        Amount: <b>{gate.amount != null ? `${gate.amount.toFixed(2)} ${order.pricing.currency}` : "—"}</b>
+        <br />
+        Customer approval:{" "}
+        {order.approval ? (
+          <>
+            <b>{order.approval.approvedBy.name}</b>, {new Date(order.approval.approvedAt).toLocaleString()} · version{" "}
+            <code>{order.approval.versionHash.slice(0, 12)}</code>
+          </>
+        ) : (
+          <span className="muted">none for the current version</span>
+        )}
+      </p>
+      <div className="row">
+        {(gate.ok || order.status === "approved") && (
+          <Link href={`/p/${order.id}`} className="button" target="_blank">
+            Open customer proof page ↗
+          </Link>
+        )}
+        {current?.status === "authorized" && (
+          <>
+            <button className="primary" disabled={disabled} onClick={() => api("capture", `/api/orders/${order.id}/paypal/capture`)}>
+              Start production &amp; capture
+            </button>
+            <button disabled={disabled} onClick={() => askVoid(true)}>
+              Void &amp; reopen for changes
+            </button>
+            <button disabled={disabled} onClick={() => askVoid(false)}>
+              Void &amp; cancel order
+            </button>
+          </>
+        )}
+      </div>
+      {order.payments.length > 0 && (
+        <table style={{ marginTop: 12 }}>
+          <thead>
+            <tr>
+              <th>Iter.</th>
+              <th>Status</th>
+              <th>PayPal ids &amp; events</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...order.payments].reverse().map((p) => (
+              <tr key={p.iteration}>
+                <td>{p.iteration}</td>
+                <td>
+                  <span className={`pill ${p.status === "voided" ? "info" : "ok"}`}>{p.status}</span>
+                </td>
+                <td className="small">
+                  order <code>{p.paypalOrderId}</code>
+                  {p.authorizationId && (
+                    <>
+                      <br />
+                      auth <code>{p.authorizationId}</code>
+                    </>
+                  )}
+                  {p.captureId && (
+                    <>
+                      <br />
+                      capture <code>{p.captureId}</code>
+                    </>
+                  )}
+                  <ul className="evidence">
+                    {p.events.map((e, i) => (
+                      <li key={i}>
+                        {new Date(e.at).toLocaleTimeString()} · {e.id === "api" ? "app" : "webhook"} · {e.type} — {e.summary}
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+const ARTWORK_FIELDS: RequiredArtworkField[] = ["year", "date", "name", "url", "text_line", "ink_colors"];
+
+// Minimal controls so the agreed rules can be exercised end to end. The full findings UI is AI-8a/8b.
 function FindingCard({
   finding: f,
   sourceName,
@@ -228,18 +375,30 @@ function FindingCard({
   finding: Finding;
   sourceName: (id: string) => string;
   disabled: boolean;
-  onAction: (body: { status: "resolved" | "waived" | "open"; value?: string }) => void;
+  onAction: (body: unknown) => void;
 }) {
-  const [value, setValue] = useState(f.resolvedValue ?? f.suggestedValue ?? "");
-  const done = f.status !== "open";
+  const invalidEvidence = f.evidenceValid === false;
+  const [value, setValue] = useState(f.resolvedValue ?? (invalidEvidence ? "" : f.suggestedValue ?? ""));
+  const [required, setRequired] = useState<{ field: RequiredArtworkField; value: string }[]>(
+    f.requiredFields ?? [{ field: "text_line", value: "" }],
+  );
+  const done = HANDLED.has(f.status);
+
+  const askReason = (message: string) => {
+    const reason = prompt(message);
+    return reason?.trim() ? reason.trim() : undefined;
+  };
+
   return (
     <div className={`finding ${f.severity} ${done ? "done" : ""}`}>
       <div className="row spread">
         <div className="row" style={{ gap: 8 }}>
           <span className={`pill ${f.severity}`}>{f.severity}</span>
           <span className="small muted">{SPEC_LABELS[f.field]}</span>
+          {f.requiresArtworkFix && <span className="pill warning">artwork fix</span>}
+          {invalidEvidence && <span className="pill blocking">unverified evidence</span>}
         </div>
-        {done && <span className="pill ok">{f.status === "resolved" ? `→ ${f.resolvedValue}` : "waived"}</span>}
+        <span className="pill info">{f.status.replaceAll("_", " ")}</span>
       </div>
       <h3 style={{ marginTop: 6 }}>{f.title}</h3>
       <div className="small">{f.explanation}</div>
@@ -250,27 +409,101 @@ function FindingCard({
           </li>
         ))}
       </ul>
-      {f.severity !== "info" && (
-        <div className="small muted" style={{ marginBottom: 8 }}>
-          Ask the customer: “{f.customerQuestion}”
+      {f.waiveReason && <div className="small">Waived: {f.waiveReason}</div>}
+      {f.dismissal && <div className="small">Dismissed as AI error: {f.dismissal.reason}</div>}
+      {f.requiredFields && (
+        <div className="small">
+          Artwork must show: {f.requiredFields.map((r) => `${r.field} = "${r.value}"`).join(", ")}
         </div>
       )}
-      {done ? (
-        <button className="small" disabled={disabled} onClick={() => onAction({ status: "open" })}>
+
+      {f.severity === "info" ? null : f.status !== "open" ? (
+        <button className="small" disabled={disabled} onClick={() => onAction({ type: "reopen" })}>
           Reopen
         </button>
       ) : (
-        f.severity !== "info" && (
-          <div className="row">
-            <input style={{ flex: 1, minWidth: 180 }} value={value} onChange={(e) => setValue(e.target.value)} />
-            <button className="primary" disabled={disabled || !value.trim()} onClick={() => onAction({ status: "resolved", value })}>
-              Confirm value
-            </button>
-            <button disabled={disabled} onClick={() => onAction({ status: "waived" })}>
-              Waive
+        <>
+          {!f.requiresArtworkFix && (
+            <div className="row" style={{ marginTop: 8 }}>
+              <input
+                style={{ flex: 1, minWidth: 180 }}
+                value={value}
+                placeholder={invalidEvidence ? "Type the correct value yourself" : ""}
+                onChange={(e) => setValue(e.target.value)}
+              />
+              <button
+                className="primary"
+                disabled={disabled || !value.trim()}
+                onClick={() => onAction({ type: "confirm", value, typedByHand: invalidEvidence })}
+              >
+                Confirm value
+              </button>
+            </div>
+          )}
+          <details style={{ marginTop: 8 }} open={f.requiresArtworkFix}>
+            <summary className="small">Needs corrected artwork: set what it must show</summary>
+            {required.map((r, i) => (
+              <div className="row" key={i} style={{ marginTop: 4 }}>
+                <select
+                  value={r.field}
+                  style={{ width: 130 }}
+                  onChange={(e) =>
+                    setRequired(required.map((x, j) => (j === i ? { ...x, field: e.target.value as RequiredArtworkField } : x)))
+                  }
+                >
+                  {ARTWORK_FIELDS.map((a) => (
+                    <option key={a}>{a}</option>
+                  ))}
+                </select>
+                <input
+                  style={{ flex: 1, minWidth: 140 }}
+                  value={r.value}
+                  onChange={(e) => setRequired(required.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))}
+                />
+              </div>
+            ))}
+            <div className="row" style={{ marginTop: 4 }}>
+              <button className="small" onClick={() => setRequired([...required, { field: "text_line", value: "" }])}>
+                + field
+              </button>
+              <button
+                className="small primary"
+                disabled={disabled}
+                onClick={() => onAction({ type: "require_artwork", requiredFields: required.filter((r) => r.value.trim()) })}
+              >
+                Require corrected artwork
+              </button>
+            </div>
+          </details>
+          <div className="row" style={{ marginTop: 8 }}>
+            {!f.requiresArtworkFix && (
+              <button
+                className="small"
+                disabled={disabled}
+                onClick={() => {
+                  const reason = askReason("Why is it OK to print with this exception? The customer will see this.");
+                  if (reason) onAction({ type: "waive", reason });
+                }}
+              >
+                Waive (shown to customer)
+              </button>
+            )}
+            <button
+              className="small"
+              disabled={disabled}
+              onClick={() => {
+                const reason = askReason("Why is this an AI error? (logged, not shown to the customer)");
+                if (!reason) return;
+                const checkedArtworkMyself = f.requiresArtworkFix
+                  ? confirm("I checked the artwork file myself and the problem isn't there.")
+                  : false;
+                onAction({ type: "dismiss", reason, checkedArtworkMyself });
+              }}
+            >
+              Dismiss as AI error
             </button>
           </div>
-        )
+        </>
       )}
     </div>
   );
@@ -285,7 +518,7 @@ function ClarificationDraft({ order, findings }: { order: Order; findings: Findi
     "",
     ...findings.map((f, i) => `${i + 1}. ${f.customerQuestion}`),
     "",
-    "Once these are settled we'll send a final proof with a PayPal link to approve and pay.",
+    "Once these are settled we'll send a final proof to approve and pay with PayPal.",
     "",
     "Thanks!",
   ].join("\n");

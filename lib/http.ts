@@ -20,7 +20,8 @@ export async function withOrder(
   try {
     return await handler(order);
   } catch (e) {
+    // Transitions throw user-facing messages for anything that isn't allowed.
     console.error(e);
-    return fail(e, 500);
+    return fail(e, 400);
   }
 }

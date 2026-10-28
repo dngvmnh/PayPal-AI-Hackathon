@@ -21,23 +21,31 @@ a single, reconciled proof and pays through PayPal. The payment is tied to that 
    checks the arithmetic (sizes add up to the quantity, quantity × unit price equals the total), reads the artwork
    for wrong text, dates, URLs and extra ink colors, and returns findings. Each finding has a severity, evidence
    quoted from each source, a suggested corrected value, and a question to send the customer.
-3. **Resolve.** The merchant confirms or waives each finding, or copies the AI-written clarification email.
-   Confirming a value updates the final spec and the amount due.
-4. **Payment gate.** `lib/gate.ts` allows payment only when the check has run, no blocking finding is open, and
-   pricing is complete.
-5. **Customer proof + PayPal.** The customer sees the final spec and the artwork, ticks "I approve", and pays with
-   PayPal Checkout (Orders v2, `intent: AUTHORIZE`). The spec hash goes into `custom_id`/`invoice_id`. If the spec
-   changes between checkout and approval, authorization is refused.
-6. **Production.** The merchant captures the authorization (Payments v2) when production starts.
+3. **Resolve.** Spec errors: the merchant confirms the value. Artwork errors: the merchant sets what the artwork
+   must show, uploads a corrected file (kept as a new version with its sha256), and re-runs the check. A finding
+   can also be waived with a reason the customer sees, or dismissed as an AI error with a logged reason.
+4. **Approval gate.** `lib/gate.ts` allows approval only when the latest check succeeded on the current artwork,
+   no blocking or warning finding is open, artwork errors were fixed by a new file (or dismissed), and pricing is
+   complete.
+5. **Customer approval.** The customer sees the final spec, the exact artwork version, the amount and any waived
+   exceptions, and approves that version. The approval is saved on the server with a hash of all of it. Any later
+   change cancels the approval.
+6. **PayPal.** The customer pays with PayPal Checkout (Orders v2, `intent: AUTHORIZE`); `custom_id` carries the
+   order, iteration and approved version hash. The order is then locked.
+7. **Capture or void.** The merchant captures when production starts (Payments v2), or voids: either to cancel,
+   or to reopen the order for changes, which needs a new approval and a new payment. Webhooks keep the status in
+   sync with PayPal.
 
 ## PayPal integration
 
 | Step | API |
 |---|---|
 | Customer checkout button | PayPal JS SDK via `@paypal/react-paypal-js` (`PayPalButtons`, `intent=authorize`) |
-| Create order with line items, `custom_id` = order:specHash, `invoice_id` | `POST /v2/checkout/orders` |
-| Hold funds when the customer approves the proof | `POST /v2/checkout/orders/{id}/authorize` |
+| Create order with line items, `custom_id` = order:iteration:versionHash, `invoice_id` | `POST /v2/checkout/orders` |
+| Hold funds once the customer has approved the version | `POST /v2/checkout/orders/{id}/authorize` |
 | Capture when production starts | `POST /v2/payments/authorizations/{id}/capture` |
+| Void to cancel, or to reopen the order for changes | `POST /v2/payments/authorizations/{id}/void` |
+| Keep status in sync (`PAYMENT.AUTHORIZATION.CREATED/VOIDED`, `PAYMENT.CAPTURE.COMPLETED/DENIED`) | Webhook at `/api/paypal/webhook`, verified with `POST /v1/notifications/verify-webhook-signature` |
 
 All calls send `PayPal-Request-Id` so retries are idempotent. Code: `lib/paypal.ts`.
 
@@ -69,12 +77,14 @@ npm run dev                  # http://localhost:3000
 | `ANTHROPIC_API_KEY` | https://console.anthropic.com (optional: leave empty for demo mode) |
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | PayPal Developer Dashboard → Apps & Credentials → **Sandbox** app |
 | `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Same sandbox client ID (used by the browser button) |
+| `PAYPAL_WEBHOOK_ID` | Sandbox app → Webhooks → add `<your public URL>/api/paypal/webhook` with the four events above; copy its id. Optional locally (needs a public URL, e.g. a tunnel) |
 
-Then click **Load sample order (Riverside 5K)** → **Run AI check** → confirm the 5 blocking findings →
-**Send proof to customer** → **Open customer proof page** → approve and pay with a sandbox *personal* account →
-back on the order, **Start production & capture payment**.
+Then click **Load sample order (Riverside 5K)** → **Run AI check** → settle the findings → **Open customer proof
+page** → tick the box, type a name, **Approve this version** → pay with a sandbox *personal* account → back on the
+order, **Start production & capture**, or **Void & reopen for changes** / **Void & cancel order**.
 
-Tests: `npm test` (payment gate, resolution and pricing logic, fixture integrity). Type check and build: `npm run build`.
+Tests: `npm test` (approval gate, finding rules, artwork versions, approval invalidation, payment iterations,
+void/reopen, webhook handling, fixture integrity). Type check and build: `npm run build`.
 
 ## Project layout
 
@@ -82,12 +92,15 @@ Tests: `npm test` (payment gate, resolution and pricing logic, fixture integrity
 app/                     Next.js App Router pages and API routes
   orders/[id]/           merchant review workspace
   p/[id]/                customer proof + PayPal checkout
-  api/orders/...         create, analyze, resolve, spec edits, PayPal create/authorize/capture
+  api/orders/...         create, analyze, finding actions, spec edits, artwork upload, approve,
+                         PayPal create/authorize/capture/void
+  api/paypal/webhook     verified PayPal webhook events
 lib/
   ai.ts                  Claude cross-check (prompt, multimodal content, structured output)
   paypal.ts              PayPal REST client (Orders v2, Payments v2)
-  gate.ts                payment gate + spec hash
-  orders.ts              apply analysis, resolve findings, status machine
+  gate.ts                approval gate + version hash
+  orders.ts              state transitions: findings, artwork versions, approval, payments, status
+  webhooks.ts            maps PayPal webhook events onto payment iterations
   store.ts               JSON-file persistence (.data/)
 samples/riverside-5k/    sample brief, message thread, design PNG, demo analysis
 docs/PLAN.md             roadmap to submission

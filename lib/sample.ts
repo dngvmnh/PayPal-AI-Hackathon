@@ -1,7 +1,8 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Order, Source } from "./types.ts";
-import { newId, saveOrder, saveUpload } from "./store.ts";
+import { newOrder } from "./orders.ts";
+import { firstVersion, newId, saveOrder, saveUpload } from "./store.ts";
 
 const DIR = path.join(process.cwd(), "samples", "riverside-5k");
 
@@ -21,24 +22,29 @@ export async function seedSampleOrder(): Promise<Order> {
   const id = newId();
   const brief = await fs.readFile(path.join(DIR, "brief.md"), "utf8");
   const thread = await fs.readFile(path.join(DIR, "messages.txt"), "utf8");
-  const file = await saveUpload(id, "front.png", await fs.readFile(path.join(DIR, "front.png")));
+  const front = await saveUpload(id, "front.png", await fs.readFile(path.join(DIR, "front.png")), "image/png");
 
   const sources: Source[] = [
     { id: "brief", kind: "brief", name: "Order brief", text: brief },
     ...splitThread(thread).map((m, i): Source => ({ id: `msg-${i + 1}`, kind: "message", ...m })),
-    { id: "design-front", kind: "design", name: "front.png", file, mimeType: "image/png" },
+    {
+      id: "design-front",
+      kind: "design",
+      name: "front.png",
+      file: front.file,
+      mimeType: front.mimeType,
+      versions: [firstVersion(front)],
+    },
   ];
 
-  return saveOrder({
-    id,
-    createdAt: new Date().toISOString(),
-    title: "Riverside 5K volunteer shirts",
-    customerName: "Dana Whitfield",
-    customerEmail: "dana@riverside5k.org",
-    isSample: true,
-    sources,
-    spec: {},
-    pricing: { quantity: null, unitPrice: null, currency: "USD" },
-    status: "draft",
-  });
+  return saveOrder(
+    newOrder({
+      id,
+      title: "Riverside 5K volunteer shirts",
+      customerName: "Dana Whitfield",
+      customerEmail: "dana@riverside5k.org",
+      isSample: true,
+      sources,
+    }),
+  );
 }

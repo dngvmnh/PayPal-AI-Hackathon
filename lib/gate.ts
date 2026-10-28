@@ -7,20 +7,67 @@ export interface GateResult {
   amount: number | null;
 }
 
+export function sha256(data: string | Uint8Array): string {
+  return createHash("sha256").update(data).digest("hex");
+}
+
+/** sha256 of the current version of every design source, by source id. */
+export function currentArtworkHashes(order: Pick<Order, "sources">): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const s of order.sources) {
+    const current = s.versions?.at(-1);
+    if (s.kind === "design" && current) out[s.id] = current.sha256;
+  }
+  return out;
+}
+
+function sameHashes(a: Record<string, string>, b: Record<string, string>): boolean {
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every((k) => a[k] === b[k]);
+}
+
+const HANDLED = new Set(["resolved", "resolved_by_artwork", "waived", "dismissed_ai_error"]);
+
 /**
- * Payment collection is only allowed once the order is internally consistent:
- * the AI check has run, no blocking finding is still open, and pricing is complete.
+ * Approval and payment are allowed only when the order is internally consistent (PLAN §4.2).
  * This is the core rule of the product, so it lives in one pure function.
  */
 export function paymentGate(order: Order): GateResult {
   const reasons: string[] = [];
-  if (!order.analysis) reasons.push("AI consistency check has not been run.");
-  const openBlocking = order.analysis?.findings.filter(
-    (f) => f.severity === "blocking" && f.status === "open",
-  );
-  if (openBlocking?.length) {
-    reasons.push(`${openBlocking.length} blocking issue(s) still open.`);
+  const analysis = order.analysis;
+  if (!analysis) {
+    reasons.push("AI consistency check has not been run.");
+  } else {
+    if (analysis.status === "failed") {
+      reasons.push(`The last AI check failed${analysis.error ? `: ${analysis.error}` : ""}. Re-run it.`);
+    }
+    if (!sameHashes(analysis.artworkHashes ?? {}, currentArtworkHashes(order))) {
+      reasons.push("Artwork changed since the last AI check. Re-run it.");
+    }
+    const findings = analysis.findings;
+    const unhandled = findings.filter((f) => f.severity !== "info" && !HANDLED.has(f.status));
+    if (unhandled.length) reasons.push(`${unhandled.length} issue(s) still open or awaiting corrected artwork.`);
+
+    const artworkBypassed = findings.filter(
+      (f) => f.requiresArtworkFix && (f.status === "resolved" || f.status === "waived"),
+    );
+    if (artworkBypassed.length) {
+      reasons.push(`${artworkBypassed.length} artwork issue(s) need a verified corrected file or a dismissal.`);
+    }
+    const unverifiedAccepted = findings.filter(
+      (f) => f.evidenceValid === false && f.status === "resolved" && !f.acceptedDespiteInvalidEvidence,
+    );
+    if (unverifiedAccepted.length) {
+      reasons.push(`${unverifiedAccepted.length} finding(s) with unverified evidence need the value typed by hand.`);
+    }
+    const missingReason = findings.filter(
+      (f) =>
+        (f.status === "waived" && !f.waiveReason?.trim()) ||
+        (f.status === "dismissed_ai_error" && !f.dismissal?.reason.trim()),
+    );
+    if (missingReason.length) reasons.push(`${missingReason.length} waived/dismissed finding(s) have no reason.`);
   }
+
   const { quantity, unitPrice } = order.pricing;
   if (!quantity || quantity <= 0) reasons.push("Quantity is not set.");
   if (unitPrice == null || unitPrice <= 0) reasons.push("Unit price is not set.");
@@ -32,11 +79,31 @@ export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-/** Stable hash of what the customer is approving. Any spec edit after approval changes it. */
-export function specHash(order: Pick<Order, "spec" | "pricing">): string {
+/** Exceptions the customer must see before approving. */
+export function waivedExceptions(order: Order) {
+  return (order.analysis?.findings ?? [])
+    .filter((f) => f.status === "waived")
+    .map((f) => ({ findingId: f.id, title: f.title, reason: f.waiveReason ?? "" }));
+}
+
+/**
+ * Hash of exactly what the customer approves: spec, pricing, artwork file hashes and the waived exceptions.
+ * Any change to one of them changes the hash and cancels the approval.
+ */
+export function versionHash(order: Order): string {
+  const artwork = currentArtworkHashes(order);
   const canonical = JSON.stringify({
     spec: SPEC_FIELDS.map((f) => [f, order.spec[f] ?? null]),
     pricing: [order.pricing.quantity, order.pricing.unitPrice, order.pricing.currency],
+    artwork: Object.keys(artwork)
+      .sort()
+      .map((k) => [k, artwork[k]]),
+    waived: waivedExceptions(order).map((w) => [w.findingId, w.reason]),
   });
-  return createHash("sha256").update(canonical).digest("hex").slice(0, 16);
+  return sha256(canonical);
+}
+
+/** The order can't be edited while an authorization is held, after capture, or once cancelled. */
+export function isLocked(order: Order): boolean {
+  return order.status === "authorized" || order.status === "captured" || order.status === "cancelled";
 }

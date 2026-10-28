@@ -299,6 +299,32 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | DG-12 | Held-out set (§2 point 5): 3 t-shirt cases with `expected.json` and artwork; commit only the sha256 fingerprint before AI-9 starts; add the files after `prompt-locked` | 0.5 | M | AI-7 format | Fingerprint committed by Nov 5; files match it |
 | | **Subtotal** | **9** | | | |
 
+#### Dang progress (Oct 28)
+
+| Task | State |
+|---|---|
+| DG-1 | **Waiting on Dang:** create the sandbox app + test accounts and fill in `.env.local` |
+| DG-2 | Code done; tested end to end against a local mock of the PayPal API. **Live sandbox run pending DG-1** |
+| DG-3 | Done: void-and-cancel and void-and-reopen (new iteration, new approval, new PayPal order); tested |
+| DG-4 | Done: artwork versions with sha256 and history; upload route; locked after authorization |
+| DG-5 | Done: approval saved with version hash, spec, artwork hashes, amount, waived exceptions; any change cancels it; authorize refuses a changed version |
+| DG-6 | Done: gate per §4.2 (failed/stale check, warnings, artwork findings, invalid evidence, reasons); waive/dismiss rules; lock |
+| DG-7a | Done: proof page shows spec, current artwork version, amount, exceptions; "Approve this version" before PayPal |
+| DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. **Registering the webhook needs DG-1 and a public URL** |
+| DG-9 | Done (basic): artwork upload, approval status, iterations with PayPal ids and events, capture / void buttons, history |
+| DG-7b, DG-10, DG-11, DG-12 | Not started |
+
+**Hand-offs to Dat** (data model is in place; the AI side fills it):
+- `Finding.checkGroup`, `requiresArtworkFix`, `evidenceValid`, `evidenceProblems` exist; the gate already enforces
+  them (AI-2, AI-3, AI-4 set them).
+- `markResolvedByArtwork(order, findingId, verifications)` in `lib/orders.ts` is the transition AI-5a calls after
+  the field-by-field comparison. It refuses unless the check succeeded on the current artwork and every required
+  field passed.
+- `applyAnalysis` still replaces all findings on a re-run, so merchant decisions are lost when the check is re-run.
+  Matching findings across runs is part of AI-5a.
+- The finding buttons in `OrderWorkspace.tsx` are minimal versions of AI-8a so the rules can be exercised; replace
+  them freely.
+
 ### 6.4 Shared and submission tasks (one owner each)
 
 | ID | Task | Owner | Est | Done when |

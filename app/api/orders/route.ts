@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { newId, saveOrder, saveUpload } from "@/lib/store.ts";
+import { firstVersion, newId, saveOrder, saveUpload } from "@/lib/store.ts";
+import { newOrder } from "@/lib/orders.ts";
 import { splitThread } from "@/lib/sample.ts";
 import type { Source } from "@/lib/types.ts";
 
@@ -21,8 +22,15 @@ export async function POST(req: Request) {
     if (entry.size > MAX_FILE_BYTES) {
       return NextResponse.json({ error: `${entry.name} is larger than 20 MB` }, { status: 400 });
     }
-    const file = await saveUpload(id, entry.name, Buffer.from(await entry.arrayBuffer()));
-    sources.push({ id: `design-${++n}`, kind: "design", name: entry.name, file, mimeType: entry.type });
+    const v = await saveUpload(id, entry.name, Buffer.from(await entry.arrayBuffer()), entry.type);
+    sources.push({
+      id: `design-${++n}`,
+      kind: "design",
+      name: entry.name,
+      file: v.file,
+      mimeType: v.mimeType,
+      versions: [firstVersion(v)],
+    });
   }
   if (sources.length < 2) {
     return NextResponse.json(
@@ -31,16 +39,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const order = await saveOrder({
-    id,
-    createdAt: new Date().toISOString(),
-    title: str("title") || "Untitled order",
-    customerName: str("customerName"),
-    customerEmail: str("customerEmail"),
-    sources,
-    spec: {},
-    pricing: { quantity: null, unitPrice: null, currency: "USD" },
-    status: "draft",
-  });
+  const order = await saveOrder(
+    newOrder({
+      id,
+      title: str("title") || "Untitled order",
+      customerName: str("customerName"),
+      customerEmail: str("customerEmail"),
+      sources,
+    }),
+  );
   return NextResponse.json({ id: order.id });
 }
