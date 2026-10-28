@@ -1,0 +1,16 @@
+{
+  "title": "Ironclad Robotics team shirts",
+  "customerName": "Priya Natarajan",
+  "customerEmail": "priya@ironcladrobotics.org",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png",
+        "front-v2.png",
+        "front-v3.png"
+      ]
+    }
+  ]
+}

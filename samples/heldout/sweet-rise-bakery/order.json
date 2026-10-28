@@ -1,0 +1,14 @@
+{
+  "title": "Sweet Rise Bakery staff tees",
+  "customerName": "Marco Bellini",
+  "customerEmail": "marco@sweetrisebakery.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "chest-logo.png",
+      "versions": [
+        "chest-logo.png"
+      ]
+    }
+  ]
+}

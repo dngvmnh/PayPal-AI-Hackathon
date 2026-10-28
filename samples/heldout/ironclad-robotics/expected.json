@@ -1,0 +1,61 @@
+{
+  "set": "heldout",
+  "notes": "Brief size breakdown sums to 42 (M 14) but quantity and the customer's list say 40 (M 12). Artwork v1 misspells ROBOTICS and says 2025 in two places. v2 fixes the name and the season line but leaves 2025 in the footer, so the year check must fail. v3 is fully fixed.",
+  "issues": [
+    {
+      "id": "i1",
+      "checkGroup": "quantity_sizes",
+      "field": "size_breakdown",
+      "minSeverity": "warning",
+      "requiresArtworkFix": false,
+      "sources": [
+        "brief",
+        "msg-1"
+      ],
+      "correctValue": "YM 4 / S 8 / M 12 / L 10 / XL 6"
+    },
+    {
+      "id": "i2",
+      "checkGroup": "text_dates",
+      "field": "print_text",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": true,
+      "sources": [
+        "brief",
+        "design-front"
+      ],
+      "correctValue": "IRONCLAD ROBOTICS / TEAM 4471 / 2026 SEASON / FIRST ROBOTICS COMPETITION 2026",
+      "requiredFields": [
+        {
+          "field": "name",
+          "value": "IRONCLAD ROBOTICS"
+        },
+        {
+          "field": "year",
+          "value": "2026"
+        }
+      ]
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": [
+    {
+      "issueId": "i2",
+      "sourceId": "design-front",
+      "version": 2,
+      "expect": {
+        "name": "pass",
+        "year": "fail"
+      }
+    },
+    {
+      "issueId": "i2",
+      "sourceId": "design-front",
+      "version": 3,
+      "expect": {
+        "name": "pass",
+        "year": "pass"
+      }
+    }
+  ]
+}
