@@ -144,6 +144,7 @@ function applyRecheck(o: Order): Order {
   const copy = structuredClone(o);
   copy.analysis!.artworkHashes = currentArtworkHashes(copy);
   copy.analysis!.status = "succeeded";
+copy.analysis!.demo = false;
   return copy;
 }
 
@@ -218,4 +219,338 @@ test("fixture evidence references real sample source ids", () => {
 test("fixture reports at most one finding per field", () => {
   const fields = fixture.findings.map((f) => f.field);
   assert.equal(new Set(fields).size, fields.length);
+});
+
+import { applyAnalysis } from "../lib/orders.ts";
+
+test("re-analysis keeps pending artwork requirements even if AI omits the finding", () => {
+let order = checked();
+order.analysis!.findings = order.analysis!.findings.filter(
+  (finding) => finding.field === "print_text",
+);
+const findingId = id(order, "print_text");
+
+  order = resolveFinding(order, findingId, {
+    type: "require_artwork",
+    requiredFields: [
+      { field: "year", value: "2026" },
+      { field: "url", value: "riverside5k.org" },
+    ],
+  });
+
+const nextAnalysis = structuredClone(fixture);
+nextAnalysis.findings = [];
+
+  const result = applyAnalysis(order, nextAnalysis, {
+    model: "test",
+    demo: false,
+    artworkHashes: currentArtworkHashes(order),
+  });
+
+  const pending = result.analysis!.findings.find((f) => f.id === findingId);
+  assert.ok(pending);
+  assert.equal(pending.status, "awaiting_artwork");
+  assert.deepEqual(pending.requiredFields, [
+    { field: "year", value: "2026" },
+    { field: "url", value: "riverside5k.org" },
+  ]);
+
+  const ids = result.analysis!.findings.map((f) => f.id);
+  assert.equal(new Set(ids).size, ids.length, "Finding IDs must be unique");
+assert.deepEqual(paymentGate(result).reasons, [
+  "1 issue(s) still open or awaiting corrected artwork.",
+]);
+});
+
+test("re-analysis keeps pending artwork and assigns unique IDs to new findings", () => {
+  let order = checked();
+  const findingId = id(order, "print_text");
+
+  order = resolveFinding(order, findingId, {
+    type: "require_artwork",
+    requiredFields: [{ field: "year", value: "2026" }],
+  });
+
+  const result = applyAnalysis(order, structuredClone(fixture), {
+    model: "test",
+    demo: false,
+    artworkHashes: currentArtworkHashes(order),
+  });
+
+  const findings = result.analysis!.findings;
+assert.equal(findings.length, order.analysis!.findings.length + fixture.findings.length);
+
+for (const oldFinding of order.analysis!.findings) {
+  assert.ok(findings.some((finding) => finding.id === oldFinding.id));
+}
+  assert.equal(findings.find((f) => f.id === findingId)?.status, "awaiting_artwork");
+  assert.equal(new Set(findings.map((f) => f.id)).size, findings.length);
+});
+
+test("invalid evidence blocks until the merchant handles it", () => {
+  const order = settled();
+  const finding = order.analysis!.findings.find((f) => f.field === "quantity")!;
+
+  finding.evidenceStatus = "invalid";
+  finding.evidenceValid = false;
+  finding.acceptedDespiteInvalidEvidence = false;
+
+  assert.equal(paymentGate(order).ok, false);
+
+  // The merchant has entered the correct value by hand.
+  finding.acceptedDespiteInvalidEvidence = true;
+
+  assert.equal(paymentGate(order).ok, true);
+});
+
+test("unverified artwork evidence blocks until resolved by artwork", () => {
+  const order = settled();
+  const finding = order.analysis!.findings.find((f) => f.field === "print_text")!;
+
+  finding.evidenceStatus = "unverified";
+  finding.evidenceValid = false;
+  finding.acceptedDespiteInvalidEvidence = true;
+
+  let gate = paymentGate(order);
+  assert.equal(gate.ok, false);
+  assert.match(gate.reasons.join(" "), /awaiting visual verification/);
+
+  finding.status = "resolved_by_artwork";
+
+  gate = paymentGate(order);
+  assert.doesNotMatch(gate.reasons.join(" "), /awaiting visual verification/);
+});
+
+test("artwork dismissal requires a manual check of the current version", () => {
+  let order = settled();
+  const findingId = id(order, "print_text");
+
+  order = resolveFinding(order, findingId, { type: "reopen" });
+  const finding = order.analysis!.findings.find((f) => f.id === findingId)!;
+  finding.evidenceStatus = "unverified";
+  finding.evidenceValid = false;
+  finding.evidence = [{
+    sourceId: "design-front",
+    value: "2026",
+    quote: "The artwork shows 2026",
+  }];
+
+  assert.throws(
+    () => resolveFinding(order, findingId, {
+      type: "dismiss",
+      reason: "The artwork already shows the correct year",
+    }),
+    /checked the artwork/i,
+  );
+
+  const dismissed = resolveFinding(order, findingId, {
+    type: "dismiss",
+    reason: "The artwork already shows the correct year",
+    checkedArtworkMyself: true,
+  });
+
+  assert.equal(paymentGate(dismissed).ok, true);
+
+  const changed = addArtworkVersion(dismissed, "design-front", {
+    file: "new.png",
+    mimeType: "image/png",
+    sha256: "hash-v2",
+  });
+
+  assert.equal(paymentGate(changed).ok, false);
+  assert.match(
+    paymentGate(changed).reasons.join(" "),
+    /awaiting visual verification/,
+  );
+});
+
+test("dismissing invalid evidence that references artwork requires checking the current file", () => {
+  let order = settled();
+  const findingId = id(order, "print_text");
+
+  order = resolveFinding(order, findingId, { type: "reopen" });
+  const finding = order.analysis!.findings.find((f) => f.id === findingId)!;
+
+  finding.evidenceStatus = "invalid";
+  finding.evidenceValid = false;
+  finding.requiresArtworkFix = false;
+  finding.evidence = [
+    { sourceId: "brief", value: "2026", quote: "Not in the brief" },
+    { sourceId: "design-front", value: "2025", quote: "Artwork shows 2025" },
+  ];
+
+  assert.throws(
+    () => resolveFinding(order, findingId, {
+      type: "dismiss",
+      reason: "The finding is based on incorrect evidence",
+    }),
+    /checked the artwork/i,
+  );
+
+  const dismissed = resolveFinding(order, findingId, {
+    type: "dismiss",
+    reason: "The finding is based on incorrect evidence",
+    checkedArtworkMyself: true,
+  });
+
+  assert.equal(paymentGate(dismissed).ok, true);
+
+  const changed = addArtworkVersion(dismissed, "design-front", {
+    file: "new.png",
+    mimeType: "image/png",
+    sha256: "hash-v2",
+  });
+
+  assert.equal(paymentGate(changed).ok, false);
+  assert.match(paymentGate(changed).reasons.join(" "), /invalid evidence/i);
+});
+
+test("artwork cannot clear while another blocking finding is open in the same group", () => {
+  const order = awaitingArtwork();
+  const findingId = id(order, "print_text");
+
+  const pending = order.analysis!.findings.find((f) => f.id === findingId)!;
+  pending.checkGroup = "text_dates";
+
+  order.analysis!.findings.push({
+    ...structuredClone(pending),
+    id: "new-text-problem",
+    status: "open",
+    severity: "blocking",
+    checkGroup: "text_dates",
+    title: "New blocking text problem",
+  });
+
+  const verifications = [
+    pass("year", "2026"),
+    pass("url", "riverside5k.org"),
+  ].map((item) => ({ ...item, findingId }));
+
+  assert.throws(
+    () => markResolvedByArtwork(order, findingId, verifications),
+    /blocking finding.*same group/i,
+  );
+});
+
+test("artwork verification rejects a saved demo analysis", () => {
+  const order = awaitingArtwork();
+  const findingId = id(order, "print_text");
+  order.analysis!.demo = true;
+
+  assert.throws(
+    () => markResolvedByArtwork(order, findingId, []),
+    /demo analysis cannot verify artwork/i,
+  );
+});
+
+test("artwork verification rejects missing or extra artwork hashes", () => {
+  const missing = awaitingArtwork();
+  const findingId = id(missing, "print_text");
+  missing.sources.find((source) => source.id === "design-front")!.versions = [];
+  missing.analysis!.artworkHashes = {};
+
+  assert.throws(
+    () => markResolvedByArtwork(missing, findingId, []),
+    /current artwork version/i,
+  );
+
+  const extra = awaitingArtwork();
+  extra.analysis!.artworkHashes["unknown-design"] = "unexpected";
+
+  assert.throws(
+    () => markResolvedByArtwork(extra, findingId, []),
+    /current artwork version/i,
+  );
+});
+
+test("re-analysis retains a merchant-confirmed finding when the issue disappears", () => {
+  let order = checked();
+  const findingId = id(order, "quantity");
+
+  order = resolveFinding(order, findingId, {
+    type: "confirm",
+    value: "150",
+  });
+
+  const freshAnalysis = structuredClone(fixture);
+  freshAnalysis.findings = [];
+
+  const result = applyAnalysis(order, freshAnalysis, {
+    model: "test",
+    demo: false,
+    artworkHashes: currentArtworkHashes(order),
+  });
+
+  const retained = result.analysis!.findings.find((f) => f.id === findingId);
+  assert.ok(retained, "The merchant decision must remain available");
+  assert.equal(retained.status, "resolved");
+  assert.equal(retained.resolvedValue, "150");
+  assert.equal(result.spec.quantity, "150");
+  assert.equal(result.pricing.quantity, 150);
+});
+
+test("a changed source or missing fingerprint reopens a confirmed finding", () => {
+  for (const scenario of ["changed-source", "missing-fingerprint"] as const) {
+    let order = checked();
+    const findingId = id(order, "quantity");
+
+    order = resolveFinding(order, findingId, {
+      type: "confirm",
+      value: "150",
+    });
+
+    if (scenario === "changed-source") {
+      const brief = order.sources.find((source) => source.id === "brief")!;
+      brief.text = `${brief.text} Changed source.`;
+    } else {
+      delete order.analysis!.sourceFingerprints;
+    }
+
+    const next = structuredClone(fixture);
+    next.findings = [];
+
+    const result = applyAnalysis(order, next, {
+      model: "test",
+      demo: false,
+      artworkHashes: currentArtworkHashes(order),
+    });
+
+    const finding = result.analysis!.findings.find((f) => f.id === findingId)!;
+    assert.equal(finding.status, "open", scenario);
+    assert.equal(finding.resolvedValue, undefined, scenario);
+    assert.equal(paymentGate(result).ok, false, scenario);
+  }
+});
+
+test("changed or newly added text sources prevent artwork verification", () => {
+  for (const scenario of ["changed", "added", "legacy"] as const) {
+    const order = awaitingArtwork();
+    const findingId = id(order, "print_text");
+    const finding = order.analysis!.findings.find((f) => f.id === findingId)!;
+
+    if (scenario === "changed") {
+      const brief = order.sources.find((source) => source.id === "brief")!;
+      brief.text = `${brief.text} New customer instruction.`;
+    } else if (scenario === "added") {
+      order.sources.push({
+        id: "new-message",
+        kind: "message",
+        name: "New message",
+        text: "The artwork requirements changed.",
+      });
+    } else {
+      delete finding.requiredSourceFingerprints;
+    }
+
+    const verifications = [
+      pass("year", "2026"),
+      pass("url", "riverside5k.org"),
+    ].map((item) => ({ ...item, findingId }));
+
+    assert.throws(
+      () => markResolvedByArtwork(order, findingId, verifications),
+      /sources changed/i,
+      scenario,
+    );
+  }
 });

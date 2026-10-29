@@ -105,9 +105,10 @@
     },
     {
       "field": "print_text",
+"requiresArtworkFix": true,
       "severity": "blocking",
       "title": "Printed text on the design has 3 errors: year, race date, and website",
-      "explanation": "The artwork looks reused from last year: it says 2025 instead of 2026. It still prints Saturday, May 16 although the race moved to Sunday, May 17 (Mar 9 email). And it shows riversidefunrun.org while the brief and the customer's email use riverside5k.org.",
+      "explanation": "The artwork looks reused from last year: it says 2025 instead of 2026. It still prints Saturday, May 16 although the race moved to Sunday, May 17 (Mar 9 email). And it shows riversidefunrun.org while the brief specifies riverside5k.org.",
       "evidence": [
         {
           "sourceId": "brief",
@@ -123,11 +124,6 @@
           "sourceId": "msg-4",
           "value": "Sunday May 17",
           "quote": "the race moved to SUNDAY May 17 because of the park permit"
-        },
-        {
-          "sourceId": "msg-1",
-          "value": "riverside5k.org",
-          "quote": "Dana Whitfield <dana@riverside5k.org>"
         }
       ],
       "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
@@ -135,6 +131,7 @@
     },
     {
       "field": "ink_colors",
+"requiresArtworkFix": true,
       "severity": "blocking",
       "title": "Design uses 3 ink colors; quote is for 2",
       "explanation": "The sun and the website are yellow, in addition to white and orange. A third screen changes the price, or the yellow needs to become white/orange.",

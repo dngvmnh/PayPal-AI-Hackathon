@@ -10,6 +10,7 @@ import {
   type Finding,
   type Order,
   type RequiredArtworkField,
+  type ArtworkVerification,
 } from "@/lib/types.ts";
 import { post } from "./api.ts";
 import { StatusPill } from "./status.tsx";
@@ -114,6 +115,12 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
                 <FindingCard
                   key={f.id}
                   finding={f}
+verificationResults={(order.analysis?.verifications ?? []).filter(
+  (verification) => verification.findingId === f.id
+)}
+hasArtworkEvidence={f.evidence.some((item) =>
+  order.sources.some((source) => source.id === item.sourceId && source.kind === "design")
+)}
                   sourceName={sourceName}
                   disabled={!!busy || locked}
                   onAction={(body) => api(f.id, `/api/orders/${order.id}/findings/${f.id}`, body)}
@@ -368,11 +375,15 @@ const ARTWORK_FIELDS: RequiredArtworkField[] = ["year", "date", "name", "url", "
 // Minimal controls so the agreed rules can be exercised end to end. The full findings UI is AI-8a/8b.
 function FindingCard({
   finding: f,
+  hasArtworkEvidence,
   sourceName,
   disabled,
   onAction,
+verificationResults,
 }: {
   finding: Finding;
+verificationResults: ArtworkVerification[];
+  hasArtworkEvidence: boolean;
   sourceName: (id: string) => string;
   disabled: boolean;
   onAction: (body: unknown) => void;
@@ -396,12 +407,19 @@ function FindingCard({
           <span className={`pill ${f.severity}`}>{f.severity}</span>
           <span className="small muted">{SPEC_LABELS[f.field]}</span>
           {f.requiresArtworkFix && <span className="pill warning">artwork fix</span>}
-          {invalidEvidence && <span className="pill blocking">unverified evidence</span>}
+{invalidEvidence && (
+  <span className="pill blocking">
+    {f.evidenceStatus === "invalid" ? "invalid evidence" : "unverified evidence"}
+  </span>
+)}
         </div>
         <span className="pill info">{f.status.replaceAll("_", " ")}</span>
       </div>
       <h3 style={{ marginTop: 6 }}>{f.title}</h3>
-      <div className="small">{f.explanation}</div>
+<div className="small">{f.explanation}</div>
+{invalidEvidence && f.evidenceProblems?.map((problem, index) => (
+  <p className="error small" key={index}>{problem}</p>
+))}
       <ul className="evidence">
         {f.evidence.map((e, i) => (
           <li key={i}>
@@ -409,6 +427,25 @@ function FindingCard({
           </li>
         ))}
       </ul>
+{verificationResults.length > 0 && (
+  <div className="small">
+    <b>Artwork re-check</b>
+    <ul>
+      {verificationResults.map((verification, index) => (
+        <li key={index}>
+          {verification.field}: expected "{verification.expected}";
+          observed "{verification.observed ?? "not readable"}" —{" "}
+          {verification.matches &&
+          verification.codeCheck === "pass" &&
+          !verification.reason
+            ? "confirmed"
+            : "not confirmed"}
+          {verification.reason ? ` (${verification.reason})` : ""}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
       {f.waiveReason && <div className="small">Waived: {f.waiveReason}</div>}
       {f.dismissal && <div className="small">Dismissed as AI error: {f.dismissal.reason}</div>}
       {f.requiredFields && (
@@ -494,7 +531,7 @@ function FindingCard({
               onClick={() => {
                 const reason = askReason("Why is this an AI error? (logged, not shown to the customer)");
                 if (!reason) return;
-                const checkedArtworkMyself = f.requiresArtworkFix
+const checkedArtworkMyself = f.requiresArtworkFix || hasArtworkEvidence
                   ? confirm("I checked the artwork file myself and the problem isn't there.")
                   : false;
                 onAction({ type: "dismiss", reason, checkedArtworkMyself });

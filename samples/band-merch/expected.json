@@ -1,0 +1,36 @@
+{
+  "set": "tuning",
+  "notes": "The customer changed the garment to heather grey. The artwork uses red in addition to the quoted white ink.",
+  "issues": [
+    {
+      "id": "garment-color",
+      "checkGroup": "colors",
+      "field": "garment_color",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": ["brief", "msg-1"],
+      "correctValue": "Heather grey"
+    },
+    {
+      "id": "ink-colors",
+      "checkGroup": "colors",
+      "field": "ink_colors",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": true,
+      "sources": ["brief", "msg-1", "design-front"],
+      "correctValue": "white",
+      "requiredFields": [
+        { "field": "ink_colors", "value": "white" }
+      ]
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": [
+    {
+      "issueId": "ink-colors",
+      "sourceId": "design-front",
+      "version": 2,
+      "expect": { "ink_colors": "pass" }
+    }
+  ]
+}

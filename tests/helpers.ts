@@ -28,7 +28,18 @@ export function draft(): Order {
 }
 
 export function checked(order = draft()): Order {
-  return applyAnalysis(order, fixture, { model: "m", demo: true, artworkHashes: currentArtworkHashes(order) });
+  // Gate tests use a synthetic brief whose full content is "...".
+  const testAnalysis = structuredClone(fixture);
+  for (const finding of testAnalysis.findings) {
+    finding.evidence = [{ sourceId: "brief", value: "...", quote: "..." }];
+finding.requiresArtworkFix = false;
+  }
+
+  return applyAnalysis(order, testAnalysis, {
+    model: "m",
+    demo: true,
+    artworkHashes: currentArtworkHashes(order),
+  });
 }
 
 /** Settle every non-info finding with its suggested value. */

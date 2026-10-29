@@ -1,0 +1,12 @@
+{
+  "title": "Northbound band merch",
+  "customerName": "Jamie Lee",
+  "customerEmail": "jamie@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": ["front.png", "front-v2.png"]
+    }
+  ]
+}

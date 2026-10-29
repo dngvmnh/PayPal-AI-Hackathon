@@ -44,7 +44,93 @@ export function paymentGate(order: Order): GateResult {
     if (!sameHashes(analysis.artworkHashes ?? {}, currentArtworkHashes(order))) {
       reasons.push("Artwork changed since the last AI check. Re-run it.");
     }
-    const findings = analysis.findings;
+const findings = analysis.findings;
+const invalidEvidence = findings.filter((finding) => {
+  if (finding.evidenceStatus !== "invalid") return false;
+
+  // A spec finding can be accepted after the merchant types the value.
+  if (finding.status === "resolved") {
+    return !finding.acceptedDespiteInvalidEvidence;
+  }
+
+  // A real, non-artwork issue can be waived with a reason.
+  if (finding.status === "waived") {
+    return Boolean(finding.requiresArtworkFix) || !finding.waiveReason?.trim();
+  }
+
+  // An AI error can be dismissed with a reason.
+  if (finding.status === "dismissed_ai_error") {
+    const dismissal = finding.dismissal;
+    if (!dismissal?.reason.trim()) return true;
+
+    const referencedDesignIds = finding.evidence
+      .map((item) => item.sourceId)
+      .filter((id) =>
+        order.sources.some((source) => source.id === id && source.kind === "design"),
+      );
+
+    const needsArtworkCheck =
+      Boolean(finding.requiresArtworkFix) || referencedDesignIds.length > 0;
+
+    if (!needsArtworkCheck) return false;
+
+    const currentHashes = currentArtworkHashes(order);
+    const hashesAvailable =
+      referencedDesignIds.length > 0 &&
+      referencedDesignIds.every((id) => Boolean(currentHashes[id]));
+
+    return !(
+      dismissal.checkedArtworkMyself &&
+      hashesAvailable &&
+      sameHashes(dismissal.artworkHashes, currentHashes)
+    );
+  }
+
+  return true;
+});
+
+if (invalidEvidence.length) {
+  reasons.push(
+    `${invalidEvidence.length} finding(s) have invalid evidence that still needs review.`,
+  );
+}
+const unverifiedEvidence = findings.filter((finding) => {
+  if (finding.evidenceStatus !== "unverified") return false;
+  if (finding.status === "resolved_by_artwork") return false;
+
+  const dismissal = finding.dismissal;
+  if (
+    finding.status !== "dismissed_ai_error" ||
+    !dismissal?.checkedArtworkMyself ||
+    !dismissal.reason.trim()
+  ) {
+    return true;
+  }
+
+  const currentHashes = currentArtworkHashes(order);
+  const referencedDesignIds = finding.evidence
+    .map((item) => item.sourceId)
+    .filter((id) =>
+      order.sources.some((source) => source.id === id && source.kind === "design"),
+    );
+
+  const hasReferencedArtwork = referencedDesignIds.length > 0;
+  const hasAllReferencedHashes = referencedDesignIds.every(
+    (id) => Boolean(currentHashes[id]),
+  );
+
+  return !(
+    hasReferencedArtwork &&
+    hasAllReferencedHashes &&
+    sameHashes(dismissal.artworkHashes, currentHashes)
+  );
+});
+
+if (unverifiedEvidence.length) {
+  reasons.push(
+    `${unverifiedEvidence.length} finding(s) have evidence awaiting visual verification.`,
+  );
+}
     const unhandled = findings.filter((f) => f.severity !== "info" && !HANDLED.has(f.status));
     if (unhandled.length) reasons.push(`${unhandled.length} issue(s) still open or awaiting corrected artwork.`);
 

@@ -1,0 +1,74 @@
+{
+  "set": "tuning",
+  "notes": "Riverside 5K: five planted blocking issues. Artwork v2 requires text and ink verification.",
+  "issues": [
+    {
+      "id": "quantity",
+      "checkGroup": "quantity_sizes",
+      "field": "quantity",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": ["brief", "msg-4"],
+      "correctValue": "150"
+    },
+    {
+      "id": "sizes",
+      "checkGroup": "quantity_sizes",
+      "field": "size_breakdown",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": ["brief", "msg-4"],
+      "correctValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5"
+    },
+    {
+      "id": "printed-text",
+      "checkGroup": "text_dates",
+      "field": "print_text",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": true,
+      "sources": ["brief", "msg-4", "design-front"],
+      "correctValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+      "requiredFields": [
+        { "field": "year", "value": "2026" },
+        { "field": "date", "value": "Sunday, May 17" },
+        { "field": "url", "value": "riverside5k.org" }
+      ]
+    },
+    {
+      "id": "ink-colors",
+      "checkGroup": "colors",
+      "field": "ink_colors",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": true,
+      "sources": ["brief", "design-front"],
+      "correctValue": "white, safety orange",
+      "requiredFields": [
+        { "field": "ink_colors", "value": "white, safety orange" }
+      ]
+    },
+    {
+      "id": "total-price",
+      "checkGroup": "pricing",
+      "field": "total_price",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": ["brief", "msg-4"],
+      "correctValue": "$1,425.00"
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": [
+    {
+      "issueId": "printed-text",
+      "sourceId": "design-front",
+      "version": 2,
+      "expect": { "year": "pass", "date": "pass", "url": "pass" }
+    },
+    {
+      "issueId": "ink-colors",
+      "sourceId": "design-front",
+      "version": 2,
+      "expect": { "ink_colors": "pass" }
+    }
+  ]
+}

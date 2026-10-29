@@ -1,0 +1,36 @@
+{
+  "set": "tuning",
+  "notes": "The size breakdown totals 46 for an order of 48. The artwork misspells the club name.",
+  "issues": [
+    {
+      "id": "sizes",
+      "checkGroup": "quantity_sizes",
+      "field": "size_breakdown",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": ["brief", "msg-1"],
+      "correctValue": null
+    },
+    {
+      "id": "club-name",
+      "checkGroup": "text_dates",
+      "field": "print_text",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": true,
+      "sources": ["brief", "msg-1", "design-front"],
+      "correctValue": "HARBOR SCIENCE CLUB / 2026",
+      "requiredFields": [
+        { "field": "text_line", "value": "HARBOR SCIENCE CLUB" }
+      ]
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": [
+    {
+      "issueId": "club-name",
+      "sourceId": "design-front",
+      "version": 2,
+      "expect": { "text_line": "pass" }
+    }
+  ]
+}

@@ -71,7 +71,17 @@ export const Evidence = z.object({
 export type Evidence = z.infer<typeof Evidence>;
 
 export const AIFinding = z.object({
-  field: SpecField,
+field: z.enum([
+  "quantity",
+  "size_breakdown",
+  "print_text",
+  "garment_color",
+  "ink_colors",
+  "unit_price",
+  "total_price",
+]),requiresArtworkFix: z.boolean().optional().describe(
+  "True only when this finding requires changing the artwork itself; false when artwork is merely supporting evidence.",
+),
   severity: z
     .enum(["blocking", "warning", "info"])
     .describe(
@@ -104,6 +114,19 @@ export const AIAnalysis = z.object({
     .array(SpecValue)
     .describe("best current understanding of each spec field, latest customer intent wins"),
   findings: z.array(AIFinding),
+artworkReadings: z.array(z.object({
+  sourceId: z.string(),
+  textElements: z.array(z.string()),
+  inkColors: z.array(z.string()),
+})).optional(),
+
+artworkClaims: z.array(z.object({
+  findingId: z.string(),
+  field: z.enum(["year", "date", "name", "url", "text_line", "ink_colors"]),
+  expected: z.string(),
+  observed: z.string().nullable(),
+  matches: z.boolean(),
+})).optional(),
   pricing: z.object({
     quantity: z.number().int().nullable(),
     unitPrice: z.number().nullable(),
@@ -143,6 +166,7 @@ export interface Finding extends AIFinding {
   /** The artwork itself is wrong; only a verified corrected file or a dismissal clears it */
   requiresArtworkFix?: boolean;
   /** Set by evidence validation; false means at least one evidence item didn't check out */
+evidenceStatus?: "verified" | "unverified" | "invalid";
   evidenceValid?: boolean;
   evidenceProblems?: string[];
   /** Value the merchant settled on (status "resolved") */
@@ -151,6 +175,7 @@ export interface Finding extends AIFinding {
   acceptedDespiteInvalidEvidence?: boolean;
   /** What the corrected artwork must show (status "awaiting_artwork") */
   requiredFields?: { field: RequiredArtworkField; value: string }[];
+requiredSourceFingerprints?: Record<string, string>;
   waiveReason?: string;
   dismissal?: Dismissal;
 }
@@ -175,6 +200,7 @@ export interface Analysis {
   error?: string;
   /** sha256 of each design source's version that this check actually read, by source id */
   artworkHashes: Record<string, string>;
+sourceFingerprints?: Record<string, string>;
   /** Filled by the verified re-check (AI-5a) */
   artworkReadings?: { sourceId: string; sha256: string; textElements: string[]; inkColors: string[] }[];
   verifications?: ArtworkVerification[];

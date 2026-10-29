@@ -1,0 +1,12 @@
+{
+  "title": "Riverside 5K volunteer shirts",
+  "customerName": "Dana Whitfield",
+  "customerEmail": "dana@riverside5k.org",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": ["front.png", "front-v2.png"]
+    }
+  ]
+}

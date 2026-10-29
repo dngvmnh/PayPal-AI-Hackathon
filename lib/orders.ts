@@ -1,5 +1,7 @@
+import { hasObviousArtworkMismatch } from "./artwork-rules.ts";
+import { validateEvidence } from "./evidence.ts";
 import { randomUUID } from "node:crypto";
-import { currentArtworkHashes, isLocked, paymentGate, versionHash, waivedExceptions } from "./gate.ts";
+import { currentArtworkHashes, isLocked, paymentGate, versionHash, waivedExceptions, sha256 } from "./gate.ts";
 import type {
   AIAnalysis,
   ArtworkVerification,
@@ -17,6 +19,35 @@ import type {
 
 const REQUIRED_FIELDS: RequiredArtworkField[] = ["year", "date", "name", "url", "text_line", "ink_colors"];
 const MIN_REASON = 10;
+export function currentSourceFingerprints(
+  order: Pick<Order, "sources">,
+): Record<string, string> {
+  return Object.fromEntries(
+    order.sources.map((source) => [
+      source.id,
+      sha256(JSON.stringify({
+        kind: source.kind,
+        name: source.name,
+        text: source.text ?? null,
+        file: source.file ?? null,
+        mimeType: source.mimeType ?? null,
+        artworkHash: source.versions?.at(-1)?.sha256 ?? null,
+      })),
+    ]),
+  );
+}
+const CHECK_GROUP_BY_FIELD: Record<
+  AIAnalysis["findings"][number]["field"],
+  NonNullable<Finding["checkGroup"]>
+> = {
+  quantity: "quantity_sizes",
+  size_breakdown: "quantity_sizes",
+  print_text: "text_dates",
+  garment_color: "colors",
+  ink_colors: "colors",
+  unit_price: "pricing",
+  total_price: "pricing",
+};
 
 export function newOrder(fields: Pick<Order, "id" | "title" | "customerName" | "customerEmail" | "sources"> & { isSample?: boolean }): Order {
   return finalize({
@@ -60,24 +91,128 @@ export function applyAnalysis(
 ): Order {
   assertEditable(order);
   const o = structuredClone(order);
+  const previousAnalysis = o.analysis;
+  const previousFindings = previousAnalysis?.findings ?? [];
+  const fingerprints = currentSourceFingerprints(o);
+
   const spec: Order["spec"] = {};
-  for (const { field, value } of ai.proposedSpec) if (value) spec[field] = value;
-  const findings: Finding[] = ai.findings.map((f, i) => ({ ...f, id: `f${i + 1}`, status: "open" }));
+  for (const { field, value } of ai.proposedSpec) {
+    if (value) spec[field] = value;
+  }
+
   o.spec = spec;
   o.pricing = { ...ai.pricing, currency: ai.pricing.currency || "USD" };
+
+  const retained: Finding[] = [];
+
+  for (const finding of previousFindings) {
+    const validation = validateEvidence(finding, o.sources);
+
+    if (finding.status === "awaiting_artwork") {
+      finding.evidenceStatus = validation.status;
+      finding.evidenceValid = validation.status === "verified";
+      finding.evidenceProblems = validation.problems;
+      retained.push(finding);
+      continue;
+    }
+
+    const sourceIds = [...new Set(finding.evidence.map((item) => item.sourceId))];
+    const sourcesUnchanged =
+      sourceIds.length > 0 &&
+      sourceIds.every((id) =>
+        o.sources.filter((source) => source.id === id).length === 1 &&
+        Boolean(previousAnalysis?.sourceFingerprints?.[id]) &&
+        previousAnalysis?.sourceFingerprints?.[id] === fingerprints[id]
+      );
+
+    const resolvedValue = finding.resolvedValue?.trim();
+    const proposedValue = spec[finding.field]?.trim();
+
+    const specAgrees = !proposedValue || proposedValue === resolvedValue;
+    const numberValue = resolvedValue
+      ? parseNumber(resolvedValue, finding.field === "quantity")
+      : null;
+
+    const pricingAgrees =
+      (finding.field !== "quantity" ||
+        ai.pricing.quantity == null ||
+        ai.pricing.quantity === numberValue) &&
+      (finding.field !== "unit_price" ||
+        ai.pricing.unitPrice == null ||
+        ai.pricing.unitPrice === numberValue);
+
+    const canRetainResolution =
+      finding.status === "resolved" &&
+      !finding.requiresArtworkFix &&
+      Boolean(resolvedValue) &&
+      sourcesUnchanged &&
+      validation.status === finding.evidenceStatus &&
+      specAgrees &&
+      pricingAgrees;
+
+    if (canRetainResolution && resolvedValue) {
+      finding.evidenceProblems = validation.problems;
+      setSpec(o, finding.field, resolvedValue);
+      retained.push(finding);
+      continue;
+    }
+
+    if (
+      finding.status === "resolved_by_artwork" &&
+      finding.requiresArtworkFix &&
+      finding.requiredFields?.length
+    ) {
+      finding.status = "awaiting_artwork";
+    } else {
+      clearResolution(finding);
+      finding.status = "open";
+    }
+
+    finding.evidenceStatus = validation.status;
+    finding.evidenceValid = validation.status === "verified";
+    finding.evidenceProblems = validation.problems;
+    retained.push(finding);
+  }
+
+  const usedIds = new Set(previousFindings.map((finding) => finding.id));
+  let nextId = 1;
+
+  const newFindings: Finding[] = ai.findings.map((finding) => {
+    while (usedIds.has(`f${nextId}`)) nextId++;
+    const id = `f${nextId++}`;
+    usedIds.add(id);
+
+    const validation = validateEvidence(finding, o.sources);
+
+    return {
+      ...finding,
+      id,
+      status: "open",
+requiresArtworkFix:
+  finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources),
+      checkGroup: CHECK_GROUP_BY_FIELD[finding.field],
+      evidenceStatus: validation.status,
+      evidenceValid: validation.status === "verified",
+      evidenceProblems: validation.problems,
+    };
+  });
+
+  const findings = [...retained, ...newFindings];
+
   o.analysis = {
     ranAt: new Date().toISOString(),
     model: meta.model,
     demo: meta.demo,
     status: "succeeded",
     artworkHashes: meta.artworkHashes,
+    sourceFingerprints: fingerprints,
     summary: ai.summary,
     findings,
   };
+
   log(o, "check", `AI check succeeded: ${findings.length} finding(s)`);
   return finalize(o);
 }
-
 /** A failed check keeps earlier findings visible but blocks approval until a re-run succeeds. */
 export function recordFailedCheck(order: Order, error: string, artworkHashes: Record<string, string>): Order {
   assertEditable(order);
@@ -137,6 +272,12 @@ export function resolveFinding(order: Order, findingId: string, action: FindingA
       f.status = "awaiting_artwork";
       f.requiresArtworkFix = true;
       f.requiredFields = fields;
+const fingerprints = currentSourceFingerprints(o);
+f.requiredSourceFingerprints = Object.fromEntries(
+  o.sources
+    .filter((source) => source.kind !== "design")
+    .map((source) => [source.id, fingerprints[source.id]]),
+);
       if (action.specValue?.trim()) setSpec(o, f.field, action.specValue.trim());
       log(o, "artwork_required", `${f.title}: artwork must show ${fields.map((r) => `${r.field}=${r.value}`).join(", ")}`);
       break;
@@ -154,8 +295,14 @@ export function resolveFinding(order: Order, findingId: string, action: FindingA
     case "dismiss": {
       const reason = action.reason?.trim() ?? "";
       if (reason.length < MIN_REASON) throw new Error(`Explain why this is an AI error (at least ${MIN_REASON} characters).`);
-      if (f.requiresArtworkFix && !action.checkedArtworkMyself) {
-        throw new Error('Confirm "I checked the artwork file myself" to dismiss an artwork finding.');
+const referencesArtwork = f.evidence.some((item) =>
+  o.sources.some((source) => source.id === item.sourceId && source.kind === "design"),
+);
+
+if (
+  (f.requiresArtworkFix || referencesArtwork) &&
+  !action.checkedArtworkMyself
+) {        throw new Error('Confirm "I checked the artwork file myself" to dismiss an artwork finding.');
       }
       clearResolution(f);
       f.status = "dismissed_ai_error";
@@ -185,6 +332,7 @@ function clearResolution(f: Finding): void {
   delete f.resolvedValue;
   delete f.acceptedDespiteInvalidEvidence;
   delete f.requiredFields;
+delete f.requiredSourceFingerprints;
   delete f.waiveReason;
   delete f.dismissal;
 }
@@ -203,11 +351,52 @@ export function markResolvedByArtwork(order: Order, findingId: string, verificat
     throw new Error("Set the required artwork fields before verifying corrected artwork.");
   }
   if (o.analysis.status !== "succeeded") throw new Error("The last check didn't succeed.");
-  const current = currentArtworkHashes(o);
-  const read = o.analysis.artworkHashes;
-  if (Object.keys(current).some((k) => current[k] !== read[k])) {
-    throw new Error("The last check didn't read the current artwork version.");
-  }
+const textSources = o.sources.filter((source) => source.kind !== "design");
+const currentFingerprints = currentSourceFingerprints(o);
+const requiredFingerprints = f.requiredSourceFingerprints;
+
+const sourceChanged =
+  !requiredFingerprints ||
+  Object.keys(requiredFingerprints).length !== textSources.length ||
+  textSources.some((source) =>
+    !requiredFingerprints[source.id] ||
+    requiredFingerprints[source.id] !== currentFingerprints[source.id]
+  );
+
+if (sourceChanged) {
+  throw new Error("Order sources changed since the artwork requirements were set.");
+}
+if (o.analysis.demo) {
+  throw new Error("A saved demo analysis cannot verify artwork.");
+}
+
+const designSources = o.sources.filter((source) => source.kind === "design");
+const current = currentArtworkHashes(o);
+const read = o.analysis.artworkHashes ?? {};
+
+const missingArtworkHash =
+  designSources.length === 0 ||
+  designSources.some((source) => !current[source.id]);
+
+const hashesDiffer =
+  Object.keys(current).length !== Object.keys(read).length ||
+  Object.keys(current).some((key) => current[key] !== read[key]);
+
+if (missingArtworkHash || hashesDiffer) {
+  throw new Error("The last check didn't read the current artwork version.");
+}
+const group = f.checkGroup ?? CHECK_GROUP_BY_FIELD[f.field];
+
+const sameGroupBlocking = o.analysis.findings.some((other) =>
+  other.id !== f.id &&
+  other.severity === "blocking" &&
+  other.status === "open" &&
+  (other.checkGroup ?? CHECK_GROUP_BY_FIELD[other.field]) === group
+);
+
+if (sameGroupBlocking) {
+  throw new Error("A blocking finding remains open in the same group.");
+}
   for (const r of f.requiredFields) {
     const v = verifications.find((x) => x.findingId === f.id && x.field === r.field && x.expected === r.value);
     if (!v || !v.matches || v.codeCheck !== "pass") {

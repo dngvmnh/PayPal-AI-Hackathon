@@ -1,0 +1,12 @@
+{
+  "title": "Harbor Science Club shirts",
+  "customerName": "Alex Morgan",
+  "customerEmail": "alex@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": ["front.png", "front-v2.png"]
+    }
+  ]
+}
