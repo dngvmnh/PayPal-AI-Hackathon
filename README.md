@@ -51,7 +51,7 @@ It is not PayPal; it only returns responses in the same shape:
 npm run mock:paypal                                    # terminal 1
 PAYPAL_API_BASE=http://localhost:4010 PAYPAL_CLIENT_ID=x PAYPAL_CLIENT_SECRET=x \
   PAYPAL_WEBHOOK_ID=x npm start                        # terminal 2 (after npm run build)
-npm run e2e                                            # terminal 3: 17 checks, approve → pay → void & reopen → pay → webhook capture
+npm run e2e                                            # terminal 3: 23 checks, settle → approve → pay → void & reopen → pay → webhook capture
 ```
 
 ## How it works
@@ -147,12 +147,30 @@ Check what is configured at `GET /api/health`.
    `NEXT_PUBLIC_PAYPAL_CLIENT_ID`, and the **Secret** into `PAYPAL_CLIENT_SECRET`.
 3. **Testing Tools → Sandbox Accounts:** PayPal creates a default *Business* account (receives the money) and a
    *Personal* account (pays). Use the personal account's email and password in the PayPal popup.
-4. **Webhooks** (needs a public URL: the hosted app, or a tunnel to localhost). In the app's settings, add a webhook
-   for `<APP_BASE_URL>/api/paypal/webhook` with the events `PAYMENT.AUTHORIZATION.CREATED`,
-   `PAYMENT.AUTHORIZATION.VOIDED`, `PAYMENT.CAPTURE.COMPLETED` and `PAYMENT.CAPTURE.DENIED`. Copy its **Webhook
-   ID** into `PAYPAL_WEBHOOK_ID`. The webhook simulator on the same page can send test events.
+4. **Webhooks** (needs a public URL: the hosted app, or a tunnel to localhost such as
+   `cloudflared tunnel --url http://localhost:3000`). Register it with `npm run sandbox -- webhook <public URL>`,
+   which subscribes `<public URL>/api/paypal/webhook` to `PAYMENT.AUTHORIZATION.CREATED`,
+   `PAYMENT.AUTHORIZATION.VOIDED`, `PAYMENT.CAPTURE.COMPLETED` and `PAYMENT.CAPTURE.DENIED` and prints the id to put
+   in `PAYPAL_WEBHOOK_ID`. Running it again for the same URL changes nothing. You can also add the webhook by hand in
+   the app's settings in the developer dashboard.
 5. Restart the app (rebuild if you changed `NEXT_PUBLIC_PAYPAL_CLIENT_ID`). In the sandbox dashboard, the
    transaction's custom field shows `order:revision:versionHash`.
+
+### Sandbox helper
+
+`scripts/sandbox.mjs` reads `.env.local` and talks to the PayPal sandbox directly:
+
+```bash
+npm run sandbox -- check                 # credentials work and the running app has them too
+npm run sandbox -- webhook <public URL>  # register the webhook, print PAYPAL_WEBHOOK_ID
+npm run sandbox -- webhooks              # list registered webhooks
+npm run sandbox -- live                  # sample order → you pay in the browser → authorize → capture,
+                                         # then a second order → authorize → void & reopen; checks custom_id
+npm run sandbox -- order <PayPal order>  # status and custom_id of one PayPal order
+```
+
+`live` prints a PayPal approval link for each order; open it and pay with the sandbox *personal* account. Point it at
+the hosted app with `APP_URL=https://...` and it also waits for PayPal's signed webhook events to arrive.
 
 ## Tests
 
@@ -165,10 +183,12 @@ npm run e2e       # end-to-end against a running app + mock PayPal (see Quicksta
 
 ## Deploy
 
-`render.yaml` is a [Render](https://render.com) blueprint: **New → Blueprint →** this repo, then fill in the secret
-environment variables. It mounts a 1 GB persistent disk at `/var/data` (`DATA_DIR`), so orders and artwork survive
-redeploys. Render disks need a paid instance type. Any Node 22 host with a persistent folder works the same way:
-`npm ci && npm run build`, then `npm start`.
+`render.yaml` is a [Render](https://render.com) blueprint on the **free plan**: **New → Blueprint →** this repo,
+then fill in the secret environment variables. The free instance sleeps after 15 idle minutes (the first request
+then takes about a minute) and loses its stored orders when it sleeps or redeploys; **Load sample order** recreates
+the sample, so the whole flow still works. Leaving `ANTHROPIC_API_KEY` empty keeps the hosted app in demo mode. To
+keep data, switch to a paid plan with a persistent disk (see the comment in `render.yaml`). Any Node 22 host works
+the same way: `npm ci && npm run build`, then `npm start`.
 
 After deploying, set `APP_BASE_URL`, register the webhook URL in the PayPal app, and add the URL to the top of this
 README.

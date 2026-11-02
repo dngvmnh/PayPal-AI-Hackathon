@@ -43,8 +43,8 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 |---|---|
 | DG-3 to DG-9, DG-7a, DG-7b, DG-11, DG-12, J-6 | Done |
 | DG-1: PayPal sandbox app + test accounts | **Not done; needs Dang's PayPal developer login** (steps in README → "PayPal sandbox setup") |
-| DG-2: live sandbox run | Code done; verified only against the local stand-in (`npm run mock:paypal` + `npm run e2e`, 17 checks pass). **Needs DG-1** |
-| DG-10: deploy | `render.yaml` ready: Starter plan + 1 GB disk at `/var/data`, `DATA_DIR`, health check at `/api/health`. **Not deployed.** Hosting decision open (below) |
+| DG-2: live sandbox run | Code done; `npm run sandbox -- live` does the whole run (Nov 2). Verified only against the local stand-in (`npm run mock:paypal` + `npm run e2e`, 23 checks pass). **Needs DG-1** |
+| DG-10: deploy | `render.yaml` ready on Render's **free plan** (decided Nov 2, below), health check at `/api/health`. **Not deployed; needs Dang's Render account** |
 | J-5: video | Checklist and shot list in `docs/VIDEO.md`; recording is Nov 9–10 on the frozen build |
 
 **What else is in place:**
@@ -63,7 +63,10 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 
 Check `git log` for anything newer.
 
-## Open decision: hosting (Dang doesn't want to pay)
+## Hosting (decided Nov 2: option B, Render free plan)
+
+Dang wants no cost, and the credit page couldn't be checked (bot wall), so `render.yaml` now uses the free plan.
+The notes below are kept for context.
 
 - **Option A:** the hackathon's Render page says participants get **$50 in Render credits** (claim link on
   https://paypalaihackathon.devpost.com/details/render). That would cover Starter + disk (roughly $7/month) through

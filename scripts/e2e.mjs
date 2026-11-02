@@ -22,13 +22,22 @@ function expect(label, r, code, check = () => true) {
   return r.json;
 }
 
+// Demo mode can't re-check corrected artwork, so artwork findings are settled the only other allowed way:
+// dismissed by a merchant who checked the file. Everything else takes the AI's suggested value.
+function settle(f) {
+  if (f.requiresArtworkFix || f.evidenceStatus === "unverified")
+    return { type: "dismiss", reason: "Checked the artwork file by hand for this payment test", checkedArtworkMyself: true };
+  return { type: "confirm", value: f.suggestedValue };
+}
+
 const { id } = (await post("/api/orders/sample")).json;
 const order = `/api/orders/${id}`;
 const analyzed = expect("AI check (demo fixture)", await post(`${order}/analyze`), 200, (o) => o.status === "needs_review");
 expect("approve with open findings is refused", await post(`${order}/approve`, { name: "Dana" }), 400);
 expect("waive needs a clear reason", await post(`${order}/findings/f1`, { type: "waive", reason: "ok" }), 400);
+expect("artwork error can't be confirmed", await post(`${order}/findings/f3`, { type: "confirm", value: "x" }), 400);
 for (const f of analyzed.analysis.findings.filter((f) => f.severity !== "info")) {
-  await post(`${order}/findings/${f.id}`, { type: "confirm", value: f.suggestedValue });
+  expect(`settle ${f.id}`, await post(`${order}/findings/${f.id}`, settle(f)), 200);
 }
 expect("approve a stale displayed version is refused", await post(`${order}/approve`, { name: "Dana", versionHash: "x" }), 400);
 const approved = expect("customer approves", await post(`${order}/approve`, { name: "Dana Whitfield" }), 200, (o) => o.status === "approved");

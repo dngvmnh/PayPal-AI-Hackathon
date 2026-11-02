@@ -1,24 +1,22 @@
 # Render blueprint (DG-10). New → Blueprint → pick this repo, then fill in the secrets marked sync: false.
-# The persistent disk keeps orders and uploaded artwork across deploys; Render disks need a paid instance type.
+# Free plan: no card, no cost. The instance sleeps after 15 idle minutes (the next request takes ~1 minute to wake
+# it) and its filesystem is wiped on sleep or redeploy, so demo orders don't last. "Load sample order" recreates
+# the sample, so the full flow still works. To keep data, switch to `plan: starter` and add:
+#   disk: { name: proofpay-data, mountPath: /var/data, sizeGB: 1 }   plus the env var DATA_DIR=/var/data
 services:
   - type: web
     name: proofpay
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    disk:
-      name: proofpay-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_VERSION
         value: "22"
-      - key: DATA_DIR
-        value: /var/data
       - key: PAYPAL_API_BASE
         value: https://api-m.sandbox.paypal.com
+      # Leave empty to keep the hosted demo in demo mode (no Anthropic API cost).
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: PAYPAL_CLIENT_ID
