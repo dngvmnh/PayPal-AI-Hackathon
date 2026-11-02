@@ -35,7 +35,7 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 - **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. At `4729fc8`: 106 tests pass,
   typecheck clean.
 
-## State of the work (at commit `4729fc8`)
+## State of the work (at commit `4729fc8`; re-checked Nov 2 at `c7907e3`: 106 tests pass, typecheck clean)
 
 **Dang's tasks**
 
@@ -73,6 +73,33 @@ Check `git log` for anything newer.
   (no persistent disk on free). Judges can still run the full flow because "Load sample order" recreates the sample.
   This needs `render.yaml` changed to `plan: free` without the disk, plus a README note that demo data resets.
 - Live AI checks cost Anthropic API money. The hosted demo can stay in demo mode (no `ANTHROPIC_API_KEY`) for free.
+
+## Starting in a local session (on Dang's computer)
+
+A local Claude Code session has none of the cloud session's network blocks, so PayPal, Render and Devpost are
+reachable directly. Setup:
+
+```bash
+git clone https://github.com/dngvmnh/PayPal-AI-Hackathon.git
+cd PayPal-AI-Hackathon            # the default branch is claude/paypal-ai-hackathon-flwxee
+git config user.name "dngvmnh"
+git config user.email "dngvmnhggsv@gmail.com"
+npm install
+cp .env.example .env.local        # fill in by hand; never paste keys into the chat
+npm test && npm run typecheck     # expect 106 passing tests at c7907e3
+npm run dev                       # http://localhost:3000
+```
+
+- `CLAUDE.md` in the repo root is loaded automatically and carries the conventions below.
+- Put the keys in `.env.local` instead of the cloud environment settings (`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`,
+  `NEXT_PUBLIC_PAYPAL_CLIENT_ID`, later `PAYPAL_WEBHOOK_ID`; optional `ANTHROPIC_API_KEY`). For Render, either log in
+  to the dashboard yourself or export `RENDER_API_KEY` in the shell before starting Claude Code.
+- PayPal webhooks need a public URL. Use the deployed app, or a free tunnel to localhost (e.g. `cloudflared tunnel
+  --url http://localhost:3000`, which needs no account).
+- To run the payment flow without sandbox keys: `npm run mock:paypal`, start the app with
+  `PAYPAL_API_BASE=http://localhost:4010`, then `npm run e2e` (see README).
+
+The rest of this file was written for the cloud session; in a local session, skip the "Network" step below.
 
 ## What the next session needs (blocked without these)
 
