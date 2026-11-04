@@ -43,13 +43,12 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 |---|---|
 | DG-3 to DG-9, DG-7a, DG-7b, DG-11, DG-12, J-6 | Done |
 | DG-1: PayPal sandbox app + test accounts | Done Nov 4; keys in `.env.local` |
-| DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Buyer step used the approval link; the proof page's PayPal button renders but its popup is not yet clicked through |
-| DG-10: deploy | `render.yaml` ready on Render's **free plan** (decided Nov 2, below), health check at `/api/health`. **Not deployed; needs Dang's Render account** |
+| DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Repeated on the hosted app, plus one payment through the proof page's real PayPal button. Sandbox dashboard screenshot still to take |
+| DG-10: deploy | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's **free plan** (decided Nov 2, below). Webhook `49U87712RS555412A` registered; signed events confirmed. Every push to this branch redeploys and wipes demo orders |
 | J-5: video | Checklist and shot list in `docs/VIDEO.md`; recording is Nov 9–10 on the frozen build |
 
 **What else is in place:**
-- `README.md`: rewritten for judges. It still needs the hosted URL, and the payment screenshots need retaking with
-  real sandbox ids (they currently show `MOCK-ORDER-…`).
+- `README.md`: rewritten for judges, with the hosted URL and payment screenshots from a real sandbox run (Nov 4).
 - `samples/FORMAT.md`: answer-key format.
 - `samples/heldout/`: 3 held-out cases plus a fingerprint in its README. Not to be used before the `prompt-locked`
   tag.
@@ -153,6 +152,11 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 
 ## Known gaps to keep in mind
 
+- **Demo-mode payment path:** without an Anthropic key, the hosted sample reaches payment only by dismissing the
+  artwork findings, so the customer can approve artwork that still says 2025. It's for Dang and Dat to decide whether
+  to show this differently before the freeze.
+- **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
+  loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
 - **Public host:** anyone can create orders and run AI checks. Rate limiting is Dat's AI-12 hardening.
 - **Held-out cases are visible:** the plan relies on Dat not using `samples/heldout/` before tagging `prompt-locked`.
 - **Plan checkpoints:**

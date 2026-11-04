@@ -304,19 +304,19 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | Task | State |
 |---|---|
 | DG-1 | Done (Nov 4): sandbox app and test accounts; keys in `.env.local` |
-| DG-2 | Code done; tested end to end against a local mock of the PayPal API. Live sandbox run passed Nov 4 with `npm run sandbox -- live`: authorize → capture and authorize → void & reopen, `custom_id` confirmed in PayPal (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`). Buyer step used the PayPal approval link; the proof page's PayPal button renders but its popup is not yet clicked through. **Sandbox dashboard screenshot still to take** |
+| DG-2 | Code done; tested end to end against a local mock of the PayPal API. Live sandbox run passed Nov 4 with `npm run sandbox -- live`: authorize → capture and authorize → void & reopen, `custom_id` confirmed in PayPal (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`). Repeated on the hosted app; a third payment went through the proof page's real PayPal button (capture `5LG447559E9447813`). **Sandbox dashboard screenshot still to take** |
 | DG-3 | Done: void-and-cancel and void-and-reopen (new iteration, new approval, new PayPal order); tested |
 | DG-4 | Done: artwork versions with sha256 and history; upload route; locked after authorization |
 | DG-5 | Done: approval saved with version hash, spec, artwork hashes, amount, waived exceptions; any change cancels it; authorize refuses a changed version |
 | DG-6 | Done: gate per §4.2 (failed/stale check, warnings, artwork findings, invalid evidence, reasons); waive/dismiss rules; lock |
 | DG-7a | Done: proof page shows spec, current artwork version, amount, exceptions; "Approve this version" before PayPal |
-| DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. `npm run sandbox -- webhook <url>` registers it. **Registering needs the public URL (DG-10)** |
+| DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. Registered Nov 4 (`49U87712RS555412A`) for the hosted app; PayPal's signed `AUTHORIZATION.CREATED`, `AUTHORIZATION.VOIDED` and `CAPTURE.COMPLETED` events accepted and recorded |
 | DG-9 | Done (basic): artwork upload, approval status, iterations with PayPal ids and events, capture / void buttons, history |
 | DG-12 | Done: 3 cases in `samples/heldout/` (format proposal `samples/FORMAT.md`, structural test `tests/samples.test.ts`) |
 | DG-7b | Done: receipt for paid orders, cancelled state, "approve again" notice after a reopen, revision label; no horizontal scroll at 375 px |
-| DG-10 | Prepared: `render.yaml` on Render's free plan (no cost; demo data resets when the instance sleeps), `/api/health`. **Deploying needs Dang's Render account** |
-| DG-11 | Done: README rewritten (quickstart, sandbox setup, tools used, §1.5 wording, screenshots). **Hosted URL to add after DG-10** |
-| J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (taken against the PayPal stand-in; retake on the frozen build) |
+| DG-10 | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's free plan (no cost; demo-mode AI; orders reset when the instance sleeps or redeploys, and every push to this branch redeploys) |
+| DG-11 | Done: README rewritten (quickstart, sandbox setup, tools used, §1.5 wording, screenshots); hosted URL added Nov 4 |
+| J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (payment shots retaken Nov 4 with real sandbox ids; retake the rest on the frozen build) |
 | J-5 | Prepared: recording checklist and shot list in `docs/VIDEO.md`. Recording is Nov 9–10 |
 | Extra | `npm run mock:paypal` + `npm run e2e`: 23 end-to-end checks of settle → approve → pay → void & reopen → pay → webhook capture without sandbox keys (fixed Nov 2 for the artwork rules from `4729fc8`: demo-mode artwork findings are dismissed, since demo mode can't re-check artwork) |
 

@@ -23,7 +23,10 @@ approves the artwork itself.
 
 ## Quickstart for judges
 
-**Hosted demo:** _URL added once deployed (see [Deploy](#deploy))._
+**Hosted demo:** https://proofpay-vpw3.onrender.com (PayPal sandbox, demo-mode AI). It runs on a free instance: the first
+request after 15 idle minutes takes about a minute, and stored orders reset when it sleeps or redeploys. If an order
+disappears, click **Load sample order** again. Demo mode can't re-check corrected artwork, so reaching payment on the
+hosted sample means dismissing the artwork findings; run with an Anthropic key to see the re-check.
 
 **Run it locally in 2 minutes, no keys needed (demo mode).** Requires Node.js 22 or newer.
 
@@ -92,7 +95,7 @@ npm run e2e                                            # terminal 3: 23 checks, 
 |---|---|
 | ![](docs/screenshots/4-payment-iterations.png) | ![](docs/screenshots/5-receipt-mobile.png) |
 
-_The payment screenshots were taken against the local PayPal stand-in, so the ids read `MOCK-ORDER-…`._
+_The payment screenshots are from a real PayPal sandbox run on the hosted app, including PayPal's signed webhook events._
 
 ## Tools used
 
@@ -190,8 +193,9 @@ the sample, so the whole flow still works. Leaving `ANTHROPIC_API_KEY` empty kee
 keep data, switch to a paid plan with a persistent disk (see the comment in `render.yaml`). Any Node 22 host works
 the same way: `npm ci && npm run build`, then `npm start`.
 
-After deploying, set `APP_BASE_URL`, register the webhook URL in the PayPal app, and add the URL to the top of this
-README.
+After deploying, set `APP_BASE_URL`, register the webhook with `npm run sandbox -- webhook <URL>`, set
+`PAYPAL_WEBHOOK_ID` on the host, and wait for the redeploy to finish before testing: on the free plan a redeploy wipes
+stored orders, including ones in the middle of a payment.
 
 ## Project layout
 

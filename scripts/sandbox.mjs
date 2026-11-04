@@ -152,6 +152,10 @@ async function checkCustomId(authorizationId, expected) {
 
 async function live() {
   await check();
+  // A host still rolling out a deploy swaps instances mid-run and, on the free plan, loses the orders with it.
+  if (!APP.includes("localhost") && (await app("GET", "/api/health")).paypalWebhook !== "configured") {
+    fail("The host has no PAYPAL_WEBHOOK_ID yet: set it and wait for the redeploy to finish.");
+  }
   let ok = true;
 
   const first = await approvedSampleOrder("Dana Whitfield");
