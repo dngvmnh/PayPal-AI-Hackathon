@@ -261,6 +261,8 @@ The **held-out** numbers are reported as measured, whatever they are.
 
 ### 6.2 Dat backlog
 
+**Nov 4: Dat handed over. Dang now owns every remaining task in this plan,** including this backlog, J-4 and J-7.
+
 Estimates in days (d). **P**: **M**ust or **S**hould.
 
 | ID | Task | Est | P | Depends | Done when |

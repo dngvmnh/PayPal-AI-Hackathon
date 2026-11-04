@@ -1,7 +1,7 @@
 # ProofPay: working notes for Claude Code
 
 Read `docs/HANDOFF.md` first (current state, open tasks, what's blocked), then `docs/PLAN.md` (agreed rules and the
-task list; Dang's tasks are `DG-*`, Dat's are `AI-*`, shared are `J-*`).
+task list; `DG-*`, `AI-*` and `J-*` are all Dang's since Nov 4, when Dat handed over the rest of the work).
 
 ## Rules for this repo
 
@@ -15,4 +15,5 @@ task list; Dang's tasks are `DG-*`, Dat's are `AI-*`, shared are `J-*`).
 - Before pushing: `npm test`, `npm run typecheck`, `npm run build`.
 - The agreed product wording is "AI-assisted verification backed by merchant and customer confirmation"; never claim
   the AI alone guarantees a correct print.
-- `docs/PLAN.md` §4 (data model, approval gate, order states) changes only with both Dat's and Dang's OK.
+- `docs/PLAN.md` §4 (data model, approval gate, order states) changes only with Dang's OK.
+- Don't read or tune against `samples/heldout/` before the `prompt-locked` tag.

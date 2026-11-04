@@ -4,6 +4,9 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 
 ## Who and what
 
+> **Nov 4: Dat handed over, so Dang now owns all remaining tasks,** including `AI-*`, J-4 and J-7. Earlier notes below
+> keep their original owners for history.
+
 - **Project:** ProofPay, an entry for the PayPal AI Hackathon (Devpost). Deadline **Nov 13, 2026 04:00 GMT+8**
   (= Thu Nov 12, 20:00 UTC); team target is to submit **Wed Nov 11**.
 - **Idea:** AI checks custom **t-shirt** orders for mismatches between the shop's brief, the customer's messages and
@@ -162,7 +165,8 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
 - **Public host:** anyone can create orders. `lib/rate-limit.ts` limits each visitor, and live AI checks also have a daily
   cap across all visitors. Limits are in memory, so a restart resets them.
-- **Held-out cases are visible:** the plan relies on Dat not using `samples/heldout/` before tagging `prompt-locked`.
+- **Held-out set is no longer independent:** Dang wrote the held-out cases and now also tunes the prompt. Nobody may read or
+  tune against `samples/heldout/` before `prompt-locked`, and the write-up must say the same person wrote the cases and tuned.
 - **Plan checkpoints:**
   - Nov 3: minimum loop on Riverside;
   - Nov 7: feature freeze, tag `v0.9-freeze`;
