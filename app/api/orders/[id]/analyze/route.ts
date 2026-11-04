@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { analyzeOrder } from "@/lib/ai.ts";
+import { analyzeOrder, liveAiConfigured } from "@/lib/ai.ts";
 import { processArtworkRecheck } from "@/lib/artwork-recheck.ts";
 import { currentArtworkHashes } from "@/lib/gate.ts";
 import { applyAnalysis, recordFailedCheck } from "@/lib/orders.ts";
 import { getOrder, saveOrder } from "@/lib/store.ts";
 import { withOrder, type IdParams } from "@/lib/http.ts";
+import { limitRequest } from "@/lib/rate-limit.ts";
 import type { Order } from "@/lib/types.ts";
 
 export const maxDuration = 300;
@@ -14,7 +15,10 @@ async function isUnchanged(order: Order): Promise<boolean> {
   return Boolean(latest && JSON.stringify(latest) === JSON.stringify(order));
 }
 
-export async function POST(_req: Request, { params }: IdParams) {
+export async function POST(req: Request, { params }: IdParams) {
+  const limited = limitRequest(req, liveAiConfigured() ? "liveAi" : "write");
+  if (limited) return limited;
+
   return withOrder(params, async (order) => {
     const artworkHashes = currentArtworkHashes(order);
 

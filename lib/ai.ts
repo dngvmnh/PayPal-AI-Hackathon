@@ -19,6 +19,7 @@ export interface AnalysisResult {
   /** demo only: the saved result of re-checking the exact bytes of SAMPLE_CORRECTED_ARTWORK */
   savedRecheck?: boolean;
   model: string;
+  usage?: { inputTokens?: number; outputTokens?: number };
 }
 
 const SYSTEM_PROMPT = `You are the pre-press desk of a custom t-shirt print shop.
@@ -141,6 +142,10 @@ if (pendingArtwork.length > 0) {
   return content;
 }
 
+export function liveAiConfigured(): boolean {
+  return Boolean(process.env.ASTRO_GATEWAY_API_KEY || process.env.ANTHROPIC_API_KEY);
+}
+
 export async function analyzeOrder(order: Order): Promise<AnalysisResult> {
   if (process.env.ASTRO_GATEWAY_API_KEY) return analyzeWithGateway(order);
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -168,7 +173,12 @@ export async function analyzeOrder(order: Order): Promise<AnalysisResult> {
   if (!response.parsed_output) {
     throw new Error(`Could not parse the analysis (stop_reason: ${response.stop_reason}).`);
   }
-  return { analysis: response.parsed_output, demo: false, model: MODEL };
+  return {
+    analysis: response.parsed_output,
+    demo: false,
+    model: MODEL,
+    usage: { inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens },
+  };
 }
 
 /** Text and images in the OpenAI-style shape the gateway takes. A file it can't read fails the check. */
@@ -187,7 +197,16 @@ function toChatContent(blocks: Anthropic.Beta.BetaContentBlockParam[]) {
 
 export function parseModelJson(text: string): AIAnalysis {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return AIAnalysis.parse(JSON.parse(fenced ? fenced[1] : text));
+  const raw = JSON.parse(fenced ? fenced[1] : text);
+  // The gateway model leaves out fields it would set to null. "Unknown" must not fail the whole check.
+  for (const spec of raw.proposedSpec ?? []) spec.value ??= null;
+  for (const finding of raw.findings ?? []) finding.suggestedValue ??= null;
+  for (const claim of raw.artworkClaims ?? []) claim.observed ??= null;
+  if (raw.pricing) {
+    raw.pricing.quantity ??= null;
+    raw.pricing.unitPrice ??= null;
+  }
+  return AIAnalysis.parse(raw);
 }
 
 async function analyzeWithGateway(order: Order): Promise<AnalysisResult> {
@@ -222,7 +241,12 @@ async function analyzeWithGateway(order: Order): Promise<AnalysisResult> {
   if (typeof choice?.message?.content !== "string") {
     throw new Error(`AI gateway returned no text (finish_reason: ${choice?.finish_reason}).`);
   }
-  return { analysis: parseModelJson(choice.message.content), demo: false, model };
+  return {
+    analysis: parseModelJson(choice.message.content),
+    demo: false,
+    model,
+    usage: { inputTokens: json.usage?.prompt_tokens, outputTokens: json.usage?.completion_tokens },
+  };
 }
 
 async function loadSaved(name: string): Promise<AIAnalysis> {

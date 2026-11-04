@@ -12,6 +12,7 @@
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "mock:paypal": "node scripts/mock-paypal.mjs",
     "e2e": "node scripts/e2e.mjs",
+    "eval": "node --env-file-if-exists=.env.local --experimental-strip-types scripts/eval.ts",
     "sandbox": "node --env-file-if-exists=.env.local scripts/sandbox.mjs"
   },
   "dependencies": {

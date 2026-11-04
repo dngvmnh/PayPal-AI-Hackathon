@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { addArtworkVersion } from "@/lib/orders.ts";
 import { saveOrder, saveUpload } from "@/lib/store.ts";
 import { withOrder, type IdParams } from "@/lib/http.ts";
+import { limitRequest } from "@/lib/rate-limit.ts";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"]);
 
 /** Multipart: sourceId, file, optional note. Adds a corrected version of a design file. */
 export async function POST(req: Request, { params }: IdParams) {
+  const limited = limitRequest(req, "write");
+  if (limited) return limited;
+
   const form = await req.formData();
   return withOrder(params, async (order) => {
     const file = form.get("file");

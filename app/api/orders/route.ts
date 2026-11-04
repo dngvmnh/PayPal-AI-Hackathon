@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { firstVersion, newId, saveOrder, saveUpload } from "@/lib/store.ts";
 import { newOrder } from "@/lib/orders.ts";
 import { splitThread } from "@/lib/sample.ts";
+import { limitRequest } from "@/lib/rate-limit.ts";
 import type { Source } from "@/lib/types.ts";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
 export async function POST(req: Request) {
+  const limited = limitRequest(req, "write");
+  if (limited) return limited;
+
   const form = await req.formData();
   const str = (k: string) => String(form.get(k) ?? "").trim();
   const id = newId();
