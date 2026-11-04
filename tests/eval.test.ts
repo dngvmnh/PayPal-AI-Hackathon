@@ -113,6 +113,23 @@ ${JSON.stringify({
   assert.equal(parsed.pricing.quantity, null);
 });
 
+test("evidence without a value still parses, labelled with its quote", () => {
+  const parsed = parseModelJson(JSON.stringify({
+    summary: "s",
+    proposedSpec: [],
+    findings: [{
+      field: "quantity",
+      severity: "blocking",
+      title: "t",
+      explanation: "e",
+      evidence: [{ sourceId: "brief", quote: "Quantity: 60" }],
+      customerQuestion: "q",
+    }],
+    pricing: { currency: "USD" },
+  }));
+  assert.equal(parsed.findings[0].evidence[0].value, "Quantity: 60");
+});
+
 test("an artwork claim about a field that can't be required is dropped, not fatal", () => {
   const parsed = parseModelJson(JSON.stringify({
     summary: "s",
