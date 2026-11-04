@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { codeCheckFindings, sizeTotal } from "../lib/spec-checks.ts";
+import { codeCheckFindings, priceTiers, sizeTotal } from "../lib/spec-checks.ts";
 import type { AIAnalysis, Source } from "../lib/types.ts";
 
 const sources: Source[] = [
@@ -47,6 +47,41 @@ test("a total that isn't quantity times unit price raises a finding", () => {
 test("a correct total raises nothing, and no source line means no finding", () => {
   assert.deepEqual(codeCheckFindings(analysis(null, "$480.00"), sources), []);
   assert.deepEqual(codeCheckFindings(analysis(null, "$700.00"), sources), []);
+});
+
+const priceList: Source[] = [
+  {
+    id: "brief",
+    kind: "brief",
+    name: "Brief",
+    text: "- Price list: $12.00 per shirt for 12-49 shirts, $10.00 per shirt for 50 or more\n- Total price: $480.00",
+  },
+];
+
+test("reads price lists in common formats", () => {
+  assert.deepEqual(priceTiers("$12.00 per shirt for 12-49 shirts, $10.00 per shirt for 50 or more"), [
+    { price: 12, min: 12, max: 49 },
+    { price: 10, min: 50, max: Infinity },
+  ]);
+  assert.deepEqual(priceTiers("12-49 shirts: $12, 50+ shirts: $10"), [
+    { min: 12, max: 49, price: 12 },
+    { min: 50, max: Infinity, price: 10 },
+  ]);
+  assert.deepEqual(priceTiers("That comes to $480 at $10 a shirt."), []);
+});
+
+test("a unit price off the price list raises findings for the price and the total", () => {
+  const found = codeCheckFindings(analysis(null, "$480.00"), priceList);
+  assert.deepEqual(found.map((f) => f.field), ["unit_price", "total_price"]);
+  assert.equal(found[0].suggestedValue, "12.00");
+  assert.equal(found[1].suggestedValue, "576.00");
+});
+
+test("the price list's price for this quantity raises nothing", () => {
+  const ai = analysis(null, "$576.00");
+  ai.pricing.unitPrice = 12;
+  const sources: Source[] = [{ ...priceList[0], text: priceList[0].text!.replace("$480.00", "$576.00") }];
+  assert.deepEqual(codeCheckFindings(ai, sources), []);
 });
 
 test("a field the model already reported isn't reported twice", () => {

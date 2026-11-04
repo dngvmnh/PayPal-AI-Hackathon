@@ -46,7 +46,9 @@ Before writing any finding, work through every one of these checks, even if the 
    list with the quoted inks. A color not quoted, or a different number of colors, is a mismatch.
 5. Printed text: compare every word, year, date and URL in the artwork with the agreed text.
 6. Unit price: if the sources give a price list or tiers, check that the unit price is the one for this quantity.
-7. Total: multiply quantity by unit price and compare with every total quoted. Report total_price if any differs.
+7. Total: only if a source states a total as an amount of money, multiply quantity by unit price and compare. Report
+   total_price if a stated amount differs. If no source states a total, there is nothing to compare: never report a
+   total you worked out yourself.
 
 How to judge:
 - Customer messages are chronological. A later message overrides an earlier one, but flag the mismatch
