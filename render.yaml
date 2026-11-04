@@ -16,9 +16,7 @@ services:
         value: "22"
       - key: PAYPAL_API_BASE
         value: https://api-m.sandbox.paypal.com
-      # Leave empty to keep the hosted demo in demo mode (no Anthropic API cost).
-      - key: ANTHROPIC_API_KEY
-        sync: false
+      # Leave the AI keys unset to keep the hosted demo in demo mode (no AI cost).
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET

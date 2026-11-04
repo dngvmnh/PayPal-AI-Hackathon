@@ -3,10 +3,23 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { z } from "zod";
+import { sha256 } from "./gate.ts";
 import { AIAnalysis, SPEC_FIELDS, SPEC_LABELS, type Order } from "./types.ts";
 import { uploadPath } from "./store.ts";
 
 export const MODEL = "claude-opus-5-5";
+const SAMPLE_DIR = path.join(process.cwd(), "samples", "riverside-5k");
+/** The sample's corrected artwork: the only file the saved re-check result may vouch for. */
+export const SAMPLE_CORRECTED_ARTWORK = path.join(SAMPLE_DIR, "front-v2.png");
+
+export interface AnalysisResult {
+  analysis: AIAnalysis;
+  demo: boolean;
+  /** demo only: the saved result of re-checking the exact bytes of SAMPLE_CORRECTED_ARTWORK */
+  savedRecheck?: boolean;
+  model: string;
+}
 
 const SYSTEM_PROMPT = `You are the pre-press desk of a custom t-shirt print shop.
 Before payment, cross-check the order brief, customer messages, and design files.
@@ -128,11 +141,12 @@ if (pendingArtwork.length > 0) {
   return content;
 }
 
-export async function analyzeOrder(order: Order): Promise<{ analysis: AIAnalysis; demo: boolean }> {
+export async function analyzeOrder(order: Order): Promise<AnalysisResult> {
+  if (process.env.ASTRO_GATEWAY_API_KEY) return analyzeWithGateway(order);
   if (!process.env.ANTHROPIC_API_KEY) {
-    if (order.isSample) return { analysis: await loadDemoAnalysis(), demo: true };
+    if (order.isSample) return loadDemoAnalysis(order);
     throw new Error(
-      "ANTHROPIC_API_KEY is not set. Add it to .env.local, or use the sample order to try demo mode.",
+      "No AI key is set (ASTRO_GATEWAY_API_KEY). Add it to .env.local, or use the sample order to try demo mode.",
     );
   }
 
@@ -154,13 +168,79 @@ export async function analyzeOrder(order: Order): Promise<{ analysis: AIAnalysis
   if (!response.parsed_output) {
     throw new Error(`Could not parse the analysis (stop_reason: ${response.stop_reason}).`);
   }
-  return { analysis: response.parsed_output, demo: false };
+  return { analysis: response.parsed_output, demo: false, model: MODEL };
 }
 
-async function loadDemoAnalysis(): Promise<AIAnalysis> {
-  const raw = await fs.readFile(
-    path.join(process.cwd(), "samples", "riverside-5k", "demo-analysis.json"),
-    "utf8",
-  );
-  return AIAnalysis.parse(JSON.parse(raw));
+/** Text and images in the OpenAI-style shape the gateway takes. A file it can't read fails the check. */
+function toChatContent(blocks: Anthropic.Beta.BetaContentBlockParam[]) {
+  return blocks.map((block) => {
+    if (block.type === "text") return { type: "text", text: block.text };
+    if (block.type === "image" && block.source.type === "base64") {
+      return {
+        type: "image_url",
+        image_url: { url: `data:${block.source.media_type};base64,${block.source.data}` },
+      };
+    }
+    throw new Error("The AI gateway can't read this artwork file type. Use a PNG, JPG, WebP or GIF.");
+  });
+}
+
+export function parseModelJson(text: string): AIAnalysis {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  return AIAnalysis.parse(JSON.parse(fenced ? fenced[1] : text));
+}
+
+async function analyzeWithGateway(order: Order): Promise<AnalysisResult> {
+  const model = process.env.ASTRO_MODEL;
+  const base = process.env.ASTRO_GATEWAY_URL?.replace(/\/+$/, "");
+  if (!model || !base) throw new Error("ASTRO_MODEL and ASTRO_GATEWAY_URL must be set with ASTRO_GATEWAY_API_KEY.");
+
+  const res = await fetch(`${base}/v1/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.ASTRO_GATEWAY_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 16000,
+      response_format: {
+        type: "json_schema",
+        json_schema: { name: "analysis", schema: z.toJSONSchema(AIAnalysis) },
+      },
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: toChatContent(await buildContent(order)) },
+      ],
+    }),
+    signal: AbortSignal.timeout(280_000),
+  });
+  if (!res.ok) throw new Error(`AI gateway returned ${res.status}: ${(await res.text()).slice(0, 300)}`);
+
+  const json = await res.json();
+  const choice = json.choices?.[0];
+  if (typeof choice?.message?.content !== "string") {
+    throw new Error(`AI gateway returned no text (finish_reason: ${choice?.finish_reason}).`);
+  }
+  return { analysis: parseModelJson(choice.message.content), demo: false, model };
+}
+
+async function loadSaved(name: string): Promise<AIAnalysis> {
+  return AIAnalysis.parse(JSON.parse(await fs.readFile(path.join(SAMPLE_DIR, name), "utf8")));
+}
+
+/**
+ * Without a key, the sample uses saved results. Corrected artwork gets the saved re-check only if it is
+ * byte-for-byte the sample's corrected file: anything else needs a live check (the route refuses it).
+ */
+async function loadDemoAnalysis(order: Order): Promise<AnalysisResult> {
+  const designs = order.sources.filter((source) => source.kind === "design");
+  const updated = designs.some((source) => (source.versions?.length ?? 0) > 1);
+  if (updated) {
+    const expected = sha256(await fs.readFile(SAMPLE_CORRECTED_ARTWORK));
+    if (designs.length === 1 && designs[0].versions?.at(-1)?.sha256 === expected) {
+      return { analysis: await loadSaved("demo-recheck.json"), demo: true, savedRecheck: true, model: "demo-fixture" };
+    }
+  }
+  return { analysis: await loadSaved("demo-analysis.json"), demo: true, model: "demo-fixture" };
 }

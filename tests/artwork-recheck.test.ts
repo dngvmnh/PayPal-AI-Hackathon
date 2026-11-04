@@ -67,6 +67,23 @@ test("a valid reading and claim clear the pending artwork finding", () => {
   assert.equal(result.analysis!.verifications![0].codeCheck, "pass");
 });
 
+function demoOrder(savedRecheck?: boolean) {
+  const { order, findingId } = preparedOrder();
+  order.analysis!.demo = true;
+  order.analysis!.savedRecheck = savedRecheck;
+  return { order, findingId };
+}
+
+test("a saved re-check result clears the finding only when marked as matched to the file", () => {
+  const saved = demoOrder(true);
+  const cleared = processArtworkRecheck(saved.order, response(saved.findingId));
+  assert.equal(cleared.analysis!.findings.find((f) => f.id === saved.findingId)!.status, "resolved_by_artwork");
+
+  const plain = demoOrder();
+  const blocked = processArtworkRecheck(plain.order, response(plain.findingId));
+  assert.equal(blocked.analysis!.findings.find((f) => f.id === plain.findingId)!.status, "awaiting_artwork");
+});
+
 test("old and new years together leave the finding blocked", () => {
   const { order, findingId } = preparedOrder();
   const output = response(findingId);

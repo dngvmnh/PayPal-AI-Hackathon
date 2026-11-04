@@ -30,7 +30,7 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
   commits show as "Unverified" on GitHub.
 - **Nothing private:** everything goes in the repo, including the held-out eval cases.
 - Don't create a PR unless asked.
-- **Stack:** Next.js 16, TypeScript, Node ≥ 22.6, `@anthropic-ai/sdk` (model `claude-opus-5-5`), PayPal REST via
+- **Stack:** Next.js 16, TypeScript, Node ≥ 22.6, Astropods AI gateway (`ASTRO_GATEWAY_API_KEY`, model `qwen3-vl`; `@anthropic-ai/sdk` remains as an alternative), PayPal REST via
   `fetch`, `@paypal/react-paypal-js`. Storage is JSON plus uploads in `DATA_DIR` (default `.data/`).
 - **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. At `4729fc8`: 106 tests pass,
   typecheck clean.
@@ -152,9 +152,8 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 
 ## Known gaps to keep in mind
 
-- **Demo-mode payment path:** without an Anthropic key, the hosted sample reaches payment only by dismissing the
-  artwork findings, so the customer can approve artwork that still says 2025. It's for Dang and Dat to decide whether
-  to show this differently before the freeze.
+- **Live model recall:** the first live `qwen3-vl` run on Riverside (Nov 4) found 3 of 5 planted issues and missed
+  sizes and ink colors, so the order reached "ready for approval" with those unflagged. That is AI-9 tuning.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
 - **Public host:** anyone can create orders and run AI checks. Rate limiting is Dat's AI-12 hardening.

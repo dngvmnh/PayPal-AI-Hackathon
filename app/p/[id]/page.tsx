@@ -3,6 +3,7 @@ import { getOrder } from "@/lib/store.ts";
 import { paymentGate, versionHash, waivedExceptions } from "@/lib/gate.ts";
 import { currentPayment, hasValidApproval } from "@/lib/orders.ts";
 import { SPEC_FIELDS, SPEC_LABELS } from "@/lib/types.ts";
+import { LocalTime } from "@/app/components/LocalTime.tsx";
 import { ProofCheckout } from "@/app/components/ProofCheckout.tsx";
 
 export const dynamic = "force-dynamic";
@@ -52,7 +53,7 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
             <tr>
               <th>Approved by</th>
               <td>
-                {order.approval.approvedBy.name}, {new Date(order.approval.approvedAt).toLocaleString()}
+                {order.approval.approvedBy.name}, <LocalTime iso={order.approval.approvedAt} />
               </td>
             </tr>
             <tr>

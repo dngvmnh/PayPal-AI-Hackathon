@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { analyzeOrder, MODEL } from "@/lib/ai.ts";
+import { analyzeOrder } from "@/lib/ai.ts";
 import { processArtworkRecheck } from "@/lib/artwork-recheck.ts";
 import { currentArtworkHashes } from "@/lib/gate.ts";
 import { applyAnalysis, recordFailedCheck } from "@/lib/orders.ts";
@@ -19,17 +19,17 @@ export async function POST(_req: Request, { params }: IdParams) {
     const artworkHashes = currentArtworkHashes(order);
 
     try {
-      const { analysis, demo } = await analyzeOrder(order);
+      const { analysis, demo, savedRecheck, model } = await analyzeOrder(order);
 
       const artworkWasUpdated = order.sources.some(
         (source) => source.kind === "design" && (source.versions?.length ?? 0) > 1,
       );
 
-      if (demo && artworkWasUpdated) {
+      if (demo && artworkWasUpdated && !savedRecheck) {
         return NextResponse.json(
           {
             error:
-              "The saved demo analysis cannot verify updated artwork. Use a live AI check when available.",
+              "Demo mode can only re-check the sample's own corrected file. Other artwork needs a live AI check.",
           },
           { status: 409 },
         );
@@ -43,12 +43,13 @@ export async function POST(_req: Request, { params }: IdParams) {
       }
 
       let updated = applyAnalysis(order, analysis, {
-        model: demo ? "demo-fixture" : MODEL,
+        model,
         demo,
+        savedRecheck,
         artworkHashes,
       });
 
-      if (!demo) {
+      if (!demo || savedRecheck) {
         updated = processArtworkRecheck(updated, analysis);
       }
 

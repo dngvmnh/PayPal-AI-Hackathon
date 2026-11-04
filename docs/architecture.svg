@@ -61,10 +61,10 @@
 
   <!-- external -->
   <rect class="box ai" x="760" y="60" width="260" height="96"/>
-  <text class="h" x="776" y="86">Claude API</text>
-  <text class="t" x="776" y="108">claude-opus-5-5, vision,</text>
-  <text class="t" x="776" y="126">structured output (Zod),</text>
-  <text class="t" x="776" y="144">refusal fallback</text>
+  <text class="h" x="776" y="86">AI gateway (Astropods)</text>
+  <text class="t" x="776" y="108">qwen3-vl, vision,</text>
+  <text class="t" x="776" y="126">JSON schema output,</text>
+  <text class="t" x="776" y="144">validated with Zod</text>
 
   <rect class="box pp" x="760" y="360" width="260" height="150"/>
   <text class="h" x="776" y="386">PayPal (sandbox)</text>

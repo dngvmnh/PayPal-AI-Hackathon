@@ -6,6 +6,8 @@
 //                                             then a second order → authorize → void & reopen
 //   npm run sandbox -- order <paypal-order-id>  status and custom_id of a PayPal order
 // The app must be running for `check` and `live` (APP_URL, default http://localhost:3000), started with the same keys.
+import { settleSample } from "./settle-sample.mjs";
+
 const API = process.env.PAYPAL_API_BASE ?? "https://api-m.sandbox.paypal.com";
 const APP = process.env.APP_URL ?? "http://localhost:3000";
 const EVENTS = [
@@ -108,17 +110,7 @@ async function approvedSampleOrder(name) {
   const { id } = await app("POST", "/api/orders/sample");
   const order = `/api/orders/${id}`;
   const analyzed = await app("POST", `${order}/analyze`);
-  // Same settling as scripts/e2e.mjs: demo mode can't re-check artwork, so artwork findings are dismissed.
-  for (const f of analyzed.analysis.findings.filter((f) => f.severity !== "info")) {
-    const artwork = f.requiresArtworkFix || f.evidenceStatus === "unverified";
-    await app(
-      "POST",
-      `${order}/findings/${f.id}`,
-      artwork
-        ? { type: "dismiss", reason: "Checked the artwork file by hand for this payment test", checkedArtworkMyself: true }
-        : { type: "confirm", value: f.suggestedValue },
-    );
-  }
+  await settleSample(APP, id, analyzed);
   const approved = await app("POST", `${order}/approve`, { name });
   console.log(`\n${name}: order ${id}, approved version ${approved.approval.versionHash.slice(0, 16)}, ${approved.approval.amount}`);
   return { id, order, approved };

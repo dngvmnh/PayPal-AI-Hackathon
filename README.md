@@ -7,7 +7,7 @@ A t-shirt order lives in three places that drift apart: the shop's order brief, 
 and the artwork file. The customer emails "make it 150", but the brief still says 120. The artwork still says last
 year. A third ink color sneaks in that nobody priced. Shops find out after printing.
 
-ProofPay is **AI-assisted verification backed by merchant and customer confirmation**. Claude reads the brief, the
+ProofPay is **AI-assisted verification backed by merchant and customer confirmation**. A vision model reads the brief, the
 messages and the artwork image together and flags mismatches in four areas: quantity and sizes, printed text and
 dates, colors, and pricing. Each flag quotes its sources. The merchant settles every flag. If the artwork itself is
 wrong, the merchant uploads a corrected file and the AI checks it again. The customer then approves one exact version,
@@ -25,8 +25,8 @@ approves the artwork itself.
 
 **Hosted demo:** https://proofpay-vpw3.onrender.com (PayPal sandbox, demo-mode AI). It runs on a free instance: the first
 request after 15 idle minutes takes about a minute, and stored orders reset when it sleeps or redeploys. If an order
-disappears, click **Load sample order** again. Demo mode can't re-check corrected artwork, so reaching payment on the
-hosted sample means dismissing the artwork findings; run with an Anthropic key to see the re-check.
+disappears, click **Load sample order** again. In demo mode the AI results are saved ones, labelled as such: the
+re-check step only accepts the sample's own corrected file. Add `ASTRO_GATEWAY_API_KEY` to run live checks.
 
 **Run it locally in 2 minutes, no keys needed (demo mode).** Requires Node.js 22 or newer.
 
@@ -37,13 +37,21 @@ npm install
 npm run build && npm start        # http://localhost:3000
 ```
 
-1. Click **Load sample order (Riverside 5K)**, then **Run AI check**. Without an Anthropic key, the sample uses a
-   saved analysis.
-2. Settle each finding: **Confirm value**, **Waive** (with a reason the customer will see), or **Dismiss as AI
-   error** (with a logged reason).
-3. When the banner turns green, click **Open customer proof page**. Tick the box, type a name, and click
+1. Click **Load sample order (Riverside 5K)**, then **Run AI check**. Without an AI key, the sample uses a saved
+   analysis.
+2. Settle the spec findings (quantity, sizes, total): **Confirm value**, **Waive** (with a reason the customer will
+   see), or **Dismiss as AI error** (with a logged reason).
+3. The two artwork findings can't be confirmed or waived, because the file itself is wrong. On each, set what the
+   corrected artwork must show, then click **Require corrected artwork**:
+   - printed text: `year` = `2026`, `date` = `Sunday, May 17`, `url` = `riverside5k.org`
+   - ink colors: `ink_colors` = `white, safety orange`
+
+   Download the corrected file from the link in the **Artwork** panel, upload it with **Upload corrected version**,
+   and click **Run AI check** again. Each required field then shows expected against what was read. Without an AI key
+   this is a saved result that applies only to that exact file; any other upload is refused.
+4. When the banner turns green, click **Open customer proof page**. Tick the box, type a name, and click
    **Approve this version**.
-4. To pay, add PayPal sandbox keys ([setup below](#paypal-sandbox-setup)) and use a sandbox *personal* account.
+5. To pay, add PayPal sandbox keys ([setup below](#paypal-sandbox-setup)) and use a sandbox *personal* account.
    Then go back to the order and click **Start production & capture**, **Void & reopen for changes**, or **Void &
    cancel order**.
 
@@ -54,7 +62,7 @@ It is not PayPal; it only returns responses in the same shape:
 npm run mock:paypal                                    # terminal 1
 PAYPAL_API_BASE=http://localhost:4010 PAYPAL_CLIENT_ID=x PAYPAL_CLIENT_SECRET=x \
   PAYPAL_WEBHOOK_ID=x npm start                        # terminal 2 (after npm run build)
-npm run e2e                                            # terminal 3: 23 checks, settle → approve → pay → void & reopen → pay → webhook capture
+npm run e2e                                            # terminal 3: 19 checks, settle and re-check → approve → pay → void & reopen → pay → webhook capture
 ```
 
 ## How it works
@@ -63,7 +71,7 @@ npm run e2e                                            # terminal 3: 23 checks, 
 
 1. **Collect sources.** The merchant creates an order with the brief, the pasted message thread, and artwork
    (PNG/JPG/WebP/GIF/PDF).
-2. **AI check.** One Claude request gets every source, with the artwork as an image or PDF. It returns findings with
+2. **AI check.** One model request gets every source, with the artwork as an image. It returns findings with
    a severity, quotes from each source, a suggested value, a question for the customer, and whether the artwork
    itself must change. The check records the fingerprint (sha256) of each artwork file it read.
 3. **Resolve.**
@@ -116,11 +124,11 @@ Every call sends a `PayPal-Request-Id`, so retries don't create duplicates. Code
 
 | What | How |
 |---|---|
-| Model | Claude Opus 5.5 (`claude-opus-5-5`) through the official `@anthropic-ai/sdk` |
-| Inputs | Brief and messages as text; artwork as image or PDF content blocks (vision) |
-| Output | A Zod schema (`AIAnalysis` in `lib/types.ts`) enforced with structured outputs |
-| Safety | Handles `refusal` stop reasons; server-side `fallbacks: "default"` |
-| Demo mode | Without `ANTHROPIC_API_KEY`, the sample order uses a saved analysis (`samples/riverside-5k/demo-analysis.json`) |
+| Model | `qwen3-vl` (vision) through the Astropods AI gateway's OpenAI-style API, set by `ASTRO_MODEL`. Without a gateway key, `ANTHROPIC_API_KEY` runs Claude Opus 5.5 instead |
+| Inputs | Brief and messages as text; artwork as images. PDF artwork works only with Claude; through the gateway it fails the check rather than going unread |
+| Output | A JSON schema generated from the Zod schema (`AIAnalysis` in `lib/types.ts`), and the reply is validated against it |
+| Safety | A failed, refused or unparseable reply fails the check, and a failed check blocks payment |
+| Demo mode | Without an AI key, the sample order uses saved results (`samples/riverside-5k/demo-analysis.json`, and `demo-recheck.json` for the exact bytes of `front-v2.png`, matched by sha256) |
 | Evaluation | Sample orders with answer keys in `samples/` (format: `samples/FORMAT.md`), including 3 held-out cases in `samples/heldout/` |
 
 Code: `lib/ai.ts`.
@@ -133,7 +141,8 @@ cp .env.example .env.local
 
 | Variable | What it's for |
 |---|---|
-| `ANTHROPIC_API_KEY` | Live AI checks. From https://console.anthropic.com. Leave empty for demo mode |
+| `ASTRO_GATEWAY_API_KEY`, `ASTRO_GATEWAY_URL`, `ASTRO_MODEL` | Live AI checks through the Astropods gateway. Leave the key empty for demo mode |
+| `ANTHROPIC_API_KEY` | Optional: live checks with Claude when the gateway key is empty |
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | Sandbox REST app credentials (server side) |
 | `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | The same client ID, for the browser's PayPal buttons. Read at build time |
 | `PAYPAL_WEBHOOK_ID` | Id of the webhook registered for this app. Needed to accept webhooks |
@@ -189,7 +198,7 @@ npm run e2e       # end-to-end against a running app + mock PayPal (see Quicksta
 `render.yaml` is a [Render](https://render.com) blueprint on the **free plan**: **New → Blueprint →** this repo,
 then fill in the secret environment variables. The free instance sleeps after 15 idle minutes (the first request
 then takes about a minute) and loses its stored orders when it sleeps or redeploys; **Load sample order** recreates
-the sample, so the whole flow still works. Leaving `ANTHROPIC_API_KEY` empty keeps the hosted app in demo mode. To
+the sample, so the whole flow still works. Leaving the AI keys empty keeps the hosted app in demo mode. To
 keep data, switch to a paid plan with a persistent disk (see the comment in `render.yaml`). Any Node 22 host works
 the same way: `npm ci && npm run build`, then `npm start`.
 
@@ -210,7 +219,7 @@ app/
   api/paypal/webhook       verified PayPal webhook events
   api/health               which integrations are configured
 lib/
-  ai.ts                    Claude check: prompt, multimodal content, structured output
+  ai.ts                    AI check: prompt, multimodal content, gateway and Claude calls, saved demo results
   gate.ts                  approval gate, version hash, artwork fingerprints
   orders.ts                state transitions: findings, artwork versions, approval, payments, status
   paypal.ts                PayPal REST client

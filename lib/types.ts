@@ -195,6 +195,8 @@ export interface Analysis {
   model: string;
   /** true when the canned demo analysis was used because no API key is configured */
   demo: boolean;
+  /** demo only: the saved re-check of the sample's exact corrected file (matched by sha256) was used */
+  savedRecheck?: boolean;
   /** A failed check keeps the order blocked until it is re-run */
   status: "succeeded" | "failed";
   error?: string;

@@ -3,6 +3,8 @@
 //   terminal 2: npm run build && PAYPAL_API_BASE=http://localhost:4010 PAYPAL_CLIENT_ID=x PAYPAL_CLIENT_SECRET=x \
 //               PAYPAL_WEBHOOK_ID=x npm start
 //   terminal 3: npm run e2e            (APP_URL defaults to http://localhost:3000)
+import { settleSample } from "./settle-sample.mjs";
+
 const B = process.env.APP_URL ?? "http://localhost:3000";
 let failures = 0;
 
@@ -22,23 +24,16 @@ function expect(label, r, code, check = () => true) {
   return r.json;
 }
 
-// Demo mode can't re-check corrected artwork, so artwork findings are settled the only other allowed way:
-// dismissed by a merchant who checked the file. Everything else takes the AI's suggested value.
-function settle(f) {
-  if (f.requiresArtworkFix || f.evidenceStatus === "unverified")
-    return { type: "dismiss", reason: "Checked the artwork file by hand for this payment test", checkedArtworkMyself: true };
-  return { type: "confirm", value: f.suggestedValue };
-}
-
 const { id } = (await post("/api/orders/sample")).json;
 const order = `/api/orders/${id}`;
 const analyzed = expect("AI check (demo fixture)", await post(`${order}/analyze`), 200, (o) => o.status === "needs_review");
 expect("approve with open findings is refused", await post(`${order}/approve`, { name: "Dana" }), 400);
 expect("waive needs a clear reason", await post(`${order}/findings/f1`, { type: "waive", reason: "ok" }), 400);
 expect("artwork error can't be confirmed", await post(`${order}/findings/f3`, { type: "confirm", value: "x" }), 400);
-for (const f of analyzed.analysis.findings.filter((f) => f.severity !== "info")) {
-  expect(`settle ${f.id}`, await post(`${order}/findings/${f.id}`, settle(f)), 200);
-}
+const checked = await settleSample(B, id, analyzed);
+expect("corrected artwork clears the artwork findings", { code: 200, json: checked }, 200, (o) =>
+  o.status === "ready_for_approval" && o.analysis.savedRecheck && o.analysis.verifications.length === 4 &&
+  o.analysis.findings.filter((f) => f.status === "resolved_by_artwork").length === 2);
 expect("approve a stale displayed version is refused", await post(`${order}/approve`, { name: "Dana", versionHash: "x" }), 400);
 const approved = expect("customer approves", await post(`${order}/approve`, { name: "Dana Whitfield" }), 200, (o) => o.status === "approved");
 expect("create PayPal order", await post(`${order}/paypal/create`), 200, (o) => o.id);

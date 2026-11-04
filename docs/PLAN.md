@@ -318,7 +318,8 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | DG-11 | Done: README rewritten (quickstart, sandbox setup, tools used, §1.5 wording, screenshots); hosted URL added Nov 4 |
 | J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (payment shots retaken Nov 4 with real sandbox ids; retake the rest on the frozen build) |
 | J-5 | Prepared: recording checklist and shot list in `docs/VIDEO.md`. Recording is Nov 9–10 |
-| Extra | `npm run mock:paypal` + `npm run e2e`: 23 end-to-end checks of settle → approve → pay → void & reopen → pay → webhook capture without sandbox keys (fixed Nov 2 for the artwork rules from `4729fc8`: demo-mode artwork findings are dismissed, since demo mode can't re-check artwork) |
+| Extra | `npm run mock:paypal` + `npm run e2e`: 19 end-to-end checks of settle and re-check → approve → pay → void & reopen → pay → webhook capture without sandbox keys |
+| Extra | Decided Nov 4: live checks go through the Astropods gateway (`ASTRO_GATEWAY_API_KEY`, `qwen3-vl`). Hosted demo stays keyless and uses a saved re-check that applies only to the exact bytes of Riverside `front-v2.png` (`savedRecheck`), labelled in the UI; any other file is refused in demo mode. First live Riverside run: wiring and re-check work, but it found 3 of 5 planted issues (missed sizes and ink colors), for AI-9 |
 
 **Hand-offs to Dat** (data model is in place; the AI side fills it):
 - `Finding.checkGroup`, `requiresArtworkFix`, `evidenceValid`, `evidenceProblems` exist; the gate already enforces

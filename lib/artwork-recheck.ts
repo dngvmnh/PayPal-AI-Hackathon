@@ -12,7 +12,11 @@ type RecheckOutput = Pick<AIAnalysis, "artworkReadings" | "artworkClaims">;
 export function processArtworkRecheck(order: Order, output: RecheckOutput): Order {
   let result = structuredClone(order);
 
-  if (!result.analysis || result.analysis.status !== "succeeded" || result.analysis.demo) {
+  if (
+    !result.analysis ||
+    result.analysis.status !== "succeeded" ||
+    (result.analysis.demo && !result.analysis.savedRecheck)
+  ) {
     return result;
   }
 

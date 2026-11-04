@@ -104,7 +104,7 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
               <div className="row spread">
                 <h2>AI findings</h2>
                 <span className="small muted">
-                  {order.analysis.status === "failed" ? "last check FAILED" : order.analysis.demo ? "demo fixture" : order.analysis.model} ·{" "}
+                  {order.analysis.status === "failed" ? "last check FAILED" : order.analysis.savedRecheck ? "saved re-check of the sample's corrected file (not a live check)" : order.analysis.demo ? "demo fixture" : order.analysis.model} ·{" "}
                   {new Date(order.analysis.ranAt).toLocaleString()}
                 </span>
               </div>
@@ -213,6 +213,12 @@ function ArtworkPanel({
     <div className="panel">
       <h2>Artwork</h2>
       {checkStale && <p className="error small">Artwork changed since the last AI check. Re-run the check.</p>}
+      {order.isSample && (
+        <p className="small muted">
+          Sample order: <a href="/api/orders/sample/corrected-artwork">download its corrected artwork</a> to upload as
+          the new version.
+        </p>
+      )}
       {designs.map((s) => {
         const current = s.versions?.at(-1);
         return (

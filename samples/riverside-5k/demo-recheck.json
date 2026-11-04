@@ -1,0 +1,116 @@
+{
+  "summary": "Saved re-check of the sample's corrected artwork (front-v2.png, matched by sha256). The year, date, website and ink colors now match what was agreed.",
+  "proposedSpec": [
+    {
+      "field": "product",
+      "value": "Gildan 64000 Softstyle unisex tee",
+      "confidence": "high"
+    },
+    {
+      "field": "quantity",
+      "value": "150",
+      "confidence": "high"
+    },
+    {
+      "field": "size_breakdown",
+      "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+      "confidence": "high"
+    },
+    {
+      "field": "garment_color",
+      "value": "Navy",
+      "confidence": "high"
+    },
+    {
+      "field": "ink_colors",
+      "value": "2 — white + safety orange",
+      "confidence": "medium"
+    },
+    {
+      "field": "print_text",
+      "value": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+      "confidence": "medium"
+    },
+    {
+      "field": "print_location",
+      "value": "Front center",
+      "confidence": "high"
+    },
+    {
+      "field": "print_dimensions",
+      "value": "11\" wide",
+      "confidence": "high"
+    },
+    {
+      "field": "due_date",
+      "value": "Pickup Saturday May 9, 2026",
+      "confidence": "high"
+    },
+    {
+      "field": "unit_price",
+      "value": "$9.50",
+      "confidence": "high"
+    },
+    {
+      "field": "total_price",
+      "value": "$1,425.00",
+      "confidence": "high"
+    },
+    {
+      "field": "shipping",
+      "value": "In-store pickup",
+      "confidence": "high"
+    }
+  ],
+  "findings": [],
+  "artworkReadings": [
+    {
+      "sourceId": "design-front",
+      "textElements": [
+        "RIVERSIDE 5K",
+        "FUN RUN 2026",
+        "SUNDAY, MAY 17",
+        "riverside5k.org"
+      ],
+      "inkColors": [
+        "white",
+        "safety orange"
+      ]
+    }
+  ],
+  "artworkClaims": [
+    {
+      "findingId": "f3",
+      "field": "year",
+      "expected": "2026",
+      "observed": "2026",
+      "matches": true
+    },
+    {
+      "findingId": "f3",
+      "field": "date",
+      "expected": "Sunday, May 17",
+      "observed": "SUNDAY, MAY 17",
+      "matches": true
+    },
+    {
+      "findingId": "f3",
+      "field": "url",
+      "expected": "riverside5k.org",
+      "observed": "riverside5k.org",
+      "matches": true
+    },
+    {
+      "findingId": "f4",
+      "field": "ink_colors",
+      "expected": "white, safety orange",
+      "observed": "white, safety orange",
+      "matches": true
+    }
+  ],
+  "pricing": {
+    "quantity": 150,
+    "unitPrice": 9.5,
+    "currency": "USD"
+  }
+}

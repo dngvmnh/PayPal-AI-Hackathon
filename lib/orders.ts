@@ -87,7 +87,7 @@ export function currentPayment(order: Order): PaymentIteration | undefined {
 export function applyAnalysis(
   order: Order,
   ai: AIAnalysis,
-  meta: { model: string; demo: boolean; artworkHashes: Record<string, string> },
+  meta: { model: string; demo: boolean; savedRecheck?: boolean; artworkHashes: Record<string, string> },
 ): Order {
   assertEditable(order);
   const o = structuredClone(order);
@@ -203,6 +203,7 @@ requiresArtworkFix:
     ranAt: new Date().toISOString(),
     model: meta.model,
     demo: meta.demo,
+    savedRecheck: meta.savedRecheck,
     status: "succeeded",
     artworkHashes: meta.artworkHashes,
     sourceFingerprints: fingerprints,
@@ -366,7 +367,7 @@ const sourceChanged =
 if (sourceChanged) {
   throw new Error("Order sources changed since the artwork requirements were set.");
 }
-if (o.analysis.demo) {
+if (o.analysis.demo && !o.analysis.savedRecheck) {
   throw new Error("A saved demo analysis cannot verify artwork.");
 }
 
