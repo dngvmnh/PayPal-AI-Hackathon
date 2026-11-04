@@ -105,6 +105,10 @@ npm run e2e                                            # terminal 3: 19 checks, 
 
 _The payment screenshots are from a real PayPal sandbox run on the hosted app, including PayPal's signed webhook events._
 
+The sandbox's API log shows the payment tied to one approved version, through `custom_id` = `order:revision:versionHash`:
+
+![PayPal sandbox log with custom_id](docs/screenshots/6-sandbox-custom-id.png)
+
 ## Tools used
 
 ### PayPal

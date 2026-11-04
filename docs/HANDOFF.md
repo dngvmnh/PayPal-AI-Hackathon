@@ -43,7 +43,7 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 |---|---|
 | DG-3 to DG-9, DG-7a, DG-7b, DG-11, DG-12, J-6 | Done |
 | DG-1: PayPal sandbox app + test accounts | Done Nov 4; keys in `.env.local` |
-| DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Repeated on the hosted app, plus one payment through the proof page's real PayPal button. Sandbox dashboard screenshot still to take |
+| DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Repeated on the hosted app, plus one payment through the proof page's real PayPal button. Sandbox log screenshot: `docs/screenshots/6-sandbox-custom-id.png` |
 | DG-10: deploy | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's **free plan** (decided Nov 2, below). Webhook `49U87712RS555412A` registered; signed events confirmed. Every push to this branch redeploys and wipes demo orders |
 | J-5: video | Checklist and shot list in `docs/VIDEO.md`; recording is Nov 9–10 on the frozen build |
 

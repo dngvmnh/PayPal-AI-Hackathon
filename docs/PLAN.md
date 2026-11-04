@@ -304,7 +304,7 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | Task | State |
 |---|---|
 | DG-1 | Done (Nov 4): sandbox app and test accounts; keys in `.env.local` |
-| DG-2 | Code done; tested end to end against a local mock of the PayPal API. Live sandbox run passed Nov 4 with `npm run sandbox -- live`: authorize → capture and authorize → void & reopen, `custom_id` confirmed in PayPal (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`). Repeated on the hosted app; a third payment went through the proof page's real PayPal button (capture `5LG447559E9447813`). **Sandbox dashboard screenshot still to take** |
+| DG-2 | Code done; tested end to end against a local mock of the PayPal API. Live sandbox run passed Nov 4 with `npm run sandbox -- live`: authorize → capture and authorize → void & reopen, `custom_id` confirmed in PayPal (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`). Repeated on the hosted app; a third payment went through the proof page's real PayPal button (capture `5LG447559E9447813`). Sandbox log screenshot with `custom_id`: `docs/screenshots/6-sandbox-custom-id.png` |
 | DG-3 | Done: void-and-cancel and void-and-reopen (new iteration, new approval, new PayPal order); tested |
 | DG-4 | Done: artwork versions with sha256 and history; upload route; locked after authorization |
 | DG-5 | Done: approval saved with version hash, spec, artwork hashes, amount, waived exceptions; any change cancels it; authorize refuses a changed version |
