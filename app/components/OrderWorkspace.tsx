@@ -13,6 +13,7 @@ import {
   type ArtworkVerification,
 } from "@/lib/types.ts";
 import { post } from "./api.ts";
+import { LocalTime } from "./LocalTime.tsx";
 import { StatusPill } from "./status.tsx";
 
 interface Props {
@@ -105,7 +106,7 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
                 <h2>AI findings</h2>
                 <span className="small muted">
                   {order.analysis.status === "failed" ? "last check FAILED" : order.analysis.savedRecheck ? "saved re-check of the sample's corrected file (not a live check)" : order.analysis.demo ? "demo fixture" : order.analysis.model} ·{" "}
-                  {new Date(order.analysis.ranAt).toLocaleString()}
+                  <LocalTime iso={order.analysis.ranAt} />
                 </span>
               </div>
               {order.analysis.status === "failed" && <p className="error small">{order.analysis.error}</p>}
@@ -185,7 +186,7 @@ hasArtworkEvidence={f.evidence.some((item) =>
             <ul className="evidence">
               {[...order.history].reverse().slice(0, 30).map((h, i) => (
                 <li key={i}>
-                  <span className="muted">{new Date(h.at).toLocaleString()}</span> — {h.summary}
+                  <span className="muted"><LocalTime iso={h.at} /></span> — {h.summary}
                 </li>
               ))}
             </ul>
@@ -242,7 +243,7 @@ function ArtworkPanel({
                     <a href={`/api/files/${order.id}/${v.file}`} target="_blank" rel="noreferrer">
                       v{v.version}
                     </a>{" "}
-                    {new Date(v.uploadedAt).toLocaleString()} · {v.sha256.slice(0, 12)} {v.note && `· ${v.note}`}
+                    <LocalTime iso={v.uploadedAt} /> · {v.sha256.slice(0, 12)} {v.note && `· ${v.note}`}
                   </li>
                 ))}
               </ul>
@@ -302,7 +303,7 @@ function PaymentPanel({
         Customer approval:{" "}
         {order.approval ? (
           <>
-            <b>{order.approval.approvedBy.name}</b>, {new Date(order.approval.approvedAt).toLocaleString()} · version{" "}
+            <b>{order.approval.approvedBy.name}</b>, <LocalTime iso={order.approval.approvedAt} /> · version{" "}
             <code>{order.approval.versionHash.slice(0, 12)}</code>
           </>
         ) : (
@@ -362,7 +363,7 @@ function PaymentPanel({
                   <ul className="evidence">
                     {p.events.map((e, i) => (
                       <li key={i}>
-                        {new Date(e.at).toLocaleTimeString()} · {e.id === "api" ? "app" : "webhook"} · {e.type} — {e.summary}
+                        <LocalTime iso={e.at} timeOnly /> · {e.id === "api" ? "app" : "webhook"} · {e.type} — {e.summary}
                       </li>
                     ))}
                   </ul>
