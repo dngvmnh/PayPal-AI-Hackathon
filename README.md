@@ -191,6 +191,7 @@ npm test          # unit tests: gate, finding rules, artwork versions, approval 
                   # payment revisions, void/reopen, webhooks, sample answer keys
 npm run typecheck
 npm run e2e       # end-to-end against a running app + mock PayPal (see Quickstart)
+npm run eval      # live AI check on the tuning samples, scored against answer keys; report in docs/eval/
 ```
 
 ## Deploy

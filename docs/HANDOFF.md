@@ -152,11 +152,16 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 
 ## Known gaps to keep in mind
 
-- **Live model recall:** the first live `qwen3-vl` run on Riverside (Nov 4) found 3 of 5 planted issues and missed
-  sizes and ink colors, so the order reached "ready for approval" with those unflagged. That is AI-9 tuning.
+- **Live model quality (`docs/eval/`, Nov 4):** recall 10/16 (63%) on 5 completed runs against a 90% target. Most
+  misses are the right field at too low a severity (ink colors, garment color). That is AI-9 tuning.
+- **Re-checks add duplicates:** a live re-check produced 8 new blocking findings across 5 runs, because `applyAnalysis`
+  adds whatever the model reports again. They stop the order reaching "ready for approval" (AI-5a).
+- **Tuning set is half done:** `company-retreat`, `clean-order` and `injection-email` don't exist yet (AI-6).
+- **Gateway key expired** during the Nov 4 eval ("virtual key has expired"); live checks fail until it's renewed.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
-- **Public host:** anyone can create orders and run AI checks. Rate limiting is Dat's AI-12 hardening.
+- **Public host:** anyone can create orders. `lib/rate-limit.ts` limits each visitor, and live AI checks also have a daily
+  cap across all visitors. Limits are in memory, so a restart resets them.
 - **Held-out cases are visible:** the plan relies on Dat not using `samples/heldout/` before tagging `prompt-locked`.
 - **Plan checkpoints:**
   - Nov 3: minimum loop on Riverside;

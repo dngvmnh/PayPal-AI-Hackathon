@@ -319,6 +319,7 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (payment shots retaken Nov 4 with real sandbox ids; retake the rest on the frozen build) |
 | J-5 | Prepared: recording checklist and shot list in `docs/VIDEO.md`. Recording is Nov 9–10 |
 | Extra | `npm run mock:paypal` + `npm run e2e`: 19 end-to-end checks of settle and re-check → approve → pay → void & reopen → pay → webhook capture without sandbox keys |
+| Extra | Nov 4, done on Dat's side at Dang's request: AI-7 `npm run eval` (report in `docs/eval/`; held-out only on the `prompt-locked` tag, once) and rate limits on the public host. First results: 10/16 recall (63%) on 5 completed runs, re-check fields 9/9, 8 new blocking findings on re-checks. The gateway key expired during the run, so `school-club` has no result |
 | Extra | Decided Nov 4: live checks go through the Astropods gateway (`ASTRO_GATEWAY_API_KEY`, `qwen3-vl`). Hosted demo stays keyless and uses a saved re-check that applies only to the exact bytes of Riverside `front-v2.png` (`savedRecheck`), labelled in the UI; any other file is refused in demo mode. First live Riverside run: wiring and re-check work, but it found 3 of 5 planted issues (missed sizes and ink colors), for AI-9 |
 
 **Hand-offs to Dat** (data model is in place; the AI side fills it):
@@ -401,7 +402,7 @@ Result at J-2: _(fill in)_
    PayPal sandbox → authorized. Show the order is locked. Merchant captures. Second take: void and reopen.
 5. **2:30–3:00 Why it matters.** AI-assisted verification, confirmed by the merchant and the customer (§1.5):
    customers pay for the exact version they approved; fewer reprints and disputes.
-   Show the held-out eval numbers with the sample count. Name the tools: Claude, PayPal Orders v2, Payments v2,
+   Show the held-out eval numbers with the sample count. Name the tools: the AI model used, PayPal Orders v2, Payments v2,
    JS SDK, webhooks.
 
 ## 8. Out of scope for the MVP
