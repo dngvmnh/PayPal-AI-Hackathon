@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { processArtworkRecheck } from "../lib/artwork-recheck.ts";
 import { currentArtworkHashes } from "../lib/gate.ts";
 import { addArtworkVersion, applyAnalysis, resolveFinding } from "../lib/orders.ts";
+import { runDiff } from "../lib/types.ts";
 import { checked, fixture } from "./helpers.ts";
 
 function preparedOrder() {
@@ -148,4 +149,51 @@ test("a blocking finding in the same group prevents clearing", () => {
     "awaiting_artwork",
   );
   assert.match(result.analysis!.verifications![0].reason ?? "", /blocking finding/i);
+});
+function recheckWith(findings: typeof fixture.findings) {
+  const { order } = preparedOrder();
+  const next = structuredClone(fixture);
+  next.findings = findings;
+  return applyAnalysis(order, next, { model: "test", demo: false, artworkHashes: currentArtworkHashes(order) });
+}
+
+test("a problem reported again on a re-check doesn't add a finding", () => {
+  const before = preparedOrder().order.analysis!.findings.length;
+  const result = recheckWith(structuredClone(fixture.findings));
+  assert.equal(result.analysis!.findings.length, before);
+  assert.deepEqual(result.analysis!.newFindingIds, []);
+});
+
+test("a decided finding keeps its decision and shows what the model said again", () => {
+  const printText = fixture.findings.find((f) => f.field === "print_text")!;
+  const result = recheckWith([{ ...printText, title: "Year still looks wrong" }]);
+  const finding = result.analysis!.findings.find((f) => f.field === "print_text")!;
+  assert.equal(finding.status, "awaiting_artwork");
+  assert.deepEqual(finding.laterReports, ["Year still looks wrong"]);
+});
+
+test("an open finding takes the latest report, and never loses severity", () => {
+  const quantity = fixture.findings.find((f) => f.field === "quantity")!;
+  const result = recheckWith([{ ...quantity, severity: "warning", title: "Latest wording" }]);
+  const finding = result.analysis!.findings.find((f) => f.field === "quantity")!;
+  assert.equal(finding.title, "Latest wording");
+  assert.equal(finding.severity, "blocking");
+});
+
+test("a problem on a new field is still added, and marked as new", () => {
+  const { order } = preparedOrder();
+  const withoutInk = structuredClone(order);
+  withoutInk.analysis!.findings = withoutInk.analysis!.findings.filter((f) => f.field !== "ink_colors");
+  const next = structuredClone(fixture);
+  next.findings = fixture.findings.filter((f) => f.field === "ink_colors");
+  const result = applyAnalysis(withoutInk, next, { model: "test", demo: false, artworkHashes: currentArtworkHashes(order) });
+  const added = result.analysis!.findings.find((f) => f.field === "ink_colors")!;
+  assert.deepEqual(result.analysis!.newFindingIds, [added.id]);
+  const diff = runDiff(result.analysis!)!;
+  assert.deepEqual(diff.new.map((f) => f.id), [added.id]);
+  assert.ok(diff.stillOpen.length > 0);
+});
+
+test("the first check has no diff", () => {
+  assert.equal(runDiff(checked().analysis!), null);
 });

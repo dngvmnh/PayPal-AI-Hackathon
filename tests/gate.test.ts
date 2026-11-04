@@ -270,6 +270,8 @@ test("re-analysis keeps pending artwork and assigns unique IDs to new findings",
     type: "require_artwork",
     requiredFields: [{ field: "year", value: "2026" }],
   });
+  // Only a field with no earlier finding gets a new one.
+  order.analysis!.findings = order.analysis!.findings.filter((f) => f.field !== "total_price");
 
   const result = applyAnalysis(order, structuredClone(fixture), {
     model: "test",
@@ -278,7 +280,7 @@ test("re-analysis keeps pending artwork and assigns unique IDs to new findings",
   });
 
   const findings = result.analysis!.findings;
-assert.equal(findings.length, order.analysis!.findings.length + fixture.findings.length);
+  assert.equal(findings.length, order.analysis!.findings.length + 1);
 
 for (const oldFinding of order.analysis!.findings) {
   assert.ok(findings.some((finding) => finding.id === oldFinding.id));

@@ -5,8 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { GateResult } from "@/lib/gate.ts";
 import {
+  CHECK_GROUP_LABELS,
+  CHECKED_FIELDS,
+  runDiff,
   SPEC_FIELDS,
   SPEC_LABELS,
+  type CheckGroup,
   type Finding,
   type Order,
   type RequiredArtworkField,
@@ -52,6 +56,10 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
   const findings = order.analysis?.findings ?? [];
   const openQuestions = findings.filter((f) => f.status === "open" && f.severity !== "info");
   const sourceName = (id: string) => order.sources.find((s) => s.id === id)?.name ?? id;
+  const diff = order.analysis ? runDiff(order.analysis) : null;
+  const findingGroups = (Object.keys(CHECK_GROUP_LABELS) as CheckGroup[])
+    .map((group) => ({ group, items: findings.filter((f) => f.checkGroup === group) }))
+    .filter(({ items }) => items.length > 0);
 
   return (
     <>
@@ -111,21 +119,33 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
               </div>
               {order.analysis.status === "failed" && <p className="error small">{order.analysis.error}</p>}
               <p>{order.analysis.summary}</p>
+              {diff && (
+                <p className="small muted">
+                  Since the last check: {diff.new.length} new, {diff.stillOpen.length} still open,{" "}
+                  {diff.resolved.length} resolved.
+                </p>
+              )}
               {findings.length === 0 && <p className="pill ok">All sources agree.</p>}
-              {findings.map((f) => (
-                <FindingCard
-                  key={f.id}
-                  finding={f}
-verificationResults={(order.analysis?.verifications ?? []).filter(
-  (verification) => verification.findingId === f.id
-)}
-hasArtworkEvidence={f.evidence.some((item) =>
-  order.sources.some((source) => source.id === item.sourceId && source.kind === "design")
-)}
-                  sourceName={sourceName}
-                  disabled={!!busy || locked}
-                  onAction={(body) => api(f.id, `/api/orders/${order.id}/findings/${f.id}`, body)}
-                />
+              {findingGroups.map(({ group, items }) => (
+                <div key={group}>
+                  <h3 style={{ margin: "12px 0 6px" }}>{CHECK_GROUP_LABELS[group]}</h3>
+                  {items.map((f) => (
+                    <FindingCard
+                      key={f.id}
+                      finding={f}
+                      isNew={diff?.new.includes(f) ?? false}
+                      verificationResults={(order.analysis?.verifications ?? []).filter(
+                        (verification) => verification.findingId === f.id,
+                      )}
+                      hasArtworkEvidence={f.evidence.some((item) =>
+                        order.sources.some((source) => source.id === item.sourceId && source.kind === "design"),
+                      )}
+                      sourceName={sourceName}
+                      disabled={!!busy || locked}
+                      onAction={(body) => api(f.id, `/api/orders/${order.id}/findings/${f.id}`, body)}
+                    />
+                  ))}
+                </div>
               ))}
               {openQuestions.length > 0 && <ClarificationDraft order={order} findings={openQuestions} />}
             </div>
@@ -156,7 +176,12 @@ hasArtworkEvidence={f.evidence.some((item) =>
                 <tbody>
                   {SPEC_FIELDS.map((field) => (
                     <tr key={field}>
-                      <th style={{ width: "40%" }}>{SPEC_LABELS[field]}</th>
+                      <th style={{ width: "40%" }}>
+                        {SPEC_LABELS[field]}
+                        {!CHECKED_FIELDS.includes(field) && (
+                          <div className="small muted" style={{ fontWeight: 400 }}>not verified by AI</div>
+                        )}
+                      </th>
                       <td>
                         {order.spec[field] ?? <span className="muted">—</span>}{" "}
                         {!locked && (
@@ -386,10 +411,12 @@ function FindingCard({
   sourceName,
   disabled,
   onAction,
-verificationResults,
+  verificationResults,
+  isNew,
 }: {
   finding: Finding;
-verificationResults: ArtworkVerification[];
+  verificationResults: ArtworkVerification[];
+  isNew: boolean;
   hasArtworkEvidence: boolean;
   sourceName: (id: string) => string;
   disabled: boolean;
@@ -414,11 +441,14 @@ verificationResults: ArtworkVerification[];
           <span className={`pill ${f.severity}`}>{f.severity}</span>
           <span className="small muted">{SPEC_LABELS[f.field]}</span>
           {f.requiresArtworkFix && <span className="pill warning">artwork fix</span>}
-{invalidEvidence && (
-  <span className="pill blocking">
-    {f.evidenceStatus === "invalid" ? "invalid evidence" : "unverified evidence"}
-  </span>
-)}
+          {isNew && <span className="pill info">new</span>}
+          {invalidEvidence ? (
+            <span className="pill blocking">
+              {f.evidenceStatus === "invalid" ? "invalid evidence" : "unverified evidence"}
+            </span>
+          ) : (
+            <span className="pill ok">quotes checked</span>
+          )}
         </div>
         <span className="pill info">{f.status.replaceAll("_", " ")}</span>
       </div>
@@ -453,6 +483,11 @@ verificationResults: ArtworkVerification[];
     </ul>
   </div>
 )}
+      {f.laterReports?.map((report, index) => (
+        <div className="small" key={index}>
+          The latest check also said: {report}
+        </div>
+      ))}
       {f.waiveReason && <div className="small">Waived: {f.waiveReason}</div>}
       {f.dismissal && <div className="small">Dismissed as AI error: {f.dismissal.reason}</div>}
       {f.requiredFields && (

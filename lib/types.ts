@@ -147,6 +147,24 @@ export type FindingStatus =
 
 export type CheckGroup = "quantity_sizes" | "text_dates" | "colors" | "pricing";
 
+export const CHECK_GROUP_LABELS: Record<CheckGroup, string> = {
+  quantity_sizes: "Quantity and sizes",
+  text_dates: "Printed text and dates",
+  colors: "Colors",
+  pricing: "Pricing",
+};
+
+/** Spec fields the AI checks. Others are extracted for display, but nothing verifies them. */
+export const CHECKED_FIELDS: string[] = [
+  "quantity",
+  "size_breakdown",
+  "print_text",
+  "garment_color",
+  "ink_colors",
+  "unit_price",
+  "total_price",
+];
+
 export type RequiredArtworkField = "year" | "date" | "name" | "url" | "text_line" | "ink_colors";
 
 export interface Dismissal {
@@ -178,6 +196,8 @@ evidenceStatus?: "verified" | "unverified" | "invalid";
 requiredSourceFingerprints?: Record<string, string>;
   waiveReason?: string;
   dismissal?: Dismissal;
+  /** What the latest check said about this field after the merchant had already decided it */
+  laterReports?: string[];
 }
 
 export interface ArtworkVerification {
@@ -208,6 +228,22 @@ sourceFingerprints?: Record<string, string>;
   verifications?: ArtworkVerification[];
   summary: string;
   findings: Finding[];
+  /** On a re-run: the findings this check added. Absent on the first check. */
+  newFindingIds?: string[];
+}
+
+const HANDLED_STATUSES: FindingStatus[] = ["resolved", "resolved_by_artwork", "waived", "dismissed_ai_error"];
+
+/** What changed since the previous check (AI-5b). Null on the first check. */
+export function runDiff(analysis: Pick<Analysis, "findings" | "newFindingIds">) {
+  if (!analysis.newFindingIds) return null;
+  const isNew = new Set(analysis.newFindingIds);
+  const earlier = analysis.findings.filter((f) => !isNew.has(f.id));
+  return {
+    new: analysis.findings.filter((f) => isNew.has(f.id)),
+    stillOpen: earlier.filter((f) => !HANDLED_STATUSES.includes(f.status)),
+    resolved: earlier.filter((f) => HANDLED_STATUSES.includes(f.status)),
+  };
 }
 
 export type OrderStatus =

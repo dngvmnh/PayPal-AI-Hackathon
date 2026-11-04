@@ -106,6 +106,7 @@ export function applyAnalysis(
   const retained: Finding[] = [];
 
   for (const finding of previousFindings) {
+    delete finding.laterReports;
     const validation = validateEvidence(finding, o.sources);
 
     if (finding.status === "awaiting_artwork") {
@@ -177,25 +178,48 @@ export function applyAnalysis(
   const usedIds = new Set(previousFindings.map((finding) => finding.id));
   let nextId = 1;
 
-  const newFindings: Finding[] = ai.findings.map((finding) => {
-    while (usedIds.has(`f${nextId}`)) nextId++;
-    const id = `f${nextId++}`;
-    usedIds.add(id);
+  const newFindings: Finding[] = [];
+  const severityRank = { info: 0, warning: 1, blocking: 2 };
 
+  for (const finding of ai.findings) {
     const validation = validateEvidence(finding, o.sources);
-
-    return {
-      ...finding,
-      id,
-      status: "open",
-requiresArtworkFix:
-  finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources),
-      checkGroup: CHECK_GROUP_BY_FIELD[finding.field],
+    const requiresArtworkFix =
+      finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources);
+    const evidenceFields = {
       evidenceStatus: validation.status,
       evidenceValid: validation.status === "verified",
       evidenceProblems: validation.problems,
     };
-  });
+
+    // A re-check sees the same sources, so the model reports the same problems again. One field is one finding
+    // across runs: the merchant's decision stays, and the merchant can still see what the model said.
+    const earlier = retained.find((f) => f.field === finding.field);
+    if (earlier?.status === "open") {
+      const severity = severityRank[finding.severity] > severityRank[earlier.severity] ? finding.severity : earlier.severity;
+      Object.assign(earlier, finding, evidenceFields, {
+        severity,
+        requiresArtworkFix: earlier.requiresArtworkFix === true || requiresArtworkFix,
+      });
+      continue;
+    }
+    if (earlier) {
+      (earlier.laterReports ??= []).push(finding.title);
+      continue;
+    }
+
+    while (usedIds.has(`f${nextId}`)) nextId++;
+    const id = `f${nextId++}`;
+    usedIds.add(id);
+
+    newFindings.push({
+      ...finding,
+      ...evidenceFields,
+      id,
+      status: "open",
+      requiresArtworkFix,
+      checkGroup: CHECK_GROUP_BY_FIELD[finding.field],
+    });
+  }
 
   const findings = [...retained, ...newFindings];
 
@@ -209,6 +233,7 @@ requiresArtworkFix:
     sourceFingerprints: fingerprints,
     summary: ai.summary,
     findings,
+    newFindingIds: previousFindings.length ? newFindings.map((f) => f.id) : undefined,
   };
 
   log(o, "check", `AI check succeeded: ${findings.length} finding(s)`);
