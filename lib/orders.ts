@@ -182,7 +182,10 @@ export function applyAnalysis(
   const newFindings: Finding[] = [];
   const severityRank = { info: 0, warning: 1, blocking: 2 };
 
-  for (const finding of [...ai.findings, ...codeCheckFindings(ai, o.sources)]) {
+  const codeFindings = codeCheckFindings(ai, o.sources);
+  const reported = ai.findings.filter((finding) => !codeFindings.some((code) => code.field === finding.field));
+
+  for (const finding of [...reported, ...codeFindings]) {
     const validation = validateEvidence(finding, o.sources);
     const requiresArtworkFix =
       finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources);

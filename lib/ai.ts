@@ -39,12 +39,14 @@ Do not inspect or report print quality, including resolution, bleed, contrast, o
 
 Before writing any finding, work through every one of these checks, even if the order looks fine:
 1. Sizes: add up the numbers in the size breakdown. If the sum differs from the latest agreed quantity, report
-   size_breakdown. Do the sum yourself; never assume it is right.
+   size_breakdown. Do the sum yourself; never assume it is right. Sizes with no counts, like "All adult L", have
+   nothing to add up: a quantity change doesn't make them wrong, so don't report them.
 2. Quantity: compare the brief's quantity with the latest quantity in the messages.
 3. Garment color: compare the brief's color with every message. A later change that the brief doesn't show is a mismatch.
 4. Ink colors: list every color visible in the artwork's printed design (not the shirt background) and compare the
    list with the quoted inks. A color not quoted, or a different number of colors, is a mismatch.
-5. Printed text: compare every word, year, date and URL in the artwork with the agreed text.
+5. Printed text: compare every word, year, date and URL in the artwork with the agreed text. Compare only the words:
+   the color of the text is an ink_colors question, never print_text.
 6. Unit price: if the sources give a price list or tiers, check that the unit price is the one for this quantity.
 7. Total: only if a source states a total as an amount of money, multiply quantity by unit price and compare. Report
    total_price if a stated amount differs. If no source states a total, there is nothing to compare: never report a
