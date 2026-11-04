@@ -342,9 +342,9 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 |---|---|---|---|---|
 | J-1 | Sign off §2; create the GitHub board; protect `main` | Both | 0.1 | All rows in §2 initialled |
 | J-2 | Checkpoint (§2 point 4): demo the minimum loop on Riverside; apply §6.6 if behind | Both | 0.1 | Result noted in §6.6 |
-| J-3 | Feature freeze, end of Sat Nov 7: only fixes, docs, video after this | Both | — | Tag `v0.9-freeze` |
-| J-4 | Fresh-machine dry run of the README on a clean clone | Dat runs it, Dang fixes | 0.25 | Every step works without help |
-| J-5 | Demo video under 3 min on the frozen build, YouTube public, no copyrighted music | Dang | 1 | Public link, < 3:00 |
+| J-3 | Feature freeze: only fixes, docs, video after this. Done Nov 5, tag `v0.9-freeze` at `6531e8a`, the build deployed on Render | Dang | — | Tag `v0.9-freeze` |
+| J-4 | Fresh-machine dry run of the README on a clean clone. Dropped by Dang on Nov 5; the last clean-clone run was Nov 4, before the UI redesign | — | — | — |
+| J-5 | Demo video under 3 min on the frozen build, YouTube public, no copyrighted music | Dat (since Nov 5) | 1 | Public link, < 3:00 |
 | J-6 | Architecture diagram + screenshots | Dang | 0.5 | Images in `docs/` |
 | J-7 | Devpost form, repo public, license visible in About | Dat | 0.25 | Confirmation received |
 

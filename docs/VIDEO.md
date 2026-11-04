@@ -1,4 +1,4 @@
-# Demo video checklist (J-5, owner Dang)
+# Demo video checklist (J-5, owner Dat since Nov 5)
 
 Script: `docs/PLAN.md` §7. Limit: under 3:00, public on YouTube, no copyrighted music or third-party trademarks
 beyond PayPal's own checkout UI.
