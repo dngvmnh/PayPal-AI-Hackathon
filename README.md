@@ -131,9 +131,10 @@ Every call sends a `PayPal-Request-Id`, so retries don't create duplicates. Code
 | Model | `qwen3-vl` (vision) through the Astropods AI gateway's OpenAI-style API, set by `ASTRO_MODEL`. Without a gateway key, `ANTHROPIC_API_KEY` runs Claude Opus 5.5 instead |
 | Inputs | Brief and messages as text; artwork as images. PDF artwork works only with Claude; through the gateway it fails the check rather than going unread |
 | Output | A JSON schema generated from the Zod schema (`AIAnalysis` in `lib/types.ts`), and the reply is validated against it |
+| Code checks | Code does the arithmetic on the brief, using the quantity and unit price the model settled on: sizes against quantity, price lists, totals (`lib/spec-checks.ts`). These can raise or harden a finding, never clear one |
 | Safety | A failed, refused or unparseable reply fails the check, and a failed check blocks payment |
 | Demo mode | Without an AI key, the sample order uses saved results (`samples/riverside-5k/demo-analysis.json`, and `demo-recheck.json` for the exact bytes of `front-v2.png`, matched by sha256) |
-| Evaluation | Sample orders with answer keys in `samples/` (format: `samples/FORMAT.md`), including 3 held-out cases in `samples/heldout/` |
+| Evaluation | Sample orders with answer keys in `samples/` (format: `samples/FORMAT.md`), including 3 held-out cases in `samples/heldout/`. Tuning history: `docs/eval/TUNING.md` |
 
 Code: `lib/ai.ts`.
 

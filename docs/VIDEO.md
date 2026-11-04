@@ -20,8 +20,8 @@ for the sample, so the demo needs no AI key." The eval numbers shown at the end 
 
 **Use live mode only if `npm run eval -- --runs 3` on the frozen build shows, for `riverside-5k`:** all 5 planted
 issues found in all 3 runs, and no new blocking findings on the re-check. New blocking findings keep the order from
-reaching "ready for approval", so the flow would stall on camera. Nov 4 result: neither condition met (see
-`docs/eval/`).
+reaching "ready for approval", so the flow would stall on camera. Nov 4 result at `345036e`: all 5 issues found in all
+3 runs, but one re-check added a new blocking finding, so saved mode stays (see `docs/eval/TUNING.md`).
 
 If live mode is used: set `ASTRO_GATEWAY_API_KEY`, `ASTRO_GATEWAY_URL` and `ASTRO_MODEL` on Render only for the
 recording, wait for the redeploy, record, then remove them and confirm `GET /api/health` shows `ai: demo` again.

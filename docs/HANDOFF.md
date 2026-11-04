@@ -35,8 +35,8 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 - Don't create a PR unless asked.
 - **Stack:** Next.js 16, TypeScript, Node ≥ 22.6, Astropods AI gateway (`ASTRO_GATEWAY_API_KEY`, model `qwen3-vl`; `@anthropic-ai/sdk` remains as an alternative), PayPal REST via
   `fetch`, `@paypal/react-paypal-js`. Storage is JSON plus uploads in `DATA_DIR` (default `.data/`).
-- **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. At `4729fc8`: 106 tests pass,
-  typecheck clean.
+- **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. On Nov 4: 147 tests pass, typecheck
+  clean, and `npm run e2e` passes all 19 checks.
 
 ## State of the work (at commit `4729fc8`; re-checked Nov 2 at `c7907e3`: 106 tests pass, typecheck clean)
 
@@ -47,7 +47,7 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 | DG-3 to DG-9, DG-7a, DG-7b, DG-11, DG-12, J-6 | Done |
 | DG-1: PayPal sandbox app + test accounts | Done Nov 4; keys in `.env.local` |
 | DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Repeated on the hosted app, plus one payment through the proof page's real PayPal button. Sandbox log screenshot: `docs/screenshots/6-sandbox-custom-id.png` |
-| DG-10: deploy | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's **free plan** (decided Nov 2, below). Webhook `49U87712RS555412A` registered; signed events confirmed. Every push to this branch redeploys and wipes demo orders |
+| DG-10: deploy | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's **free plan** (decided Nov 2, below). Webhook `49U87712RS555412A` registered; signed events confirmed. Auto-deploy is off: deploy by hand from the Render dashboard, which wipes demo orders |
 | J-5: video | Checklist and shot list in `docs/VIDEO.md`; recording is Nov 9–10 on the frozen build |
 
 **What else is in place:**
@@ -91,7 +91,7 @@ git config user.name "dngvmnh"
 git config user.email "dngvmnhggsv@gmail.com"
 npm install
 cp .env.example .env.local        # fill in by hand; never paste keys into the chat
-npm test && npm run typecheck     # expect 106 passing tests at c7907e3
+npm test && npm run typecheck
 npm run dev                       # http://localhost:3000
 ```
 
@@ -155,12 +155,15 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 
 ## Known gaps to keep in mind
 
-- **Live model quality (`docs/eval/`, Nov 4):** recall 10/16 (63%) on 5 completed runs against a 90% target. Most
-  misses are the right field at too low a severity (ink colors, garment color). That is AI-9 tuning.
-- **Re-checks add duplicates:** a live re-check produced 8 new blocking findings across 5 runs, because `applyAnalysis`
-  adds whatever the model reports again. They stop the order reaching "ready for approval" (AI-5a).
-- **Tuning set is half done:** `company-retreat`, `clean-order` and `injection-email` don't exist yet (AI-6).
-- **Gateway key expired** during the Nov 4 eval ("virtual key has expired"); live checks fail until it's renewed.
+- **Live model quality (Nov 4, history in `docs/eval/TUNING.md`):** final tuning report `345036e`: recall 36/36, false
+  blocking 2 (target at most 1), `requiresArtworkFix` 35/36, re-check fields 18/18, 1 new blocking finding on a re-check.
+  Results vary from run to run, so a single report can land on either side of the targets. Code checks on the brief
+  (`lib/spec-checks.ts`) do the arithmetic and were written while looking at the tuning samples.
+- **Live re-checks can still stall:** a new blocking finding on a re-check keeps the order from "ready for approval"
+  (1 of 18 in the final report). This is why the video stays in saved mode.
+- **Not tagged yet:** `prompt-locked` and the held-out run (AI-12) are Dang's call. The run can only happen once, and any
+  change to `lib/ai.ts` or `lib/spec-checks.ts` after the tag voids it. The Devpost draft is in `docs/DEVPOST.md`.
+- **Hosted app is behind this branch:** auto-deploy is off on Render, so a manual deploy is needed to ship new commits.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
 - **Public host:** anyone can create orders. `lib/rate-limit.ts` limits each visitor, and live AI checks also have a daily
