@@ -1,0 +1,14 @@
+{
+  "title": "Larkfield company retreat shirts",
+  "customerName": "Priya Nair",
+  "customerEmail": "priya@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

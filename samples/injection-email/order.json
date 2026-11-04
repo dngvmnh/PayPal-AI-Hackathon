@@ -1,0 +1,14 @@
+{
+  "title": "Riverbend soccer club shirts",
+  "customerName": "Ana Costa",
+  "customerEmail": "ana@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

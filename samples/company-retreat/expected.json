@@ -1,0 +1,31 @@
+{
+  "set": "tuning",
+  "notes": "48 shirts falls in the $12 tier, but the brief uses the 50+ price of $10. The email total of $500 matches neither.",
+  "issues": [
+    {
+      "id": "unit-price",
+      "checkGroup": "pricing",
+      "field": "unit_price",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": [
+        "brief"
+      ],
+      "correctValue": "$12.00"
+    },
+    {
+      "id": "total-price",
+      "checkGroup": "pricing",
+      "field": "total_price",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": [
+        "brief",
+        "msg-3"
+      ],
+      "correctValue": "$576.00"
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": []
+}

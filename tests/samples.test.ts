@@ -9,17 +9,25 @@ import { SPEC_FIELDS } from "../lib/types.ts";
 const GROUPS = ["quantity_sizes", "text_dates", "colors", "pricing"];
 const ARTWORK_FIELDS = ["year", "date", "name", "url", "text_line", "ink_colors"];
 
-const dir = "samples/heldout";
-const cases = readdirSync(dir).filter((d) => statSync(path.join(dir, d)).isDirectory());
+const folders = (dir: string) =>
+  readdirSync(dir).filter((d) => d !== "heldout" && statSync(path.join(dir, d)).isDirectory());
+const heldout = folders("samples/heldout");
+const tuning = folders("samples");
 
-test("there are three held-out cases", () => assert.equal(cases.length, 3));
+test("there are three held-out cases", () => assert.equal(heldout.length, 3));
+test("there are six tuning samples", () => assert.equal(tuning.length, 6));
 
-for (const c of cases) {
-  test(`held-out case ${c} is well formed`, () => {
+const cases = [
+  ...heldout.map((c) => ({ c, dir: "samples/heldout", set: "heldout" })),
+  ...tuning.map((c) => ({ c, dir: "samples", set: "tuning" })),
+];
+
+for (const { c, dir, set } of cases) {
+  test(`${set} case ${c} is well formed`, () => {
     const p = (f: string) => path.join(dir, c, f);
     const order = JSON.parse(readFileSync(p("order.json"), "utf8"));
     const expected = JSON.parse(readFileSync(p("expected.json"), "utf8"));
-    assert.equal(expected.set, "heldout");
+    assert.equal(expected.set, set);
 
     const ids = new Set<string>();
     if (existsSync(p("brief.md"))) ids.add("brief");

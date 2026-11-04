@@ -1,0 +1,14 @@
+{
+  "title": "Maple Street bake sale shirts",
+  "customerName": "Tom Becker",
+  "customerEmail": "tom@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

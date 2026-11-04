@@ -1,0 +1,7 @@
+{
+  "set": "tuning",
+  "notes": "Everything agrees. Any blocking finding is a false positive.",
+  "issues": [],
+  "maxFalseBlocking": 0,
+  "artworkChecks": []
+}
