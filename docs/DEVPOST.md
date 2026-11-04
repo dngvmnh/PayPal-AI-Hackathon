@@ -62,7 +62,8 @@ Sample orders have planted issues and answer keys, scored by `npm run eval`. Rep
   blocking findings, including 0 on the order with no issues and the one with a prompt injection attempt. 3 of 4 artwork
   re-check fields came out as expected. The fourth was a safe failure: a correct file was rejected because our year
   check, which is code and not the model, treated the team number `4471` as a second year. A merchant would have had
-  to dismiss it by hand. The version with a leftover old year was correctly rejected.
+  to dismiss it by hand. The version with a leftover old year was correctly rejected. We fixed that check afterwards, so
+  numbers outside 1900 to 2099 no longer count as years, but the result above is the run as measured, before the fix.
 - **How to read it:** the held-out cases were committed before the prompt was locked, with a fingerprint, and weren't
   run or read during tuning. They were visible in the repo, and the same person who wrote them also did the final
   tuning, so they aren't fully independent. Three orders is a small sample, and we make no general accuracy claim.

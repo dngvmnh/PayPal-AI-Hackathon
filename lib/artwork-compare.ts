@@ -5,7 +5,9 @@ export interface ComparisonResult {
 }
 
 /**
- * Compare the expected year against all four-digit numbers read from artwork.
+ * Compare the expected year against every number on the artwork that could be a year: 1900 to 2099, or the expected
+ * year itself. A number like "TEAM 4471" isn't one. Any other year in range still fails, even a legitimate one like
+ * "EST. 2019" or a team numbered 2054, because a leftover old year looks exactly the same; the merchant settles those.
  * The AI's separate `matches` result must also pass before a finding is cleared.
  */
 export function compareArtworkYear(
@@ -23,7 +25,9 @@ export function compareArtworkYear(
   }
 
   const observed = [...new Set(
-    textElements.flatMap((element) => element.match(/\b\d{4}\b/g) ?? []),
+    textElements
+      .flatMap((element) => element.match(/\b\d{4}\b/g) ?? [])
+      .filter((number) => number === wanted || /^(?:19|20)\d{2}$/.test(number)),
   )].sort();
 
   if (observed.length !== 1 || observed[0] !== wanted) {

@@ -35,8 +35,8 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 - Don't create a PR unless asked.
 - **Stack:** Next.js 16, TypeScript, Node ≥ 22.6, Astropods AI gateway (`ASTRO_GATEWAY_API_KEY`, model `qwen3-vl`; `@anthropic-ai/sdk` remains as an alternative), PayPal REST via
   `fetch`, `@paypal/react-paypal-js`. Storage is JSON plus uploads in `DATA_DIR` (default `.data/`).
-- **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. On Nov 4: 147 tests pass, typecheck
-  clean, and `npm run e2e` passes all 19 checks.
+- **Checks before pushing:** `npm test`, `npm run typecheck`, `npm run build`. On Nov 5: 150 tests pass and typecheck
+  is clean. `npm run e2e` last passed all 19 checks on Nov 4.
 
 ## State of the work (at commit `4729fc8`; re-checked Nov 2 at `c7907e3`: 106 tests pass, typecheck clean)
 
@@ -164,8 +164,10 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 - **Held-out run done (AI-12, once, tag `prompt-locked` at `7b64f66`):** on 3 orders, 4/4 planted issues found, 0 false
   blocking, re-check fields 3/4 (`docs/eval/heldout-2026-11-04-7b64f66.md`). It can't be run again; the eval script
   refuses. Devpost quotes these numbers (`docs/DEVPOST.md`), and any later code change doesn't change them.
-- **Known bug from that run:** `lib/artwork-compare.ts` treats every 4-digit number as a year, so `TEAM 4471` fails a
-  correct file. It fails safe, and the merchant can dismiss it.
+- **Fixed after that run:** `lib/artwork-compare.ts` treated every 4-digit number as a year, so `TEAM 4471` failed a
+  correct file. Now only 1900 to 2099 (or the expected year) count. The held-out numbers stay as measured, since the
+  fix came after the run and can't be re-measured. A number in that range, like a team numbered 2054 or "EST. 2019",
+  still fails when a year is required, and the merchant can dismiss it.
 - **Hosted app is behind this branch:** auto-deploy is off on Render, so a manual deploy is needed to ship new commits.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).

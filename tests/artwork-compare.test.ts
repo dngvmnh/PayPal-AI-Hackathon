@@ -16,6 +16,21 @@ test("old and new years together fail", () => {
   assert.deepEqual(result.observed, ["2025", "2026"]);
 });
 
+test("a four-digit number that can't be a year is ignored", () => {
+  const result = compareArtworkYear("2026", ["TEAM 4471", "2026 SEASON"]);
+  assert.equal(result.codeCheck, "pass");
+  assert.deepEqual(result.observed, ["2026"]);
+  assert.equal(compareArtworkYear("2026", ["TEAM 4471"]).codeCheck, "fail");
+});
+
+test("an old year still fails beside a number that isn't a year", () => {
+  assert.equal(compareArtworkYear("2026", ["TEAM 4471", "2026 SEASON", "Copyright 1999"]).codeCheck, "fail");
+});
+
+test("an expected year outside the usual range can still pass", () => {
+  assert.equal(compareArtworkYear("1875", ["SINCE 1875"]).codeCheck, "pass");
+});
+
 test("missing or wrong year fails", () => {
   assert.equal(compareArtworkYear("2026", ["FUN RUN"]).codeCheck, "fail");
   assert.equal(compareArtworkYear("2026", ["FUN RUN 2025"]).codeCheck, "fail");
