@@ -161,8 +161,11 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
   (`lib/spec-checks.ts`) do the arithmetic and were written while looking at the tuning samples.
 - **Live re-checks can still stall:** a new blocking finding on a re-check keeps the order from "ready for approval"
   (1 of 18 in the final report). This is why the video stays in saved mode.
-- **Not tagged yet:** `prompt-locked` and the held-out run (AI-12) are Dang's call. The run can only happen once, and any
-  change to `lib/ai.ts` or `lib/spec-checks.ts` after the tag voids it. The Devpost draft is in `docs/DEVPOST.md`.
+- **Held-out run done (AI-12, once, tag `prompt-locked` at `7b64f66`):** on 3 orders, 4/4 planted issues found, 0 false
+  blocking, re-check fields 3/4 (`docs/eval/heldout-2026-11-04-7b64f66.md`). It can't be run again; the eval script
+  refuses. Devpost quotes these numbers (`docs/DEVPOST.md`), and any later code change doesn't change them.
+- **Known bug from that run:** `lib/artwork-compare.ts` treats every 4-digit number as a year, so `TEAM 4471` fails a
+  correct file. It fails safe, and the merchant can dismiss it.
 - **Hosted app is behind this branch:** auto-deploy is off on Render, so a manual deploy is needed to ship new commits.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).

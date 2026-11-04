@@ -1,7 +1,7 @@
 # Devpost write-up (draft, AI-10)
 
-Held-out numbers are filled in after AI-12. Until then this draft quotes none, on purpose. Paste into the Devpost form
-section by section.
+Paste into the Devpost form section by section. The held-out numbers come from the one run on the `prompt-locked` tag
+(`docs/eval/heldout-2026-11-04-7b64f66.md`).
 
 ## Tagline
 
@@ -58,7 +58,11 @@ the artwork itself.
 
 Sample orders have planted issues and answer keys, scored by `npm run eval`. Reports are in `docs/eval/`.
 
-- **Held-out result:** _(fill in after AI-12: recall and false blocking, "on 3 held-out orders", plus the tag.)_
+- **Held-out result, on 3 held-out orders, one run each, `prompt-locked` tag:** all 4 planted issues found, 0 false
+  blocking findings, including 0 on the order with no issues and the one with a prompt injection attempt. 3 of 4 artwork
+  re-check fields came out as expected. The fourth was a safe failure: a correct file was rejected because our year
+  check, which is code and not the model, treated the team number `4471` as a second year. A merchant would have had
+  to dismiss it by hand. The version with a leftover old year was correctly rejected.
 - **How to read it:** the held-out cases were committed before the prompt was locked, with a fingerprint, and weren't
   run or read during tuning. They were visible in the repo, and the same person who wrote them also did the final
   tuning, so they aren't fully independent. Three orders is a small sample, and we make no general accuracy claim.
@@ -106,7 +110,6 @@ sandbox. Add a gateway key to run live checks. The free instance sleeps when idl
 
 ## Before submitting
 
-- [ ] AI-12 numbers filled in, with the sample count.
 - [ ] Video link (public, under 3:00) and repo link added; repo public, license visible in About.
 - [ ] Model name still matches what the eval ran on.
 - [ ] Dang has reviewed the PayPal parts.
