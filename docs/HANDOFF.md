@@ -172,7 +172,7 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 - **UI redesign (Nov 5):** neobrutalist restyle, in-page dialogs instead of browser prompts, a 5-step progress bar, the
   proof link in the green banner, and a page for lost orders. Gate, payment and API code didn't change. Screenshots 4
   and 5 still show `MOCK` ids: retake them on a real sandbox payment after deploying.
-- **Hosted app is behind this branch:** auto-deploy is off on Render, so a manual deploy is needed to ship new commits.
+- **Hosted app:** runs `v0.9-freeze`. Auto-deploy is off on Render, and a deploy wipes orders, so don't deploy during the video.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
 - **Public host:** anyone can create orders. `lib/rate-limit.ts` limits each visitor, and live AI checks also have a daily
@@ -182,6 +182,5 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 - **Plan checkpoints:**
   - Nov 3: minimum loop on Riverside;
   - Nov 5: feature freeze, tag `v0.9-freeze`;
-  - Nov 9: fresh-machine dry run of the README;
-  - Nov 9–10: video;
+  - Nov 9–10: video, by Dat;
   - Nov 11: submit.
