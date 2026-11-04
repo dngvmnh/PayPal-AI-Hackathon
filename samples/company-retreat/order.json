@@ -1,0 +1,14 @@
+{
+  "title": "Cedar team day shirts",
+  "customerName": "Morgan Reed",
+  "customerEmail": "synthetic@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

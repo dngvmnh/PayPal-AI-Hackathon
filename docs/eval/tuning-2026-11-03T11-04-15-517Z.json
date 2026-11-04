@@ -1,0 +1,400 @@
+{
+  "kind": "Development tuning evaluation; not held-out or general accuracy",
+  "startedAt": "2026-11-03T11:04:15.708Z",
+  "model": "qwen3-vl",
+  "provider": "astropods",
+  "initialOnly": true,
+  "fullTuningSet": false,
+  "codeHashes": {
+    "lib/ai.ts": "fc51f973443ce2ad94d3e930e46899b5111aa64a48cb5c2598416e08b3e23138",
+    "lib/ai-gateway.ts": "81c845d46a5827fa711b2cb9fe436deb5ef2add41fb45d7b7f18afc3b8732a9a",
+    "lib/ai-config.ts": "999f5be2235a7a29274e2f239c743f4d19e73f92d8ac12378a674581e91cdb08",
+    "lib/artwork-ink-audit.ts": "fa776a15deeca1c8d33202e3d98079f90064fe54e14ed7a05b6566dd3d90338d",
+    "lib/order-size-audit.ts": "ba1bdd6071aef631831649c87945e5b9e43ad89306032a48ca9d6c474a3eeb54",
+    "lib/artwork-compare.ts": "3e28e506ea741c91023648e754ac36fab3c2843d9d6dca0e7c90045404e981f0",
+    "lib/artwork-recheck.ts": "3b1fd50317cb3e5cb19090b1b8ef583e8596b8b3abf0f6eeda19b99daf5e41ec",
+    "lib/artwork-rules.ts": "552e26e9358769692693867002be54d9d8764ada89c649d219af59a7e17223f5",
+    "lib/evidence.ts": "ff04f54233f5a989e2527b6e6268bbf86c67f1abe12849b701f02e6b4d5d570a",
+    "lib/orders.ts": "de85b56f34b9bbfeed9215773d4012041834f4576cc12ae7442a269ebe5be7f0",
+    "lib/types.ts": "c6cc8a6fa3739b75a011abc6b6e6cb7de3d0e017c4e7fde4c262a20515c26833",
+    "lib/eval-score.ts": "25ff6c498b42f34754ba876da5c502933d0e2403d1b5b41c95d4235c4d12d685",
+    "scripts/eval.ts": "b5baae339ab09b9f7033342504fa13adb0bc1b71785f0da38235bad230a73103"
+  },
+  "datasetHashes": {
+    "company-retreat": {
+      "order.json": "0c5ee85b9ec8c60973d3f91457281b075ea48df41d0138d39a7b2fbd00d21a42",
+      "expected.json": "b095103796a5f7f6724c04ff51007c1516b9b2526274cbe567bceec94f751a08",
+      "brief.md": "589d7cef16187f399ee80f233a7e0153cf5df00dd119410eeafbcb98551de0b8",
+      "messages.txt": "b71372a284123d8ac298bc6fea3bd0f8a7451c3d4825aa5aa5734ca34513803e",
+      "front.png": "2d7096e37c01d582d0a7a084cc37924ce34241354181112506e7f451b08efb53"
+    }
+  },
+  "heldoutAccessed": false,
+  "promptLocked": false,
+  "matching": "One-to-one field, checkGroup, minimum severity; does not score semantic completeness of each finding",
+  "cases": [
+    {
+      "name": "company-retreat",
+      "status": "ok",
+      "artwork": [],
+      "initial": {
+        "order": {
+          "id": "eval-company-retreat",
+          "title": "Cedar team day shirts",
+          "customerName": "Morgan Reed",
+          "customerEmail": "synthetic@example.com",
+          "sources": [
+            {
+              "id": "brief",
+              "kind": "brief",
+              "name": "Order brief",
+              "text": "# Cedar team day order\nQuantity: 48\nSizes: S 8 / M 18 / L 16 / XL 6\nGarment color: Navy\nInk colors: 1 — white\nFront text: \"CEDAR TEAM DAY\" / \"2026\"\nAccepted price schedule: quantities 1–49 cost USD 11.50 each; quantities 50 or more cost USD 10.00 each.\nQuoted unit price: USD 10.00\nQuoted total: USD 480.00\n"
+            },
+            {
+              "id": "msg-1",
+              "kind": "message",
+              "name": "Email · Apr 12, 2026 · Morgan Reed",
+              "text": "We confirm 48 navy shirts and the exact size breakdown in the brief. The one-color white artwork is correct. We accept the published schedule, so the unit price for our 48 shirts is USD 11.50."
+            },
+            {
+              "id": "msg-2",
+              "kind": "message",
+              "name": "Email · Apr 12, 2026 · Print shop",
+              "text": "Confirmed: 48 shirts at USD 11.50 each. The total is USD 500.00."
+            },
+            {
+              "id": "design-front",
+              "kind": "design",
+              "name": "front.png",
+              "file": "4b1def16-front.png",
+              "mimeType": "image/png",
+              "versions": [
+                {
+                  "file": "4b1def16-front.png",
+                  "mimeType": "image/png",
+                  "sha256": "2d7096e37c01d582d0a7a084cc37924ce34241354181112506e7f451b08efb53",
+                  "version": 1,
+                  "uploadedAt": "2026-11-03T11:04:15.712Z"
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-11-03T11:04:15.712Z",
+          "spec": {
+            "product": "Cedar team day shirts",
+            "quantity": "48",
+            "size_breakdown": "S 8 / M 18 / L 16 / XL 6",
+            "garment_color": "Navy",
+            "ink_colors": "white",
+            "print_text": "CEDAR TEAM DAY / 2026",
+            "print_location": "Front",
+            "unit_price": "USD 11.50",
+            "total_price": "USD 552.00"
+          },
+          "pricing": {
+            "quantity": 48,
+            "unitPrice": 11.5,
+            "currency": "USD"
+          },
+          "status": "needs_review",
+          "iteration": 1,
+          "approvals": [],
+          "payments": [],
+          "history": [
+            {
+              "at": "2026-11-03T11:04:15.712Z",
+              "type": "created",
+              "summary": "Order created with 4 sources"
+            },
+            {
+              "at": "2026-11-03T11:04:48.277Z",
+              "type": "check",
+              "summary": "AI check succeeded: 2 finding(s)"
+            }
+          ],
+          "analysis": {
+            "ranAt": "2026-11-03T11:04:48.277Z",
+            "model": "qwen3-vl",
+            "demo": false,
+            "status": "succeeded",
+            "artworkHashes": {
+              "design-front": "2d7096e37c01d582d0a7a084cc37924ce34241354181112506e7f451b08efb53"
+            },
+            "sourceFingerprints": {
+              "brief": "c238879e8b7312e0d01ebbe50fb624fad1f078cb1755d97d067ec4171fe22b82",
+              "msg-1": "9e04a8ecc78581fdb989937030f031f8825f4dbbee0e56df3aa9f2999d6929ba",
+              "msg-2": "c3d1ccdc4d05182af547ba331d581252bf7fcd62b91b86bc8e45d35afe7d68ce",
+              "design-front": "dfe3120fb14c8bcd995ee720ef02e36d4f924b0d1fa192192c081838ff04e605"
+            },
+            "summary": "AI flagged 2 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+            "findings": [
+              {
+                "field": "unit_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Brief quotes USD 10.00/unit, but customer and shop confirm USD 11.50/unit for 48 shirts",
+                "explanation": "The brief incorrectly states USD 10.00/unit for 48 shirts, which contradicts the accepted price schedule (1–49 shirts = USD 11.50) and both customer and shop messages. The brief must be updated to reflect the correct unit price.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Quoted unit price: USD 10.00",
+                    "quote": "Quoted unit price: USD 10.00"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50.",
+                    "quote": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50."
+                  },
+                  {
+                    "sourceId": "msg-2",
+                    "value": "Confirmed: 48 shirts at USD 11.50 each.",
+                    "quote": "Confirmed: 48 shirts at USD 11.50 each."
+                  }
+                ],
+                "suggestedValue": "USD 11.50",
+                "customerQuestion": "Can you confirm the unit price for 48 shirts should be USD 11.50 per shirt?",
+                "id": "f1",
+                "status": "open",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "total_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Brief quotes USD 480.00 total, but 48 shirts × USD 11.50 = USD 552.00",
+                "explanation": "The brief’s total of USD 480.00 is incorrect; 48 shirts at the agreed USD 11.50 each equals USD 552.00. The shop’s quoted USD 500.00 is also wrong. The correct total must be calculated from the accepted unit price and quantity.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Quoted total: USD 480.00",
+                    "quote": "Quoted total: USD 480.00"
+                  },
+                  {
+                    "sourceId": "msg-2",
+                    "value": "The total is USD 500.00.",
+                    "quote": "The total is USD 500.00."
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50.",
+                    "quote": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50."
+                  }
+                ],
+                "suggestedValue": "USD 552.00",
+                "customerQuestion": "Should we adjust the total to USD 552.00 (48 × 11.50) instead of USD 480.00 or USD 500.00?",
+                "id": "f2",
+                "status": "open",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              }
+            ],
+            "artworkReadings": [
+              {
+                "sourceId": "design-front",
+                "textElements": [
+                  "CEDAR TEAM DAY",
+                  "2026"
+                ],
+                "inkColors": [
+                  "white"
+                ],
+                "sha256": "2d7096e37c01d582d0a7a084cc37924ce34241354181112506e7f451b08efb53"
+              }
+            ],
+            "verifications": []
+          }
+        },
+        "raw": {
+          "summary": "AI flagged 2 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+          "proposedSpec": [
+            {
+              "field": "product",
+              "value": "Cedar team day shirts",
+              "confidence": "high"
+            },
+            {
+              "field": "quantity",
+              "value": "48",
+              "confidence": "high"
+            },
+            {
+              "field": "size_breakdown",
+              "value": "S 8 / M 18 / L 16 / XL 6",
+              "confidence": "high"
+            },
+            {
+              "field": "garment_color",
+              "value": "Navy",
+              "confidence": "high"
+            },
+            {
+              "field": "ink_colors",
+              "value": "white",
+              "confidence": "high"
+            },
+            {
+              "field": "print_text",
+              "value": "CEDAR TEAM DAY / 2026",
+              "confidence": "high"
+            },
+            {
+              "field": "print_location",
+              "value": "Front",
+              "confidence": "high"
+            },
+            {
+              "field": "print_dimensions",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "due_date",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "unit_price",
+              "value": "USD 11.50",
+              "confidence": "high"
+            },
+            {
+              "field": "total_price",
+              "value": "USD 552.00",
+              "confidence": "medium"
+            },
+            {
+              "field": "shipping",
+              "value": null,
+              "confidence": "low"
+            }
+          ],
+          "findings": [
+            {
+              "field": "unit_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Brief quotes USD 10.00/unit, but customer and shop confirm USD 11.50/unit for 48 shirts",
+              "explanation": "The brief incorrectly states USD 10.00/unit for 48 shirts, which contradicts the accepted price schedule (1–49 shirts = USD 11.50) and both customer and shop messages. The brief must be updated to reflect the correct unit price.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "Quoted unit price: USD 10.00",
+                  "quote": "Quoted unit price: USD 10.00"
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50.",
+                  "quote": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50."
+                },
+                {
+                  "sourceId": "msg-2",
+                  "value": "Confirmed: 48 shirts at USD 11.50 each.",
+                  "quote": "Confirmed: 48 shirts at USD 11.50 each."
+                }
+              ],
+              "suggestedValue": "USD 11.50",
+              "customerQuestion": "Can you confirm the unit price for 48 shirts should be USD 11.50 per shirt?"
+            },
+            {
+              "field": "total_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Brief quotes USD 480.00 total, but 48 shirts × USD 11.50 = USD 552.00",
+              "explanation": "The brief’s total of USD 480.00 is incorrect; 48 shirts at the agreed USD 11.50 each equals USD 552.00. The shop’s quoted USD 500.00 is also wrong. The correct total must be calculated from the accepted unit price and quantity.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "Quoted total: USD 480.00",
+                  "quote": "Quoted total: USD 480.00"
+                },
+                {
+                  "sourceId": "msg-2",
+                  "value": "The total is USD 500.00.",
+                  "quote": "The total is USD 500.00."
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50.",
+                  "quote": "We accept the published schedule, so the unit price for our 48 shirts is USD 11.50."
+                }
+              ],
+              "suggestedValue": "USD 552.00",
+              "customerQuestion": "Should we adjust the total to USD 552.00 (48 × 11.50) instead of USD 480.00 or USD 500.00?"
+            }
+          ],
+          "artworkReadings": [
+            {
+              "sourceId": "design-front",
+              "textElements": [
+                "CEDAR TEAM DAY",
+                "2026"
+              ],
+              "inkColors": [
+                "white"
+              ]
+            }
+          ],
+          "artworkClaims": [],
+          "pricing": {
+            "quantity": 48,
+            "unitPrice": 11.5,
+            "currency": "USD"
+          }
+        },
+        "latencyMs": 32565
+      },
+      "score": {
+        "expected": 2,
+        "matched": 2,
+        "recall": 1,
+        "issues": [
+          {
+            "issueId": "unit-price",
+            "field": "unit_price",
+            "detected": true,
+            "findingId": "f1",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          },
+          {
+            "issueId": "total-price",
+            "field": "total_price",
+            "detected": true,
+            "findingId": "f2",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          }
+        ],
+        "falseBlocking": [],
+        "invalidEvidence": [],
+        "unverifiedArtworkEvidence": [],
+        "unexpectedNonBlocking": [],
+        "clean": false,
+        "injectionResisted": null,
+        "sampleFalseBlockingLimitPassed": true
+      }
+    }
+  ],
+  "summary": {
+    "selectedCases": 1,
+    "completedCases": 1,
+    "complete": true,
+    "expected": 2,
+    "matched": 2,
+    "recall": 1,
+    "falseBlocking": 0,
+    "invalidEvidence": 0,
+    "artworkFixCorrect": 2,
+    "artworkFixAssessed": 2,
+    "artworkChecksPassed": 0,
+    "artworkChecks": 0,
+    "targetsPassed": false,
+    "artworkVerificationSkipped": true
+  },
+  "completedAt": "2026-11-03T11:04:48.280Z"
+}

@@ -60,3 +60,20 @@ export function validateEvidence(
     problems,
   };
 }
+/** Expand shortened quotes only when every fragment has one unambiguous location in the source. */
+export function expandSourceQuote(quote: string, source: string): string | null {
+  const text = normalizeWhitespace(source);
+  const original = normalizeWhitespace(quote);
+  if (text.includes(original)) return null;
+  const parts = original.split(/\.\.\.|…/).map(p => p.trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, "")).filter(Boolean);
+  if (parts.length < 2 || parts.some(p => p.length < 8)) return null;
+  let cursor = 0;
+  let start = -1;
+  for (const part of parts) {
+    const at = text.indexOf(part);
+    if (at < cursor || at < 0 || text.indexOf(part, at + 1) !== -1) return null;
+    if (start < 0) start = at;
+    cursor = at + part.length;
+  }
+  return text.slice(start, cursor);
+}

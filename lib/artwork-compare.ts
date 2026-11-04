@@ -248,13 +248,24 @@ const INK_COLORS: Record<string, string> = {
   magenta: "magenta",
 };
 
-function parseInkColors(values: string[]): string[] | null {
-  const parts = values.flatMap((value) =>
+export function parseInkColors(values: string[]): string[] | null {
+  let declaredCount: number | undefined;
+  const inputs: string[] = [];
+  for (const value of values) {
+    const counted = /^\s*(\d+)\s*[-—–,:]\s*(.+)$/.exec(value);
+    if (counted) {
+      if (values.length !== 1) return null;
+      declaredCount = Number(counted[1]);
+      inputs.push(counted[2]);
+    } else inputs.push(value);
+  }
+  const parts = inputs.flatMap(value =>
     value.toLowerCase().split(/\s*(?:,|\+|;|\band\b)\s*/i),
-  ).map((part) => part.trim()).filter(Boolean);
-
-  if (parts.length === 0 || parts.some((part) => !INK_COLORS[part])) return null;
-  return [...new Set(parts.map((part) => INK_COLORS[part]))].sort();
+  ).map(part => part.trim()).filter(Boolean);
+  if (parts.length === 0 || parts.some(part => !INK_COLORS[part])) return null;
+  const colors = [...new Set(parts.map(part => INK_COLORS[part]))].sort();
+  if (declaredCount !== undefined && declaredCount !== colors.length) return null;
+  return colors;
 }
 
 export function compareArtworkInkColors(

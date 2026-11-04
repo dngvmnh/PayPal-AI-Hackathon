@@ -1,0 +1,14 @@
+{
+  "title": "Oak Volunteer shirts",
+  "customerName": "Casey Wong",
+  "customerEmail": "synthetic@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

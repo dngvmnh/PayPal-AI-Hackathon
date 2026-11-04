@@ -1,0 +1,32 @@
+{
+  "set": "tuning",
+  "notes": "The brief uses the 50+ unit-price tier for 48 shirts. Both quoted totals disagree with 48 × 11.50 = 552. Artwork is consistent.",
+  "issues": [
+    {
+      "id": "unit-price",
+      "field": "unit_price",
+      "checkGroup": "pricing",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": [
+        "brief",
+        "msg-1"
+      ],
+      "correctValue": "USD 11.50"
+    },
+    {
+      "id": "total-price",
+      "field": "total_price",
+      "checkGroup": "pricing",
+      "minSeverity": "blocking",
+      "requiresArtworkFix": false,
+      "sources": [
+        "brief",
+        "msg-2"
+      ],
+      "correctValue": "USD 552.00"
+    }
+  ],
+  "maxFalseBlocking": 0,
+  "artworkChecks": []
+}

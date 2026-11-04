@@ -278,7 +278,8 @@ test("re-analysis keeps pending artwork and assigns unique IDs to new findings",
   });
 
   const findings = result.analysis!.findings;
-assert.equal(findings.length, order.analysis!.findings.length + fixture.findings.length);
+assert.ok(findings.length <= order.analysis!.findings.length + fixture.findings.length);
+assert.equal(findings.filter(f => f.field === "quantity").length, 1, "An open field should reuse its stable ID");
 
 for (const oldFinding of order.analysis!.findings) {
   assert.ok(findings.some((finding) => finding.id === oldFinding.id));

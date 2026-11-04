@@ -76,8 +76,7 @@ export function OrderWorkspace({ order, gate, aiConfigured, paypalConfigured, ch
 
       {!aiConfigured && (
         <p className="hint">
-          Demo mode: no ANTHROPIC_API_KEY set, so the sample order uses a saved analysis. Add a key to analyze
-          your own orders live.
+          No live AI provider is configured. Sample orders can use a saved demo analysis. Configure AI access to check your own orders live.
         </p>
       )}
       {error && <p className="error">{error}</p>}

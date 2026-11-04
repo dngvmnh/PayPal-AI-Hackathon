@@ -21,7 +21,14 @@ export function processArtworkRecheck(order: Order, output: RecheckOutput): Orde
   );
   const currentHashes = currentArtworkHashes(result);
   const verifications: ArtworkVerification[] = [];
-  const recordedReadings: NonNullable<Order["analysis"]>["artworkReadings"] = [];
+  const recordedReadings: NonNullable<Order["analysis"]>["artworkReadings"] = (output.artworkReadings ?? [])
+    .filter(reading => {
+      const sourceId = reading.sourceId;
+      return result.sources.filter(s => s.id === sourceId && s.kind === "design").length === 1 &&
+        (output.artworkReadings ?? []).filter(r => r.sourceId === sourceId).length === 1 &&
+        Boolean(currentHashes[sourceId]) && result.analysis!.artworkHashes[sourceId] === currentHashes[sourceId];
+    })
+    .map(reading => ({ ...reading, sha256: currentHashes[reading.sourceId] }));
 
   for (const finding of pending) {
     const required = finding.requiredFields ?? [];
@@ -60,12 +67,6 @@ export function processArtworkRecheck(order: Order, output: RecheckOutput): Orde
       continue;
     }
 
-    recordedReadings.push({
-      sourceId,
-      sha256: currentHashes[sourceId],
-      textElements: reading.textElements,
-      inkColors: reading.inkColors,
-    });
 
     const checks = buildArtworkVerifications(
       finding.id,

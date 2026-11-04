@@ -1,0 +1,2303 @@
+{
+  "kind": "Development tuning evaluation; not held-out or general accuracy",
+  "startedAt": "2026-11-03T10:50:05.242Z",
+  "model": "qwen3-vl",
+  "provider": "astropods",
+  "initialOnly": false,
+  "fullTuningSet": false,
+  "codeHashes": {
+    "lib/ai.ts": "638cdb61943138329782782c324370ce2de9851ca302974ec912d693d0dbf288",
+    "lib/ai-gateway.ts": "71a7b530cf46c8a9db518952cba2aa5c91188ef53973d380d91464c852142a02",
+    "lib/ai-config.ts": "999f5be2235a7a29274e2f239c743f4d19e73f92d8ac12378a674581e91cdb08",
+    "lib/artwork-ink-audit.ts": "fa776a15deeca1c8d33202e3d98079f90064fe54e14ed7a05b6566dd3d90338d",
+    "lib/order-size-audit.ts": "ba1bdd6071aef631831649c87945e5b9e43ad89306032a48ca9d6c474a3eeb54",
+    "lib/artwork-compare.ts": "3e28e506ea741c91023648e754ac36fab3c2843d9d6dca0e7c90045404e981f0",
+    "lib/artwork-recheck.ts": "3b1fd50317cb3e5cb19090b1b8ef583e8596b8b3abf0f6eeda19b99daf5e41ec",
+    "lib/artwork-rules.ts": "552e26e9358769692693867002be54d9d8764ada89c649d219af59a7e17223f5",
+    "lib/evidence.ts": "ff04f54233f5a989e2527b6e6268bbf86c67f1abe12849b701f02e6b4d5d570a",
+    "lib/orders.ts": "de85b56f34b9bbfeed9215773d4012041834f4576cc12ae7442a269ebe5be7f0",
+    "lib/types.ts": "c6cc8a6fa3739b75a011abc6b6e6cb7de3d0e017c4e7fde4c262a20515c26833",
+    "lib/eval-score.ts": "46537c90c0312e3751a1e2f51e86f6fdcfe20614d0b80051a77447c089b3be93",
+    "scripts/eval.ts": "398b14d8bde0e68132537b29c020880684eb311b985d8db126b7ea18dbe0c478"
+  },
+  "datasetHashes": {
+    "riverside-5k": {
+      "order.json": "e0dbdce4f95c2cce04c5b8ea24f5f406c6b81af4258719403fc5124c64df557c",
+      "expected.json": "f7f95d962044ffe52113ac3b339e34b5098a812b275957d859d86b14189f165f",
+      "brief.md": "4172eb1ea5845a4cbefbe5b7afbcb28e079274340ae0564987a63242ee2f1df3",
+      "messages.txt": "14b9569cce9cc58f2c13e743d0c8df618df680719d6612a8eb3113e13e37f30c",
+      "front.png": "432ee5d9b5e50b2cc2e6609828e2a4e3fa9e767feb3b785b310ccc7b35b16572",
+      "front-v2.png": "9d1debbaf9b3d9aed99318b6ce5e75916217b45f3d978113354d9f9415afe546"
+    },
+    "band-merch": {
+      "order.json": "2243fb53e3390495778689000803d1e0ea8edbb9bfe48c42cee9bcfea61d482d",
+      "expected.json": "3a2b0adf05941415ccd0843e32d41fd79bb10c8fab442e0e9c8bf19d6e59942a",
+      "brief.md": "c2d9cb8d15529e65d4ced4e364b7e846c4e23f741f0acbde12332001ab5f5dac",
+      "messages.txt": "60d57d24ae84af46fab6f117659b8ed94e979fb802c9937154df44f196154128",
+      "front.png": "f91ed403940e9e583adf8b48ac1022cf1e41eb499dd3311c02798c2632f919b1",
+      "front-v2.png": "19906f790aac744783f5cbb7231d4bad741722fefa30c7dd1d7908b75bcba3f7"
+    }
+  },
+  "heldoutAccessed": false,
+  "promptLocked": false,
+  "matching": "One-to-one field, checkGroup, minimum severity; does not score semantic completeness of each finding",
+  "cases": [
+    {
+      "name": "riverside-5k",
+      "status": "ok",
+      "artwork": [
+        {
+          "issueId": "printed-text",
+          "field": "year",
+          "expected": "pass",
+          "passed": true,
+          "verification": {
+            "findingId": "f3",
+            "field": "year",
+            "expected": "2026",
+            "observed": "2026",
+            "matches": true,
+            "codeCheck": "pass"
+          }
+        },
+        {
+          "issueId": "printed-text",
+          "field": "date",
+          "expected": "pass",
+          "passed": true,
+          "verification": {
+            "findingId": "f3",
+            "field": "date",
+            "expected": "Sunday, May 17",
+            "observed": "SUNDAY, MAY 17",
+            "matches": true,
+            "codeCheck": "pass"
+          }
+        },
+        {
+          "issueId": "printed-text",
+          "field": "url",
+          "expected": "pass",
+          "passed": true,
+          "verification": {
+            "findingId": "f3",
+            "field": "url",
+            "expected": "riverside5k.org",
+            "observed": "riverside5k.org",
+            "matches": true,
+            "codeCheck": "pass"
+          }
+        },
+        {
+          "issueId": "ink-colors",
+          "field": "ink_colors",
+          "expected": "pass",
+          "passed": false,
+          "verification": {
+            "findingId": "f5",
+            "field": "ink_colors",
+            "expected": "white, safety orange",
+            "observed": "white, safety orange",
+            "matches": true,
+            "codeCheck": "pass",
+            "reason": "A blocking finding remains open in the same group."
+          }
+        }
+      ],
+      "initial": {
+        "order": {
+          "id": "eval-riverside-5k",
+          "title": "Riverside 5K volunteer shirts",
+          "customerName": "Dana Whitfield",
+          "customerEmail": "dana@riverside5k.org",
+          "sources": [
+            {
+              "id": "brief",
+              "kind": "brief",
+              "name": "Order brief",
+              "text": "# Order brief — Riverside 5K volunteer shirts\r\nTaken by: Sam (front desk), phone call with Dana Whitfield on Mar 1, 2026\r\n\r\n- Product: Gildan 64000 Softstyle unisex tee\r\n- Quantity: 120\r\n- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5\r\n- Garment color: Navy\r\n- Print: front center, 11\" wide, screen print\r\n- Ink colors: 2 — white + safety orange\r\n- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\"\r\n- Price: $9.50 per shirt (2-color front) — total $1,140.00\r\n- Needed by: pickup in store Saturday May 9, 2026\r\n"
+            },
+            {
+              "id": "msg-1",
+              "kind": "message",
+              "name": "Email · Mar 2, 2026 · Dana Whitfield <dana@riverside5k.org>",
+              "text": "Hi Sam! Confirming the 120 navy shirts for the fun run, final design attached (front.png).\r\nAny chance we can do $8.50 a shirt like last year?"
+            },
+            {
+              "id": "msg-2",
+              "kind": "message",
+              "name": "Email · Mar 3, 2026 · Sam (shop)",
+              "text": "Hi Dana, last year was a 1-color job. For the 2-color front we can do $9.50 per shirt."
+            },
+            {
+              "id": "msg-3",
+              "kind": "message",
+              "name": "Email · Mar 3, 2026 · Dana Whitfield",
+              "text": "Ah ok, $9.50 works. Thanks!"
+            },
+            {
+              "id": "msg-4",
+              "kind": "message",
+              "name": "Email · Mar 9, 2026 · Dana Whitfield",
+              "text": "Small change! Registrations jumped so we need 150 shirts now — please add the 30 extra as mediums.\r\nAlso the race moved to SUNDAY May 17 because of the park permit. Everything else stays the same."
+            },
+            {
+              "id": "design-front",
+              "kind": "design",
+              "name": "front.png",
+              "file": "5fb32e3f-front.png",
+              "mimeType": "image/png",
+              "versions": [
+                {
+                  "file": "5fb32e3f-front.png",
+                  "mimeType": "image/png",
+                  "sha256": "432ee5d9b5e50b2cc2e6609828e2a4e3fa9e767feb3b785b310ccc7b35b16572",
+                  "version": 1,
+                  "uploadedAt": "2026-11-03T10:50:05.244Z"
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-11-03T10:50:05.245Z",
+          "spec": {
+            "product": "Gildan 64000 Softstyle unisex tee",
+            "quantity": "150",
+            "size_breakdown": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+            "garment_color": "Navy",
+            "ink_colors": "white + safety orange",
+            "print_text": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+            "print_location": "front center",
+            "print_dimensions": "11\" wide",
+            "due_date": "Saturday May 9, 2026",
+            "unit_price": "$9.50",
+            "total_price": "$1,425.00",
+            "shipping": "pickup in store"
+          },
+          "pricing": {
+            "quantity": 150,
+            "unitPrice": 9.5,
+            "currency": "USD"
+          },
+          "status": "needs_review",
+          "iteration": 1,
+          "approvals": [],
+          "payments": [],
+          "history": [
+            {
+              "at": "2026-11-03T10:50:05.245Z",
+              "type": "created",
+              "summary": "Order created with 6 sources"
+            },
+            {
+              "at": "2026-11-03T10:50:58.623Z",
+              "type": "check",
+              "summary": "AI check succeeded: 7 finding(s)"
+            }
+          ],
+          "analysis": {
+            "ranAt": "2026-11-03T10:50:58.623Z",
+            "model": "qwen3-vl",
+            "demo": false,
+            "status": "succeeded",
+            "artworkHashes": {
+              "design-front": "432ee5d9b5e50b2cc2e6609828e2a4e3fa9e767feb3b785b310ccc7b35b16572"
+            },
+            "sourceFingerprints": {
+              "brief": "069e74a654c406face98b96e23d0b74ec6515481e44e1d55a07351475ae5738a",
+              "msg-1": "bf533eacf530237e16d97e54f09c68284e347e27fcc1d4ea686c0a0b9252a7a9",
+              "msg-2": "aa33ef46385304159c1c8f8f4b668eadc8176515d4268118c30a944624090660",
+              "msg-3": "9aeee0fa07a3b1e1b33e2aed2078711bf02a10eb7d92ab585a0238a0410bc6a9",
+              "msg-4": "db49ad7b7cc45e8807bae0f598f5464da6eebfba26f91d9cd377692ba9d3b08c",
+              "design-front": "5b5212159331f6495c32232f4626cbeefa05127c0322ebc60e685e1971e65e8b"
+            },
+            "summary": "AI flagged 7 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+            "findings": [
+              {
+                "field": "quantity",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Quantity in brief (120) differs from latest message (150)",
+                "explanation": "The order brief still says 120 shirts, but the customer’s Mar 9 message explicitly increased it to 150 shirts, which must be the correct value for charging and production.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "120",
+                    "quote": "- Quantity: 120"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "Small change! Registrations jumped so we need 150 shirts now — please add the 30 extra as mediums."
+                  }
+                ],
+                "suggestedValue": "150",
+                "customerQuestion": "Just confirming — you’d like 150 shirts total, correct?",
+                "id": "f1",
+                "status": "open",
+                "checkGroup": "quantity_sizes",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "size_breakdown",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Size breakdown in brief (S20/M40/L40/XL15/2XL5) not updated to include 30 extra M",
+                "explanation": "The brief still lists the original breakdown of 120 shirts. The latest message adds 30 extra mediums, making the correct breakdown S20/M70/L40/XL15/2XL5. The brief is stale and must be updated. The explicit size counts sum to 120, while the extracted quantity is 150 and is stated in a text source. Confirm the allocation of sizes; do not guess which sizes to add or remove.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5",
+                    "quote": "- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                    "quote": "please add the 30 extra as mediums"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "150 shirts"
+                  },
+                  {
+                    "sourceId": "brief",
+                    "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5 (sum 120)",
+                    "quote": "Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                  }
+                ],
+                "suggestedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                "customerQuestion": "To confirm, we’re adding 30 extra mediums for a total of 70 M — all other sizes unchanged?",
+                "id": "f2",
+                "status": "open",
+                "checkGroup": "quantity_sizes",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "print_text",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Year (2025), date (Saturday, May 16), and URL (riversidefunrun.org) on design do not match agreed text (2026, Sunday, May 17, riverside5k.org)",
+                "explanation": "The artwork front.png displays 2025, Saturday, May 16, and the URL riversidefunrun.org. The customer’s latest message corrects the date to Sunday, May 17 and confirms the event is in 2026 with URL riverside5k.org. All three items are incorrect on the artwork and must be updated to match the order.",
+                "evidence": [
+                  {
+                    "sourceId": "msg-4",
+                    "value": "SUNDAY May 17",
+                    "quote": "Also the race moved to SUNDAY May 17 because of the park permit."
+                  },
+                  {
+                    "sourceId": "brief",
+                    "value": "RIVERSIDE 5K FUN RUN 2026 / Saturday, May 16 / riverside5k.org",
+                    "quote": "- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\""
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "RIVERSIDE 5K FUN RUN 2025 / SATURDAY, MAY 16 / riversidefunrun.org",
+                    "quote": "Visible text on design: 'RIVERSIDE 5K FUN RUN 2025', 'SATURDAY, MAY 16', 'riversidefunrun.org'"
+                  }
+                ],
+                "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+                "customerQuestion": "We noticed the design says 2025 and Saturday May 16 — can you resend the artwork updated to 2026 and Sunday May 17 with the correct URL?",
+                "id": "f3",
+                "status": "open",
+                "checkGroup": "text_dates",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              },
+              {
+                "field": "garment_color",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Garment color in brief (Navy) unchanged despite possible background misinterpretation in artwork",
+                "explanation": "The brief and messages specify Navy as the garment color. The artwork displays a dark blue background, but per policy this is not sufficient proof of the actual stock color. The brief must be explicitly updated if there’s a change — it still says Navy and there’s no conflicting message.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Navy",
+                    "quote": "- Garment color: Navy"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "Navy",
+                    "quote": "Everything else stays the same."
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "dark blue background",
+                    "quote": "Design background is dark blue, but that is not proof of the actual garment stock color."
+                  }
+                ],
+                "suggestedValue": "Navy",
+                "customerQuestion": "Just confirming — the shirt color is still Navy, correct?",
+                "id": "f4",
+                "status": "open",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              },
+              {
+                "field": "ink_colors",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Ink colors in design (white, safety orange, yellow) exceed agreed 2-color count",
+                "explanation": "The brief and messages agree on 2 ink colors: white and safety orange. The artwork adds a third color (yellow) for the sun graphic. This extra color may incur a higher charge or require confirmation, even if it’s not text. The AI artwork inventory differs from the source-backed extracted ink specification (white + safety orange). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "white + safety orange",
+                    "quote": "Ink colors: 2 — white + safety orange"
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "orange, white, yellow",
+                    "quote": "AI image observation lists these print inks: orange, white, yellow."
+                  }
+                ],
+                "suggestedValue": "white + safety orange",
+                "customerQuestion": "The design includes a yellow sun — should that be a third ink color, or can it be removed to stay at 2 colors?",
+                "id": "f5",
+                "status": "open",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              },
+              {
+                "field": "unit_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Unit price in brief ($9.50) is correct, but brief must be updated to reflect acceptance of $9.50 after negotiation",
+                "explanation": "The brief originally listed $9.50, which the customer accepted after asking for $8.50. While the value is correct, the brief must reflect that this was agreed upon to avoid confusion. No change to the number is needed, but the brief is outdated in context.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "$9.50",
+                    "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "$8.50",
+                    "quote": "Any chance we can do $8.50 a shirt like last year?"
+                  },
+                  {
+                    "sourceId": "msg-3",
+                    "value": "$9.50",
+                    "quote": "Ah ok, $9.50 works. Thanks!"
+                  }
+                ],
+                "suggestedValue": "$9.50",
+                "customerQuestion": "Just confirming — $9.50 per shirt for the 2-color print is still ok with you?",
+                "id": "f6",
+                "status": "open",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "total_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Total price in brief ($1,140.00) does not match new quantity (150 × $9.50 = $1,425.00)",
+                "explanation": "The brief total is based on 120 shirts. With the quantity now at 150, the correct total is $1,425.00. This must be corrected to avoid billing errors.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "$1,140.00",
+                    "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "we need 150 shirts now — please add the 30 extra as mediums"
+                  },
+                  {
+                    "sourceId": "msg-3",
+                    "value": "$9.50",
+                    "quote": "Ah ok, $9.50 works. Thanks!"
+                  }
+                ],
+                "suggestedValue": "$1,425.00",
+                "customerQuestion": "We’ll update the total to $1,425.00 for 150 shirts at $9.50 each — does that look right to you?",
+                "id": "f7",
+                "status": "open",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              }
+            ],
+            "artworkReadings": [
+              {
+                "sourceId": "design-front",
+                "textElements": [
+                  "RIVERSIDE 5K",
+                  "FUN RUN 2025",
+                  "SATURDAY, MAY 16",
+                  "riversidefunrun.org"
+                ],
+                "inkColors": [
+                  "white",
+                  "safety orange",
+                  "yellow"
+                ],
+                "sha256": "432ee5d9b5e50b2cc2e6609828e2a4e3fa9e767feb3b785b310ccc7b35b16572"
+              }
+            ],
+            "verifications": []
+          }
+        },
+        "raw": {
+          "summary": "AI flagged 7 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+          "proposedSpec": [
+            {
+              "field": "product",
+              "value": "Gildan 64000 Softstyle unisex tee",
+              "confidence": "high"
+            },
+            {
+              "field": "quantity",
+              "value": "150",
+              "confidence": "high"
+            },
+            {
+              "field": "size_breakdown",
+              "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+              "confidence": "high"
+            },
+            {
+              "field": "garment_color",
+              "value": "Navy",
+              "confidence": "high"
+            },
+            {
+              "field": "ink_colors",
+              "value": "white + safety orange",
+              "confidence": "medium"
+            },
+            {
+              "field": "print_text",
+              "value": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+              "confidence": "high"
+            },
+            {
+              "field": "print_location",
+              "value": "front center",
+              "confidence": "high"
+            },
+            {
+              "field": "print_dimensions",
+              "value": "11\" wide",
+              "confidence": "high"
+            },
+            {
+              "field": "due_date",
+              "value": "Saturday May 9, 2026",
+              "confidence": "high"
+            },
+            {
+              "field": "unit_price",
+              "value": "$9.50",
+              "confidence": "high"
+            },
+            {
+              "field": "total_price",
+              "value": "$1,425.00",
+              "confidence": "high"
+            },
+            {
+              "field": "shipping",
+              "value": "pickup in store",
+              "confidence": "high"
+            }
+          ],
+          "findings": [
+            {
+              "field": "quantity",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Quantity in brief (120) differs from latest message (150)",
+              "explanation": "The order brief still says 120 shirts, but the customer’s Mar 9 message explicitly increased it to 150 shirts, which must be the correct value for charging and production.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "120",
+                  "quote": "- Quantity: 120"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150",
+                  "quote": "Small change! Registrations jumped so we need 150 shirts now — please add the 30 extra as mediums."
+                }
+              ],
+              "suggestedValue": "150",
+              "customerQuestion": "Just confirming — you’d like 150 shirts total, correct?"
+            },
+            {
+              "field": "size_breakdown",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Size breakdown in brief (S20/M40/L40/XL15/2XL5) not updated to include 30 extra M",
+              "explanation": "The brief still lists the original breakdown of 120 shirts. The latest message adds 30 extra mediums, making the correct breakdown S20/M70/L40/XL15/2XL5. The brief is stale and must be updated. The explicit size counts sum to 120, while the extracted quantity is 150 and is stated in a text source. Confirm the allocation of sizes; do not guess which sizes to add or remove.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5",
+                  "quote": "- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                  "quote": "please add the 30 extra as mediums"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150",
+                  "quote": "150 shirts"
+                },
+                {
+                  "sourceId": "brief",
+                  "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5 (sum 120)",
+                  "quote": "Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                }
+              ],
+              "suggestedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+              "customerQuestion": "To confirm, we’re adding 30 extra mediums for a total of 70 M — all other sizes unchanged?"
+            },
+            {
+              "field": "print_text",
+              "requiresArtworkFix": true,
+              "severity": "blocking",
+              "title": "Year (2025), date (Saturday, May 16), and URL (riversidefunrun.org) on design do not match agreed text (2026, Sunday, May 17, riverside5k.org)",
+              "explanation": "The artwork front.png displays 2025, Saturday, May 16, and the URL riversidefunrun.org. The customer’s latest message corrects the date to Sunday, May 17 and confirms the event is in 2026 with URL riverside5k.org. All three items are incorrect on the artwork and must be updated to match the order.",
+              "evidence": [
+                {
+                  "sourceId": "msg-4",
+                  "value": "SUNDAY May 17",
+                  "quote": "Also the race moved to SUNDAY May 17 because of the park permit."
+                },
+                {
+                  "sourceId": "brief",
+                  "value": "RIVERSIDE 5K FUN RUN 2026 / Saturday, May 16 / riverside5k.org",
+                  "quote": "- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\""
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "RIVERSIDE 5K FUN RUN 2025 / SATURDAY, MAY 16 / riversidefunrun.org",
+                  "quote": "Visible text on design: 'RIVERSIDE 5K FUN RUN 2025', 'SATURDAY, MAY 16', 'riversidefunrun.org'"
+                }
+              ],
+              "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+              "customerQuestion": "We noticed the design says 2025 and Saturday May 16 — can you resend the artwork updated to 2026 and Sunday May 17 with the correct URL?"
+            },
+            {
+              "field": "garment_color",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Garment color in brief (Navy) unchanged despite possible background misinterpretation in artwork",
+              "explanation": "The brief and messages specify Navy as the garment color. The artwork displays a dark blue background, but per policy this is not sufficient proof of the actual stock color. The brief must be explicitly updated if there’s a change — it still says Navy and there’s no conflicting message.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "Navy",
+                  "quote": "- Garment color: Navy"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "Navy",
+                  "quote": "Everything else stays the same."
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "dark blue background",
+                  "quote": "Design background is dark blue, but that is not proof of the actual garment stock color."
+                }
+              ],
+              "suggestedValue": "Navy",
+              "customerQuestion": "Just confirming — the shirt color is still Navy, correct?"
+            },
+            {
+              "field": "ink_colors",
+              "requiresArtworkFix": true,
+              "severity": "blocking",
+              "title": "Ink colors in design (white, safety orange, yellow) exceed agreed 2-color count",
+              "explanation": "The brief and messages agree on 2 ink colors: white and safety orange. The artwork adds a third color (yellow) for the sun graphic. This extra color may incur a higher charge or require confirmation, even if it’s not text. The AI artwork inventory differs from the source-backed extracted ink specification (white + safety orange). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "white + safety orange",
+                  "quote": "Ink colors: 2 — white + safety orange"
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "orange, white, yellow",
+                  "quote": "AI image observation lists these print inks: orange, white, yellow."
+                }
+              ],
+              "suggestedValue": "white + safety orange",
+              "customerQuestion": "The design includes a yellow sun — should that be a third ink color, or can it be removed to stay at 2 colors?"
+            },
+            {
+              "field": "unit_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Unit price in brief ($9.50) is correct, but brief must be updated to reflect acceptance of $9.50 after negotiation",
+              "explanation": "The brief originally listed $9.50, which the customer accepted after asking for $8.50. While the value is correct, the brief must reflect that this was agreed upon to avoid confusion. No change to the number is needed, but the brief is outdated in context.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "$9.50",
+                  "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "$8.50",
+                  "quote": "Any chance we can do $8.50 a shirt like last year?"
+                },
+                {
+                  "sourceId": "msg-3",
+                  "value": "$9.50",
+                  "quote": "Ah ok, $9.50 works. Thanks!"
+                }
+              ],
+              "suggestedValue": "$9.50",
+              "customerQuestion": "Just confirming — $9.50 per shirt for the 2-color print is still ok with you?"
+            },
+            {
+              "field": "total_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Total price in brief ($1,140.00) does not match new quantity (150 × $9.50 = $1,425.00)",
+              "explanation": "The brief total is based on 120 shirts. With the quantity now at 150, the correct total is $1,425.00. This must be corrected to avoid billing errors.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "$1,140.00",
+                  "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150",
+                  "quote": "we need 150 shirts now — please add the 30 extra as mediums"
+                },
+                {
+                  "sourceId": "msg-3",
+                  "value": "$9.50",
+                  "quote": "Ah ok, $9.50 works. Thanks!"
+                }
+              ],
+              "suggestedValue": "$1,425.00",
+              "customerQuestion": "We’ll update the total to $1,425.00 for 150 shirts at $9.50 each — does that look right to you?"
+            }
+          ],
+          "artworkReadings": [
+            {
+              "sourceId": "design-front",
+              "textElements": [
+                "RIVERSIDE 5K",
+                "FUN RUN 2025",
+                "SATURDAY, MAY 16",
+                "riversidefunrun.org"
+              ],
+              "inkColors": [
+                "white",
+                "safety orange",
+                "yellow"
+              ]
+            }
+          ],
+          "artworkClaims": [],
+          "pricing": {
+            "quantity": 150,
+            "unitPrice": 9.5,
+            "currency": "USD"
+          }
+        },
+        "latencyMs": 53378
+      },
+      "score": {
+        "expected": 5,
+        "matched": 5,
+        "recall": 1,
+        "issues": [
+          {
+            "issueId": "quantity",
+            "field": "quantity",
+            "detected": true,
+            "findingId": "f1",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          },
+          {
+            "issueId": "sizes",
+            "field": "size_breakdown",
+            "detected": true,
+            "findingId": "f2",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          },
+          {
+            "issueId": "printed-text",
+            "field": "print_text",
+            "detected": true,
+            "findingId": "f3",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "unverified"
+          },
+          {
+            "issueId": "ink-colors",
+            "field": "ink_colors",
+            "detected": true,
+            "findingId": "f5",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "unverified"
+          },
+          {
+            "issueId": "total-price",
+            "field": "total_price",
+            "detected": true,
+            "findingId": "f7",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          }
+        ],
+        "falseBlocking": [
+          "f4",
+          "f6"
+        ],
+        "invalidEvidence": [],
+        "unverifiedArtworkEvidence": [
+          "f3",
+          "f4",
+          "f5"
+        ],
+        "unexpectedNonBlocking": [],
+        "clean": false,
+        "injectionResisted": null,
+        "sampleFalseBlockingLimitPassed": false
+      },
+      "recheck": {
+        "order": {
+          "id": "eval-riverside-5k",
+          "title": "Riverside 5K volunteer shirts",
+          "customerName": "Dana Whitfield",
+          "customerEmail": "dana@riverside5k.org",
+          "sources": [
+            {
+              "id": "brief",
+              "kind": "brief",
+              "name": "Order brief",
+              "text": "# Order brief — Riverside 5K volunteer shirts\r\nTaken by: Sam (front desk), phone call with Dana Whitfield on Mar 1, 2026\r\n\r\n- Product: Gildan 64000 Softstyle unisex tee\r\n- Quantity: 120\r\n- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5\r\n- Garment color: Navy\r\n- Print: front center, 11\" wide, screen print\r\n- Ink colors: 2 — white + safety orange\r\n- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\"\r\n- Price: $9.50 per shirt (2-color front) — total $1,140.00\r\n- Needed by: pickup in store Saturday May 9, 2026\r\n"
+            },
+            {
+              "id": "msg-1",
+              "kind": "message",
+              "name": "Email · Mar 2, 2026 · Dana Whitfield <dana@riverside5k.org>",
+              "text": "Hi Sam! Confirming the 120 navy shirts for the fun run, final design attached (front.png).\r\nAny chance we can do $8.50 a shirt like last year?"
+            },
+            {
+              "id": "msg-2",
+              "kind": "message",
+              "name": "Email · Mar 3, 2026 · Sam (shop)",
+              "text": "Hi Dana, last year was a 1-color job. For the 2-color front we can do $9.50 per shirt."
+            },
+            {
+              "id": "msg-3",
+              "kind": "message",
+              "name": "Email · Mar 3, 2026 · Dana Whitfield",
+              "text": "Ah ok, $9.50 works. Thanks!"
+            },
+            {
+              "id": "msg-4",
+              "kind": "message",
+              "name": "Email · Mar 9, 2026 · Dana Whitfield",
+              "text": "Small change! Registrations jumped so we need 150 shirts now — please add the 30 extra as mediums.\r\nAlso the race moved to SUNDAY May 17 because of the park permit. Everything else stays the same."
+            },
+            {
+              "id": "design-front",
+              "kind": "design",
+              "name": "front.png",
+              "file": "6e52d16d-front-v2.png",
+              "mimeType": "image/png",
+              "versions": [
+                {
+                  "file": "5fb32e3f-front.png",
+                  "mimeType": "image/png",
+                  "sha256": "432ee5d9b5e50b2cc2e6609828e2a4e3fa9e767feb3b785b310ccc7b35b16572",
+                  "version": 1,
+                  "uploadedAt": "2026-11-03T10:50:05.244Z"
+                },
+                {
+                  "file": "6e52d16d-front-v2.png",
+                  "mimeType": "image/png",
+                  "sha256": "9d1debbaf9b3d9aed99318b6ce5e75916217b45f3d978113354d9f9415afe546",
+                  "version": 2,
+                  "uploadedAt": "2026-11-03T10:50:58.629Z"
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-11-03T10:50:05.245Z",
+          "spec": {
+            "product": "Gildan 64000 Softstyle unisex tee",
+            "quantity": "150",
+            "size_breakdown": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+            "garment_color": "Navy",
+            "ink_colors": "white, safety orange",
+            "print_text": "RIVERSIDE 5K FUN RUN 2026 / SUNDAY, MAY 17 / riverside5k.org",
+            "print_location": "front center",
+            "print_dimensions": "11\" wide",
+            "due_date": "Saturday May 9, 2026",
+            "unit_price": "$9.50",
+            "total_price": "$1,425.00",
+            "shipping": "pickup in store"
+          },
+          "pricing": {
+            "quantity": 150,
+            "unitPrice": 9.5,
+            "currency": "USD"
+          },
+          "status": "needs_review",
+          "iteration": 1,
+          "approvals": [],
+          "payments": [],
+          "history": [
+            {
+              "at": "2026-11-03T10:50:05.245Z",
+              "type": "created",
+              "summary": "Order created with 6 sources"
+            },
+            {
+              "at": "2026-11-03T10:50:58.623Z",
+              "type": "check",
+              "summary": "AI check succeeded: 7 finding(s)"
+            },
+            {
+              "at": "2026-11-03T10:50:58.625Z",
+              "type": "finding_resolved",
+              "summary": "Quantity in brief (120) differs from latest message (150) → 150"
+            },
+            {
+              "at": "2026-11-03T10:50:58.625Z",
+              "type": "finding_resolved",
+              "summary": "Size breakdown in brief (S20/M40/L40/XL15/2XL5) not updated to include 30 extra M → S 20 / M 70 / L 40 / XL 15 / 2XL 5"
+            },
+            {
+              "at": "2026-11-03T10:50:58.625Z",
+              "type": "artwork_required",
+              "summary": "Year (2025), date (Saturday, May 16), and URL (riversidefunrun.org) on design do not match agreed text (2026, Sunday, May 17, riverside5k.org): artwork must show year=2026, date=Sunday, May 17, url=riverside5k.org"
+            },
+            {
+              "at": "2026-11-03T10:50:58.626Z",
+              "type": "artwork_required",
+              "summary": "Ink colors in design (white, safety orange, yellow) exceed agreed 2-color count: artwork must show ink_colors=white, safety orange"
+            },
+            {
+              "at": "2026-11-03T10:50:58.626Z",
+              "type": "finding_resolved",
+              "summary": "Total price in brief ($1,140.00) does not match new quantity (150 × $9.50 = $1,425.00) → $1,425.00"
+            },
+            {
+              "at": "2026-11-03T10:50:58.629Z",
+              "type": "artwork_uploaded",
+              "summary": "front.png: version 2 uploaded"
+            },
+            {
+              "at": "2026-11-03T10:51:55.384Z",
+              "type": "finding_reconciled",
+              "summary": "{\"keptId\":\"f1\",\"field\":\"quantity\",\"freshTitle\":\"Quantity mismatch: brief (120) vs. message (150)\"}"
+            },
+            {
+              "at": "2026-11-03T10:51:55.384Z",
+              "type": "finding_reconciled",
+              "summary": "{\"keptId\":\"f2\",\"field\":\"size_breakdown\",\"freshTitle\":\"Size breakdown outdated: brief (S20/M40/L40/XL15/2XL5) vs. message (S20/M70/L40/XL15/2XL5)\"}"
+            },
+            {
+              "at": "2026-11-03T10:51:55.384Z",
+              "type": "finding_reconciled",
+              "summary": "{\"keptId\":\"f3\",\"field\":\"print_text\",\"freshTitle\":\"Date mismatch: brief (Saturday, May 16) vs. message & artwork (Sunday, May 17)\"}"
+            },
+            {
+              "at": "2026-11-03T10:51:55.385Z",
+              "type": "finding_reconciled",
+              "summary": "{\"keptId\":\"f7\",\"field\":\"total_price\",\"freshTitle\":\"Total price mismatch: brief ($1,140.00) vs. recalculated ($1,425.00)\"}"
+            },
+            {
+              "at": "2026-11-03T10:51:55.385Z",
+              "type": "check",
+              "summary": "AI check succeeded: 7 finding(s)"
+            },
+            {
+              "at": "2026-11-03T10:51:55.388Z",
+              "type": "artwork_verified",
+              "summary": "Year (2025), date (Saturday, May 16), and URL (riversidefunrun.org) on design do not match agreed text (2026, Sunday, May 17, riverside5k.org): corrected artwork verified"
+            }
+          ],
+          "analysis": {
+            "ranAt": "2026-11-03T10:51:55.385Z",
+            "model": "qwen3-vl",
+            "demo": false,
+            "status": "succeeded",
+            "artworkHashes": {
+              "design-front": "9d1debbaf9b3d9aed99318b6ce5e75916217b45f3d978113354d9f9415afe546"
+            },
+            "sourceFingerprints": {
+              "brief": "069e74a654c406face98b96e23d0b74ec6515481e44e1d55a07351475ae5738a",
+              "msg-1": "bf533eacf530237e16d97e54f09c68284e347e27fcc1d4ea686c0a0b9252a7a9",
+              "msg-2": "aa33ef46385304159c1c8f8f4b668eadc8176515d4268118c30a944624090660",
+              "msg-3": "9aeee0fa07a3b1e1b33e2aed2078711bf02a10eb7d92ab585a0238a0410bc6a9",
+              "msg-4": "db49ad7b7cc45e8807bae0f598f5464da6eebfba26f91d9cd377692ba9d3b08c",
+              "design-front": "db6e62668ad4b00bcf057b70f0a74b3a25e045017a299684f7f739de7a7cf0e3"
+            },
+            "summary": "AI flagged 5 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+            "findings": [
+              {
+                "field": "quantity",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Quantity in brief (120) differs from latest message (150)",
+                "explanation": "The order brief still says 120 shirts, but the customer’s Mar 9 message explicitly increased it to 150 shirts, which must be the correct value for charging and production.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "120",
+                    "quote": "- Quantity: 120"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "Small change! Registrations jumped so we need 150 shirts now — please add the 30 extra as mediums."
+                  }
+                ],
+                "suggestedValue": "150",
+                "customerQuestion": "Just confirming — you’d like 150 shirts total, correct?",
+                "id": "f1",
+                "status": "resolved",
+                "checkGroup": "quantity_sizes",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": [],
+                "resolvedValue": "150"
+              },
+              {
+                "field": "size_breakdown",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Size breakdown in brief (S20/M40/L40/XL15/2XL5) not updated to include 30 extra M",
+                "explanation": "The brief still lists the original breakdown of 120 shirts. The latest message adds 30 extra mediums, making the correct breakdown S20/M70/L40/XL15/2XL5. The brief is stale and must be updated. The explicit size counts sum to 120, while the extracted quantity is 150 and is stated in a text source. Confirm the allocation of sizes; do not guess which sizes to add or remove.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5",
+                    "quote": "- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                    "quote": "please add the 30 extra as mediums"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "150 shirts"
+                  },
+                  {
+                    "sourceId": "brief",
+                    "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5 (sum 120)",
+                    "quote": "Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                  }
+                ],
+                "suggestedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                "customerQuestion": "To confirm, we’re adding 30 extra mediums for a total of 70 M — all other sizes unchanged?",
+                "id": "f2",
+                "status": "resolved",
+                "checkGroup": "quantity_sizes",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": [],
+                "resolvedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5"
+              },
+              {
+                "field": "print_text",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Year (2025), date (Saturday, May 16), and URL (riversidefunrun.org) on design do not match agreed text (2026, Sunday, May 17, riverside5k.org)",
+                "explanation": "The artwork front.png displays 2025, Saturday, May 16, and the URL riversidefunrun.org. The customer’s latest message corrects the date to Sunday, May 17 and confirms the event is in 2026 with URL riverside5k.org. All three items are incorrect on the artwork and must be updated to match the order.",
+                "evidence": [
+                  {
+                    "sourceId": "msg-4",
+                    "value": "SUNDAY May 17",
+                    "quote": "Also the race moved to SUNDAY May 17 because of the park permit."
+                  },
+                  {
+                    "sourceId": "brief",
+                    "value": "RIVERSIDE 5K FUN RUN 2026 / Saturday, May 16 / riverside5k.org",
+                    "quote": "- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\""
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "RIVERSIDE 5K FUN RUN 2025 / SATURDAY, MAY 16 / riversidefunrun.org",
+                    "quote": "Visible text on design: 'RIVERSIDE 5K FUN RUN 2025', 'SATURDAY, MAY 16', 'riversidefunrun.org'"
+                  }
+                ],
+                "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / Sunday, May 17 / riverside5k.org",
+                "customerQuestion": "We noticed the design says 2025 and Saturday May 16 — can you resend the artwork updated to 2026 and Sunday May 17 with the correct URL?",
+                "id": "f3",
+                "status": "resolved_by_artwork",
+                "checkGroup": "text_dates",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ],
+                "requiredFields": [
+                  {
+                    "field": "year",
+                    "value": "2026"
+                  },
+                  {
+                    "field": "date",
+                    "value": "Sunday, May 17"
+                  },
+                  {
+                    "field": "url",
+                    "value": "riverside5k.org"
+                  }
+                ],
+                "requiredSourceFingerprints": {
+                  "brief": "069e74a654c406face98b96e23d0b74ec6515481e44e1d55a07351475ae5738a",
+                  "msg-1": "bf533eacf530237e16d97e54f09c68284e347e27fcc1d4ea686c0a0b9252a7a9",
+                  "msg-2": "aa33ef46385304159c1c8f8f4b668eadc8176515d4268118c30a944624090660",
+                  "msg-3": "9aeee0fa07a3b1e1b33e2aed2078711bf02a10eb7d92ab585a0238a0410bc6a9",
+                  "msg-4": "db49ad7b7cc45e8807bae0f598f5464da6eebfba26f91d9cd377692ba9d3b08c"
+                }
+              },
+              {
+                "field": "garment_color",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Garment color in brief (Navy) unchanged despite possible background misinterpretation in artwork",
+                "explanation": "The brief and messages specify Navy as the garment color. The artwork displays a dark blue background, but per policy this is not sufficient proof of the actual stock color. The brief must be explicitly updated if there’s a change — it still says Navy and there’s no conflicting message.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Navy",
+                    "quote": "- Garment color: Navy"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "Navy",
+                    "quote": "Everything else stays the same."
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "dark blue background",
+                    "quote": "Design background is dark blue, but that is not proof of the actual garment stock color."
+                  }
+                ],
+                "suggestedValue": "Navy",
+                "customerQuestion": "Just confirming — the shirt color is still Navy, correct?",
+                "id": "f4",
+                "status": "open",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              },
+              {
+                "field": "ink_colors",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Ink colors in design (white, safety orange, yellow) exceed agreed 2-color count",
+                "explanation": "The brief and messages agree on 2 ink colors: white and safety orange. The artwork adds a third color (yellow) for the sun graphic. This extra color may incur a higher charge or require confirmation, even if it’s not text. The AI artwork inventory differs from the source-backed extracted ink specification (white + safety orange). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "white + safety orange",
+                    "quote": "Ink colors: 2 — white + safety orange"
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "orange, white, yellow",
+                    "quote": "AI image observation lists these print inks: orange, white, yellow."
+                  }
+                ],
+                "suggestedValue": "white + safety orange",
+                "customerQuestion": "The design includes a yellow sun — should that be a third ink color, or can it be removed to stay at 2 colors?",
+                "id": "f5",
+                "status": "awaiting_artwork",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ],
+                "requiredFields": [
+                  {
+                    "field": "ink_colors",
+                    "value": "white, safety orange"
+                  }
+                ],
+                "requiredSourceFingerprints": {
+                  "brief": "069e74a654c406face98b96e23d0b74ec6515481e44e1d55a07351475ae5738a",
+                  "msg-1": "bf533eacf530237e16d97e54f09c68284e347e27fcc1d4ea686c0a0b9252a7a9",
+                  "msg-2": "aa33ef46385304159c1c8f8f4b668eadc8176515d4268118c30a944624090660",
+                  "msg-3": "9aeee0fa07a3b1e1b33e2aed2078711bf02a10eb7d92ab585a0238a0410bc6a9",
+                  "msg-4": "db49ad7b7cc45e8807bae0f598f5464da6eebfba26f91d9cd377692ba9d3b08c"
+                }
+              },
+              {
+                "field": "unit_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Unit price outdated in brief: $9.50 accepted, but brief still lists $9.50 (correct), no issue",
+                "explanation": "The brief still states $9.50 per shirt, which matches the accepted price. No change needed, but flagged as this field is often misquoted or outdated.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "$9.50",
+                    "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                  },
+                  {
+                    "sourceId": "msg-3",
+                    "value": "$9.50",
+                    "quote": "Ah ok, $9.50 works. Thanks!"
+                  }
+                ],
+                "suggestedValue": "$9.50",
+                "customerQuestion": "Just double-checking — unit price remains $9.50 per shirt for the 2-color front print?",
+                "id": "f6",
+                "status": "open",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "total_price",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Total price in brief ($1,140.00) does not match new quantity (150 × $9.50 = $1,425.00)",
+                "explanation": "The brief total is based on 120 shirts. With the quantity now at 150, the correct total is $1,425.00. This must be corrected to avoid billing errors.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "$1,140.00",
+                    "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                  },
+                  {
+                    "sourceId": "msg-4",
+                    "value": "150",
+                    "quote": "we need 150 shirts now — please add the 30 extra as mediums"
+                  },
+                  {
+                    "sourceId": "msg-3",
+                    "value": "$9.50",
+                    "quote": "Ah ok, $9.50 works. Thanks!"
+                  }
+                ],
+                "suggestedValue": "$1,425.00",
+                "customerQuestion": "We’ll update the total to $1,425.00 for 150 shirts at $9.50 each — does that look right to you?",
+                "id": "f7",
+                "status": "resolved",
+                "checkGroup": "pricing",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": [],
+                "resolvedValue": "$1,425.00"
+              }
+            ],
+            "artworkReadings": [
+              {
+                "sourceId": "design-front",
+                "textElements": [
+                  "RIVERSIDE 5K",
+                  "FUN RUN 2026",
+                  "SUNDAY, MAY 17",
+                  "riverside5k.org"
+                ],
+                "inkColors": [
+                  "white",
+                  "safety orange"
+                ],
+                "sha256": "9d1debbaf9b3d9aed99318b6ce5e75916217b45f3d978113354d9f9415afe546"
+              }
+            ],
+            "verifications": [
+              {
+                "findingId": "f3",
+                "field": "year",
+                "expected": "2026",
+                "observed": "2026",
+                "matches": true,
+                "codeCheck": "pass"
+              },
+              {
+                "findingId": "f3",
+                "field": "date",
+                "expected": "Sunday, May 17",
+                "observed": "SUNDAY, MAY 17",
+                "matches": true,
+                "codeCheck": "pass"
+              },
+              {
+                "findingId": "f3",
+                "field": "url",
+                "expected": "riverside5k.org",
+                "observed": "riverside5k.org",
+                "matches": true,
+                "codeCheck": "pass"
+              },
+              {
+                "findingId": "f5",
+                "field": "ink_colors",
+                "expected": "white, safety orange",
+                "observed": "white, safety orange",
+                "matches": true,
+                "codeCheck": "pass",
+                "reason": "A blocking finding remains open in the same group."
+              }
+            ]
+          }
+        },
+        "raw": {
+          "summary": "AI flagged 5 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+          "proposedSpec": [
+            {
+              "field": "product",
+              "value": "Gildan 64000 Softstyle unisex tee",
+              "confidence": "high"
+            },
+            {
+              "field": "quantity",
+              "value": "150",
+              "confidence": "high"
+            },
+            {
+              "field": "size_breakdown",
+              "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+              "confidence": "high"
+            },
+            {
+              "field": "garment_color",
+              "value": "Navy",
+              "confidence": "high"
+            },
+            {
+              "field": "ink_colors",
+              "value": "white, safety orange",
+              "confidence": "high"
+            },
+            {
+              "field": "print_text",
+              "value": "RIVERSIDE 5K FUN RUN 2026 / SUNDAY, MAY 17 / riverside5k.org",
+              "confidence": "high"
+            },
+            {
+              "field": "print_location",
+              "value": "front center",
+              "confidence": "medium"
+            },
+            {
+              "field": "print_dimensions",
+              "value": "11\" wide",
+              "confidence": "medium"
+            },
+            {
+              "field": "due_date",
+              "value": "Saturday May 9, 2026",
+              "confidence": "high"
+            },
+            {
+              "field": "unit_price",
+              "value": "$9.50",
+              "confidence": "high"
+            },
+            {
+              "field": "total_price",
+              "value": "$1,425.00",
+              "confidence": "high"
+            },
+            {
+              "field": "shipping",
+              "value": "pickup in store",
+              "confidence": "high"
+            }
+          ],
+          "findings": [
+            {
+              "field": "quantity",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Quantity mismatch: brief (120) vs. message (150)",
+              "explanation": "The order brief still lists 120 shirts, but the customer explicitly requested 150 on Mar 9, 2026. The total price must be recalculated accordingly.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "120",
+                  "quote": "- Quantity: 120"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150",
+                  "quote": "Small change! Registrations jumped so we need 150 shirts now"
+                }
+              ],
+              "suggestedValue": "150",
+              "customerQuestion": "Confirming we’re producing 150 shirts as requested on Mar 9 — correct?"
+            },
+            {
+              "field": "size_breakdown",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Size breakdown outdated: brief (S20/M40/L40/XL15/2XL5) vs. message (S20/M70/L40/XL15/2XL5)",
+              "explanation": "The brief does not reflect the customer’s Mar 9 request to add 30 extra Mediums. The total must sum to 150, not 120. The explicit size counts sum to 120, while the extracted quantity is 150 and is stated in a text source. Confirm the allocation of sizes; do not guess which sizes to add or remove.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5",
+                  "quote": "- Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+                  "quote": "please add the 30 extra as mediums"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150",
+                  "quote": "150 shirts"
+                },
+                {
+                  "sourceId": "brief",
+                  "value": "S 20 / M 40 / L 40 / XL 15 / 2XL 5 (sum 120)",
+                  "quote": "Sizes: S 20 / M 40 / L 40 / XL 15 / 2XL 5"
+                }
+              ],
+              "suggestedValue": "S 20 / M 70 / L 40 / XL 15 / 2XL 5",
+              "customerQuestion": "Just confirming the size breakdown is now S20/M70/L40/XL15/2XL5, correct?"
+            },
+            {
+              "field": "print_text",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Date mismatch: brief (Saturday, May 16) vs. message & artwork (Sunday, May 17)",
+              "explanation": "The brief still lists the old date. The artwork and customer message both confirm the event moved to Sunday, May 17. The text on the shirt must match.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "Saturday, May 16",
+                  "quote": "- Front text: \"RIVERSIDE 5K FUN RUN 2026\" / \"Saturday, May 16\" / \"riverside5k.org\""
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "Sunday, May 17",
+                  "quote": "the race moved to SUNDAY May 17 because of the park permit"
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "SUNDAY, MAY 17",
+                  "quote": "Visible text in artwork: 'SUNDAY, MAY 17'"
+                }
+              ],
+              "suggestedValue": "RIVERSIDE 5K FUN RUN 2026 / SUNDAY, MAY 17 / riverside5k.org",
+              "customerQuestion": "Confirming the date on the shirts is 'SUNDAY, MAY 17' — correct?"
+            },
+            {
+              "field": "unit_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Unit price outdated in brief: $9.50 accepted, but brief still lists $9.50 (correct), no issue",
+              "explanation": "The brief still states $9.50 per shirt, which matches the accepted price. No change needed, but flagged as this field is often misquoted or outdated.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "$9.50",
+                  "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                },
+                {
+                  "sourceId": "msg-3",
+                  "value": "$9.50",
+                  "quote": "Ah ok, $9.50 works. Thanks!"
+                }
+              ],
+              "suggestedValue": "$9.50",
+              "customerQuestion": "Just double-checking — unit price remains $9.50 per shirt for the 2-color front print?"
+            },
+            {
+              "field": "total_price",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Total price mismatch: brief ($1,140.00) vs. recalculated ($1,425.00)",
+              "explanation": "The brief’s total of $1,140.00 is based on 120 shirts. With 150 shirts at $9.50, the correct total is $1,425.00.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "$1,140.00",
+                  "quote": "- Price: $9.50 per shirt (2-color front) — total $1,140.00"
+                },
+                {
+                  "sourceId": "msg-4",
+                  "value": "150 shirts",
+                  "quote": "we need 150 shirts now"
+                },
+                {
+                  "sourceId": "msg-3",
+                  "value": "$9.50",
+                  "quote": "Ah ok, $9.50 works. Thanks!"
+                }
+              ],
+              "suggestedValue": "$1,425.00",
+              "customerQuestion": "The new total for 150 shirts at $9.50 each is $1,425.00 — okay to proceed?"
+            }
+          ],
+          "artworkReadings": [
+            {
+              "sourceId": "design-front",
+              "textElements": [
+                "RIVERSIDE 5K",
+                "FUN RUN 2026",
+                "SUNDAY, MAY 17",
+                "riverside5k.org"
+              ],
+              "inkColors": [
+                "white",
+                "safety orange"
+              ]
+            }
+          ],
+          "artworkClaims": [
+            {
+              "findingId": "f3",
+              "field": "year",
+              "expected": "2026",
+              "observed": "2026",
+              "matches": true
+            },
+            {
+              "findingId": "f3",
+              "field": "date",
+              "expected": "Sunday, May 17",
+              "observed": "SUNDAY, MAY 17",
+              "matches": true
+            },
+            {
+              "findingId": "f3",
+              "field": "url",
+              "expected": "riverside5k.org",
+              "observed": "riverside5k.org",
+              "matches": true
+            },
+            {
+              "findingId": "f5",
+              "field": "ink_colors",
+              "expected": "white, safety orange",
+              "observed": "white, safety orange",
+              "matches": true
+            }
+          ],
+          "pricing": {
+            "quantity": 150,
+            "unitPrice": 9.5,
+            "currency": "USD"
+          }
+        },
+        "latencyMs": 56759
+      }
+    },
+    {
+      "name": "band-merch",
+      "status": "ok",
+      "artwork": [
+        {
+          "issueId": "ink-colors",
+          "field": "ink_colors",
+          "expected": "pass",
+          "passed": true,
+          "verification": {
+            "findingId": "f2",
+            "field": "ink_colors",
+            "expected": "white",
+            "observed": "white",
+            "matches": true,
+            "codeCheck": "pass"
+          }
+        }
+      ],
+      "initial": {
+        "order": {
+          "id": "eval-band-merch",
+          "title": "Northbound band merch",
+          "customerName": "Jamie Lee",
+          "customerEmail": "jamie@example.com",
+          "sources": [
+            {
+              "id": "brief",
+              "kind": "brief",
+              "name": "Order brief",
+              "text": "\\# Order brief — Northbound band merch\r\n\r\n\r\n\r\n\\- Product: Gildan 64000 unisex tee\r\n\r\n\\- Quantity: 80\r\n\r\n\\- Sizes: S 10 / M 25 / L 30 / XL 15\r\n\r\n\\- Garment color: Black\r\n\r\n\\- Ink colors: 1 — white\r\n\r\n\\- Front text: \"NORTHBOUND\" / \"TOUR 2026\"\r\n\r\n\\- Unit price: $12.00 per shirt for a one-color front\r\n\r\n\\- Total price: $960.00\r\n\r\n\\- Print location: Front center\r\n"
+            },
+            {
+              "id": "msg-1",
+              "kind": "message",
+              "name": "Email · Apr 8, 2026 · Jamie Lee",
+              "text": "Hi! Please change the shirts from black to heather grey. Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print, and $12 per shirt. Thanks!"
+            },
+            {
+              "id": "design-front",
+              "kind": "design",
+              "name": "front.png",
+              "file": "3b30aa62-front.png",
+              "mimeType": "image/png",
+              "versions": [
+                {
+                  "file": "3b30aa62-front.png",
+                  "mimeType": "image/png",
+                  "sha256": "f91ed403940e9e583adf8b48ac1022cf1e41eb499dd3311c02798c2632f919b1",
+                  "version": 1,
+                  "uploadedAt": "2026-11-03T10:51:55.391Z"
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-11-03T10:51:55.391Z",
+          "spec": {
+            "product": "Gildan 64000 unisex tee",
+            "quantity": "80",
+            "size_breakdown": "S 10 / M 25 / L 30 / XL 15",
+            "garment_color": "heather grey",
+            "ink_colors": "1 — white",
+            "print_text": "NORTHBOUND / TOUR 2026",
+            "print_location": "Front center",
+            "unit_price": "$12.00",
+            "total_price": "$960.00"
+          },
+          "pricing": {
+            "quantity": 80,
+            "unitPrice": 12,
+            "currency": "USD"
+          },
+          "status": "needs_review",
+          "iteration": 1,
+          "approvals": [],
+          "payments": [],
+          "history": [
+            {
+              "at": "2026-11-03T10:51:55.391Z",
+              "type": "created",
+              "summary": "Order created with 3 sources"
+            },
+            {
+              "at": "2026-11-03T10:52:47.122Z",
+              "type": "evidence_refreshed",
+              "summary": "{\"sourceId\":\"msg-1\",\"before\":\"Everything else stays the same: ... a one-color white front print ...\",\"after\":\"Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print\"}"
+            },
+            {
+              "at": "2026-11-03T10:52:47.124Z",
+              "type": "check",
+              "summary": "AI check succeeded: 3 finding(s)"
+            }
+          ],
+          "analysis": {
+            "ranAt": "2026-11-03T10:52:47.124Z",
+            "model": "qwen3-vl",
+            "demo": false,
+            "status": "succeeded",
+            "artworkHashes": {
+              "design-front": "f91ed403940e9e583adf8b48ac1022cf1e41eb499dd3311c02798c2632f919b1"
+            },
+            "sourceFingerprints": {
+              "brief": "60f9f9ac21b47dce3f13f596b2c4b2d2ffac6dce278d6c6a18c517b3cf5852fe",
+              "msg-1": "2b0bf62a33d87ddb7cf58bd66ef21001674701973186e3200949676f34d7ccaa",
+              "design-front": "c6515b4fa74b794551b9ddf8b96f101bd6b3679cb0db36485ceff4c9f717928b"
+            },
+            "summary": "AI flagged 3 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+            "findings": [
+              {
+                "field": "garment_color",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Garment color in brief (black) conflicts with customer request (heather grey)",
+                "explanation": "The order brief still lists garment color as black, but the customer’s message dated Apr 8, 2026 explicitly requests heather grey. This is a blocking issue because printing on black vs. heather grey may affect visibility and customer satisfaction, and the brief must reflect the current agreement.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Black",
+                    "quote": "- Garment color: Black"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "heather grey",
+                    "quote": "Please change the shirts from black to heather grey."
+                  }
+                ],
+                "suggestedValue": "heather grey",
+                "customerQuestion": "Just confirming — you’d like heather grey shirts, not black, right?",
+                "id": "f1",
+                "status": "open",
+                "checkGroup": "colors",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": []
+              },
+              {
+                "field": "ink_colors",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Artwork uses red for 'TOUR 2026', contradicting agreed one-color white print",
+                "explanation": "The customer confirmed a one-color white front print, but the artwork shows 'TOUR 2026' in red. This is a blocking issue because it violates the ink-color agreement and may result in incorrect printing or rejection by the customer. The artwork must be corrected to use white only. The AI artwork inventory differs from the source-backed extracted ink specification (1 — white). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "1 — white",
+                    "quote": "Ink colors: 1 — white"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "one-color white front print",
+                    "quote": "Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print"
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "red, white",
+                    "quote": "AI image observation lists these print inks: red, white."
+                  }
+                ],
+                "suggestedValue": "1 — white",
+                "customerQuestion": "The design currently shows 'TOUR 2026' in red — did you want that changed to white to match the one-color agreement?",
+                "id": "f2",
+                "status": "open",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              },
+              {
+                "field": "print_text",
+                "requiresArtworkFix": false,
+                "severity": "info",
+                "title": "All text matches: NORTHBOUND / TOUR 2026",
+                "explanation": "All sources agree on the print text. The artwork displays the correct lines, though in conflicting colors. No content change is needed.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "NORTHBOUND / TOUR 2026",
+                    "quote": "- Front text: \"NORTHBOUND\" / \"TOUR 2026\""
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "Everything else stays the same",
+                    "quote": "Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print, and $12 per shirt."
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "NORTHBOUND / TOUR 2026",
+                    "quote": "Artwork shows two lines: 'NORTHBOUND' and 'TOUR 2026'"
+                  }
+                ],
+                "suggestedValue": null,
+                "customerQuestion": "",
+                "id": "f3",
+                "status": "open",
+                "checkGroup": "text_dates",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              }
+            ],
+            "artworkReadings": [
+              {
+                "sourceId": "design-front",
+                "textElements": [
+                  "NORTHBOUND",
+                  "TOUR 2026"
+                ],
+                "inkColors": [
+                  "white",
+                  "red"
+                ],
+                "sha256": "f91ed403940e9e583adf8b48ac1022cf1e41eb499dd3311c02798c2632f919b1"
+              }
+            ],
+            "verifications": []
+          }
+        },
+        "raw": {
+          "summary": "AI flagged 3 potential issue(s) for review. Additional issues may remain; merchant and customer confirmation are required.",
+          "proposedSpec": [
+            {
+              "field": "product",
+              "value": "Gildan 64000 unisex tee",
+              "confidence": "high"
+            },
+            {
+              "field": "quantity",
+              "value": "80",
+              "confidence": "high"
+            },
+            {
+              "field": "size_breakdown",
+              "value": "S 10 / M 25 / L 30 / XL 15",
+              "confidence": "high"
+            },
+            {
+              "field": "garment_color",
+              "value": "heather grey",
+              "confidence": "high"
+            },
+            {
+              "field": "ink_colors",
+              "value": "1 — white",
+              "confidence": "medium"
+            },
+            {
+              "field": "print_text",
+              "value": "NORTHBOUND / TOUR 2026",
+              "confidence": "high"
+            },
+            {
+              "field": "print_location",
+              "value": "Front center",
+              "confidence": "high"
+            },
+            {
+              "field": "print_dimensions",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "due_date",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "unit_price",
+              "value": "$12.00",
+              "confidence": "high"
+            },
+            {
+              "field": "total_price",
+              "value": "$960.00",
+              "confidence": "high"
+            },
+            {
+              "field": "shipping",
+              "value": null,
+              "confidence": "low"
+            }
+          ],
+          "findings": [
+            {
+              "field": "garment_color",
+              "requiresArtworkFix": false,
+              "severity": "blocking",
+              "title": "Garment color in brief (black) conflicts with customer request (heather grey)",
+              "explanation": "The order brief still lists garment color as black, but the customer’s message dated Apr 8, 2026 explicitly requests heather grey. This is a blocking issue because printing on black vs. heather grey may affect visibility and customer satisfaction, and the brief must reflect the current agreement.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "Black",
+                  "quote": "- Garment color: Black"
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "heather grey",
+                  "quote": "Please change the shirts from black to heather grey."
+                }
+              ],
+              "suggestedValue": "heather grey",
+              "customerQuestion": "Just confirming — you’d like heather grey shirts, not black, right?"
+            },
+            {
+              "field": "ink_colors",
+              "requiresArtworkFix": true,
+              "severity": "blocking",
+              "title": "Artwork uses red for 'TOUR 2026', contradicting agreed one-color white print",
+              "explanation": "The customer confirmed a one-color white front print, but the artwork shows 'TOUR 2026' in red. This is a blocking issue because it violates the ink-color agreement and may result in incorrect printing or rejection by the customer. The artwork must be corrected to use white only. The AI artwork inventory differs from the source-backed extracted ink specification (1 — white). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "1 — white",
+                  "quote": "Ink colors: 1 — white"
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "one-color white front print",
+                  "quote": "Everything else stays the same: ... a one-color white front print ..."
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "red, white",
+                  "quote": "AI image observation lists these print inks: red, white."
+                }
+              ],
+              "suggestedValue": "1 — white",
+              "customerQuestion": "The design currently shows 'TOUR 2026' in red — did you want that changed to white to match the one-color agreement?"
+            },
+            {
+              "field": "print_text",
+              "requiresArtworkFix": false,
+              "severity": "info",
+              "title": "All text matches: NORTHBOUND / TOUR 2026",
+              "explanation": "All sources agree on the print text. The artwork displays the correct lines, though in conflicting colors. No content change is needed.",
+              "evidence": [
+                {
+                  "sourceId": "brief",
+                  "value": "NORTHBOUND / TOUR 2026",
+                  "quote": "- Front text: \"NORTHBOUND\" / \"TOUR 2026\""
+                },
+                {
+                  "sourceId": "msg-1",
+                  "value": "Everything else stays the same",
+                  "quote": "Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print, and $12 per shirt."
+                },
+                {
+                  "sourceId": "design-front",
+                  "value": "NORTHBOUND / TOUR 2026",
+                  "quote": "Artwork shows two lines: 'NORTHBOUND' and 'TOUR 2026'"
+                }
+              ],
+              "suggestedValue": null,
+              "customerQuestion": ""
+            }
+          ],
+          "artworkReadings": [
+            {
+              "sourceId": "design-front",
+              "textElements": [
+                "NORTHBOUND",
+                "TOUR 2026"
+              ],
+              "inkColors": [
+                "white",
+                "red"
+              ]
+            }
+          ],
+          "artworkClaims": [],
+          "pricing": {
+            "quantity": 80,
+            "unitPrice": 12,
+            "currency": "USD"
+          }
+        },
+        "latencyMs": 51733
+      },
+      "score": {
+        "expected": 2,
+        "matched": 2,
+        "recall": 1,
+        "issues": [
+          {
+            "issueId": "garment-color",
+            "field": "garment_color",
+            "detected": true,
+            "findingId": "f1",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "verified"
+          },
+          {
+            "issueId": "ink-colors",
+            "field": "ink_colors",
+            "detected": true,
+            "findingId": "f2",
+            "artworkFixCorrect": true,
+            "evidenceStatus": "unverified"
+          }
+        ],
+        "falseBlocking": [],
+        "invalidEvidence": [],
+        "unverifiedArtworkEvidence": [
+          "f2",
+          "f3"
+        ],
+        "unexpectedNonBlocking": [
+          "f3"
+        ],
+        "clean": false,
+        "injectionResisted": null,
+        "sampleFalseBlockingLimitPassed": true
+      },
+      "recheck": {
+        "order": {
+          "id": "eval-band-merch",
+          "title": "Northbound band merch",
+          "customerName": "Jamie Lee",
+          "customerEmail": "jamie@example.com",
+          "sources": [
+            {
+              "id": "brief",
+              "kind": "brief",
+              "name": "Order brief",
+              "text": "\\# Order brief — Northbound band merch\r\n\r\n\r\n\r\n\\- Product: Gildan 64000 unisex tee\r\n\r\n\\- Quantity: 80\r\n\r\n\\- Sizes: S 10 / M 25 / L 30 / XL 15\r\n\r\n\\- Garment color: Black\r\n\r\n\\- Ink colors: 1 — white\r\n\r\n\\- Front text: \"NORTHBOUND\" / \"TOUR 2026\"\r\n\r\n\\- Unit price: $12.00 per shirt for a one-color front\r\n\r\n\\- Total price: $960.00\r\n\r\n\\- Print location: Front center\r\n"
+            },
+            {
+              "id": "msg-1",
+              "kind": "message",
+              "name": "Email · Apr 8, 2026 · Jamie Lee",
+              "text": "Hi! Please change the shirts from black to heather grey. Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print, and $12 per shirt. Thanks!"
+            },
+            {
+              "id": "design-front",
+              "kind": "design",
+              "name": "front.png",
+              "file": "65a79fc7-front-v2.png",
+              "mimeType": "image/png",
+              "versions": [
+                {
+                  "file": "3b30aa62-front.png",
+                  "mimeType": "image/png",
+                  "sha256": "f91ed403940e9e583adf8b48ac1022cf1e41eb499dd3311c02798c2632f919b1",
+                  "version": 1,
+                  "uploadedAt": "2026-11-03T10:51:55.391Z"
+                },
+                {
+                  "file": "65a79fc7-front-v2.png",
+                  "mimeType": "image/png",
+                  "sha256": "19906f790aac744783f5cbb7231d4bad741722fefa30c7dd1d7908b75bcba3f7",
+                  "version": 2,
+                  "uploadedAt": "2026-11-03T10:52:47.128Z"
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-11-03T10:51:55.391Z",
+          "spec": {
+            "product": "Gildan 64000 unisex tee",
+            "quantity": "80",
+            "size_breakdown": "S 10 / M 25 / L 30 / XL 15",
+            "garment_color": "Heather grey",
+            "ink_colors": "white",
+            "print_text": "NORTHBOUND / TOUR 2026",
+            "print_location": "Front center",
+            "unit_price": "$12.00",
+            "total_price": "$960.00"
+          },
+          "pricing": {
+            "quantity": 80,
+            "unitPrice": 12,
+            "currency": "USD"
+          },
+          "status": "needs_review",
+          "iteration": 1,
+          "approvals": [],
+          "payments": [],
+          "history": [
+            {
+              "at": "2026-11-03T10:51:55.391Z",
+              "type": "created",
+              "summary": "Order created with 3 sources"
+            },
+            {
+              "at": "2026-11-03T10:52:47.122Z",
+              "type": "evidence_refreshed",
+              "summary": "{\"sourceId\":\"msg-1\",\"before\":\"Everything else stays the same: ... a one-color white front print ...\",\"after\":\"Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print\"}"
+            },
+            {
+              "at": "2026-11-03T10:52:47.124Z",
+              "type": "check",
+              "summary": "AI check succeeded: 3 finding(s)"
+            },
+            {
+              "at": "2026-11-03T10:52:47.125Z",
+              "type": "finding_resolved",
+              "summary": "Garment color in brief (black) conflicts with customer request (heather grey) → Heather grey"
+            },
+            {
+              "at": "2026-11-03T10:52:47.125Z",
+              "type": "artwork_required",
+              "summary": "Artwork uses red for 'TOUR 2026', contradicting agreed one-color white print: artwork must show ink_colors=white"
+            },
+            {
+              "at": "2026-11-03T10:52:47.128Z",
+              "type": "artwork_uploaded",
+              "summary": "front.png: version 2 uploaded"
+            },
+            {
+              "at": "2026-11-03T10:52:57.726Z",
+              "type": "check",
+              "summary": "AI check succeeded: 3 finding(s)"
+            },
+            {
+              "at": "2026-11-03T10:52:57.727Z",
+              "type": "artwork_verified",
+              "summary": "Artwork uses red for 'TOUR 2026', contradicting agreed one-color white print: corrected artwork verified"
+            }
+          ],
+          "analysis": {
+            "ranAt": "2026-11-03T10:52:57.726Z",
+            "model": "qwen3-vl",
+            "demo": false,
+            "status": "succeeded",
+            "artworkHashes": {
+              "design-front": "19906f790aac744783f5cbb7231d4bad741722fefa30c7dd1d7908b75bcba3f7"
+            },
+            "sourceFingerprints": {
+              "brief": "60f9f9ac21b47dce3f13f596b2c4b2d2ffac6dce278d6c6a18c517b3cf5852fe",
+              "msg-1": "2b0bf62a33d87ddb7cf58bd66ef21001674701973186e3200949676f34d7ccaa",
+              "design-front": "92bdf8adcd8bb962acd3cf407980c7cd131feee20500da0b8b582593e86bbf2c"
+            },
+            "summary": "AI reported no inconsistencies in the scoped checks. This is not a guarantee; review the sources and artwork before approval.",
+            "findings": [
+              {
+                "field": "garment_color",
+                "requiresArtworkFix": false,
+                "severity": "blocking",
+                "title": "Garment color in brief (black) conflicts with customer request (heather grey)",
+                "explanation": "The order brief still lists garment color as black, but the customer’s message dated Apr 8, 2026 explicitly requests heather grey. This is a blocking issue because printing on black vs. heather grey may affect visibility and customer satisfaction, and the brief must reflect the current agreement.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "Black",
+                    "quote": "- Garment color: Black"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "heather grey",
+                    "quote": "Please change the shirts from black to heather grey."
+                  }
+                ],
+                "suggestedValue": "heather grey",
+                "customerQuestion": "Just confirming — you’d like heather grey shirts, not black, right?",
+                "id": "f1",
+                "status": "resolved",
+                "checkGroup": "colors",
+                "evidenceStatus": "verified",
+                "evidenceValid": true,
+                "evidenceProblems": [],
+                "resolvedValue": "Heather grey"
+              },
+              {
+                "field": "ink_colors",
+                "requiresArtworkFix": true,
+                "severity": "blocking",
+                "title": "Artwork uses red for 'TOUR 2026', contradicting agreed one-color white print",
+                "explanation": "The customer confirmed a one-color white front print, but the artwork shows 'TOUR 2026' in red. This is a blocking issue because it violates the ink-color agreement and may result in incorrect printing or rejection by the customer. The artwork must be corrected to use white only. The AI artwork inventory differs from the source-backed extracted ink specification (1 — white). Review the cited order statement and artwork before printing; the image observation itself may be wrong.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "1 — white",
+                    "quote": "Ink colors: 1 — white"
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "one-color white front print",
+                    "quote": "Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print"
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "red, white",
+                    "quote": "AI image observation lists these print inks: red, white."
+                  }
+                ],
+                "suggestedValue": "1 — white",
+                "customerQuestion": "The design currently shows 'TOUR 2026' in red — did you want that changed to white to match the one-color agreement?",
+                "id": "f2",
+                "status": "resolved_by_artwork",
+                "checkGroup": "colors",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ],
+                "requiredFields": [
+                  {
+                    "field": "ink_colors",
+                    "value": "white"
+                  }
+                ],
+                "requiredSourceFingerprints": {
+                  "brief": "60f9f9ac21b47dce3f13f596b2c4b2d2ffac6dce278d6c6a18c517b3cf5852fe",
+                  "msg-1": "2b0bf62a33d87ddb7cf58bd66ef21001674701973186e3200949676f34d7ccaa"
+                }
+              },
+              {
+                "field": "print_text",
+                "requiresArtworkFix": false,
+                "severity": "info",
+                "title": "All text matches: NORTHBOUND / TOUR 2026",
+                "explanation": "All sources agree on the print text. The artwork displays the correct lines, though in conflicting colors. No content change is needed.",
+                "evidence": [
+                  {
+                    "sourceId": "brief",
+                    "value": "NORTHBOUND / TOUR 2026",
+                    "quote": "- Front text: \"NORTHBOUND\" / \"TOUR 2026\""
+                  },
+                  {
+                    "sourceId": "msg-1",
+                    "value": "Everything else stays the same",
+                    "quote": "Everything else stays the same: 80 shirts, the size breakdown in the brief, a one-color white front print, and $12 per shirt."
+                  },
+                  {
+                    "sourceId": "design-front",
+                    "value": "NORTHBOUND / TOUR 2026",
+                    "quote": "Artwork shows two lines: 'NORTHBOUND' and 'TOUR 2026'"
+                  }
+                ],
+                "suggestedValue": null,
+                "customerQuestion": "",
+                "id": "f3",
+                "status": "open",
+                "checkGroup": "text_dates",
+                "evidenceStatus": "unverified",
+                "evidenceValid": false,
+                "evidenceProblems": [
+                  "Artwork evidence for \"design-front\" needs visual verification."
+                ]
+              }
+            ],
+            "artworkReadings": [
+              {
+                "sourceId": "design-front",
+                "textElements": [
+                  "NORTHBOUND",
+                  "TOUR 2026"
+                ],
+                "inkColors": [
+                  "white"
+                ],
+                "sha256": "19906f790aac744783f5cbb7231d4bad741722fefa30c7dd1d7908b75bcba3f7"
+              }
+            ],
+            "verifications": [
+              {
+                "findingId": "f2",
+                "field": "ink_colors",
+                "expected": "white",
+                "observed": "white",
+                "matches": true,
+                "codeCheck": "pass"
+              }
+            ]
+          }
+        },
+        "raw": {
+          "summary": "AI reported no inconsistencies in the scoped checks. This is not a guarantee; review the sources and artwork before approval.",
+          "proposedSpec": [
+            {
+              "field": "product",
+              "value": "Gildan 64000 unisex tee",
+              "confidence": "high"
+            },
+            {
+              "field": "quantity",
+              "value": "80",
+              "confidence": "high"
+            },
+            {
+              "field": "size_breakdown",
+              "value": "S 10 / M 25 / L 30 / XL 15",
+              "confidence": "high"
+            },
+            {
+              "field": "garment_color",
+              "value": "Heather grey",
+              "confidence": "high"
+            },
+            {
+              "field": "ink_colors",
+              "value": "white",
+              "confidence": "high"
+            },
+            {
+              "field": "print_text",
+              "value": "NORTHBOUND / TOUR 2026",
+              "confidence": "high"
+            },
+            {
+              "field": "print_location",
+              "value": "Front center",
+              "confidence": "high"
+            },
+            {
+              "field": "print_dimensions",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "due_date",
+              "value": null,
+              "confidence": "low"
+            },
+            {
+              "field": "unit_price",
+              "value": "$12.00",
+              "confidence": "high"
+            },
+            {
+              "field": "total_price",
+              "value": "$960.00",
+              "confidence": "high"
+            },
+            {
+              "field": "shipping",
+              "value": null,
+              "confidence": "low"
+            }
+          ],
+          "findings": [],
+          "artworkReadings": [
+            {
+              "sourceId": "design-front",
+              "textElements": [
+                "NORTHBOUND",
+                "TOUR 2026"
+              ],
+              "inkColors": [
+                "white"
+              ]
+            }
+          ],
+          "artworkClaims": [
+            {
+              "findingId": "f2",
+              "field": "ink_colors",
+              "expected": "white",
+              "observed": "white",
+              "matches": true
+            }
+          ],
+          "pricing": {
+            "quantity": 80,
+            "unitPrice": 12,
+            "currency": "USD"
+          }
+        },
+        "latencyMs": 10599
+      }
+    }
+  ],
+  "summary": {
+    "selectedCases": 2,
+    "completedCases": 2,
+    "complete": true,
+    "expected": 7,
+    "matched": 7,
+    "recall": 1,
+    "falseBlocking": 2,
+    "invalidEvidence": 0,
+    "artworkFixCorrect": 7,
+    "artworkFixAssessed": 7,
+    "artworkChecksPassed": 4,
+    "artworkChecks": 5,
+    "targetsPassed": false
+  },
+  "completedAt": "2026-11-03T10:52:57.730Z"
+}

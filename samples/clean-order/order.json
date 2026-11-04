@@ -1,0 +1,14 @@
+{
+  "title": "Maple Robotics shirts",
+  "customerName": "Taylor Chen",
+  "customerEmail": "synthetic@example.com",
+  "designs": [
+    {
+      "sourceId": "design-front",
+      "name": "front.png",
+      "versions": [
+        "front.png"
+      ]
+    }
+  ]
+}

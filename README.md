@@ -200,3 +200,18 @@ docs/PLAN.md               MVP plan, decisions, task split
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+
+## Astropods AI Gateway (local development)
+
+The existing **Run AI check** button supports `AI_PROVIDER=astropods`. Start the separate Astropods local probe first, then in PowerShell run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\connect-astropods.ps1
+```
+
+This copies the managed development credential from `proofpay-ai-probe-agent-1` into ignored `.env.local` without displaying it, preserving other environment settings. Restart `npm.cmd run dev`. The helper can be re-run after the development key is renewed. Never commit `.env.local`. This development credential is not a deployment setup.
+
+The gateway currently checks PNG/JPEG/WebP artwork; PDF and other formats are explicitly rejected rather than omitted. The provider must return JSON matching the existing Zod schema. API errors, expired keys, unreadable artwork responses and invalid/truncated output fail the check and keep approval blocked. There are no automatic paid retries.
+
+A successful text/image probe is not evidence of general accuracy. Verify findings against the input files. Keep `samples/heldout/` outside tuning.

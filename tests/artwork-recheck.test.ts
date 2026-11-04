@@ -132,3 +132,24 @@ test("a blocking finding in the same group prevents clearing", () => {
   );
   assert.match(result.analysis!.verifications![0].reason ?? "", /blocking finding/i);
 });
+test("initial checks retain unique current artwork observations even without pending corrections", () => {
+  let order = checked();
+  order = applyAnalysis(order, {...structuredClone(fixture), findings: []}, {
+    model: "test", demo: false, artworkHashes: currentArtworkHashes(order),
+  });
+  const result = processArtworkRecheck(order, response("unused"));
+  assert.equal(result.analysis!.artworkReadings!.length, 1);
+  assert.equal(result.analysis!.artworkReadings![0].sha256, "hash-v1");
+  assert.deepEqual(result.analysis!.artworkReadings![0].inkColors, ["white"]);
+});
+
+test("stored observations do not assign current hashes to stale or ambiguous readings", () => {
+  for (const mode of ["stale", "duplicate", "unknown"] as const) {
+    const {order, findingId} = preparedOrder();
+    const output = response(findingId);
+    if (mode === "stale") order.analysis!.artworkHashes["design-front"] = "old";
+    if (mode === "duplicate") output.artworkReadings.push(structuredClone(output.artworkReadings[0]));
+    if (mode === "unknown") output.artworkReadings[0].sourceId = "unknown";
+    assert.deepEqual(processArtworkRecheck(order, output).analysis!.artworkReadings, [], mode);
+  }
+});

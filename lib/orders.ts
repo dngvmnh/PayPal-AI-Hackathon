@@ -1,5 +1,6 @@
+import { compareArtworkInkColors } from "./artwork-compare.ts";
 import { hasObviousArtworkMismatch } from "./artwork-rules.ts";
-import { validateEvidence } from "./evidence.ts";
+import { expandSourceQuote, validateEvidence } from "./evidence.ts";
 import { randomUUID } from "node:crypto";
 import { currentArtworkHashes, isLocked, paymentGate, versionHash, waivedExceptions, sha256 } from "./gate.ts";
 import type {
@@ -103,9 +104,39 @@ export function applyAnalysis(
   o.spec = spec;
   o.pricing = { ...ai.pricing, currency: ai.pricing.currency || "USD" };
 
+  // Any new/changed text source requires review; an artwork-only upload does not erase text decisions.
+  const previousTextIds = Object.keys(previousAnalysis?.sourceFingerprints ?? {}).filter(id =>
+    !Object.hasOwn(previousAnalysis?.artworkHashes ?? {}, id));
+  const currentTextSources = order.sources.filter(s => s.kind !== "design");
+  const textSourcesUnchanged = Boolean(previousAnalysis?.sourceFingerprints) &&
+    previousTextIds.length === currentTextSources.length &&
+    new Set(currentTextSources.map(s => s.id)).size === currentTextSources.length &&
+    currentTextSources.every(s => previousTextIds.includes(s.id) && previousAnalysis!.sourceFingerprints![s.id] === fingerprints[s.id]);
+  const refreshEvidence = (finding: AIAnalysis["findings"][number]) => {
+    for (const item of finding.evidence) {
+      const matches = o.sources.filter(s => s.id === item.sourceId);
+      if (matches.length !== 1 || matches[0].kind === "design" || !matches[0].text) continue;
+      const expanded = expandSourceQuote(item.quote, matches[0].text!);
+      if (expanded) {
+        log(o, "evidence_refreshed", JSON.stringify({ sourceId: item.sourceId, before: item.quote, after: expanded }));
+        item.quote = expanded;
+      }
+    }
+  };
+  const sameValue = (field: SpecField, a: string | null | undefined, b: string | null | undefined): boolean => {
+    if (!a?.trim() || !b?.trim()) return false;
+    if (["quantity", "unit_price", "total_price"].includes(field)) {
+      const x = parseNumber(a, field === "quantity"), y = parseNumber(b, field === "quantity");
+      return x != null && y != null && x === y;
+    }
+    if (field === "ink_colors") return compareArtworkInkColors(a, [b]).codeCheck === "pass";
+    const normalize = (v: string) => v.toLowerCase().replace(/[\s/|,;:$]+/g, "");
+    return normalize(a) === normalize(b);
+  };
   const retained: Finding[] = [];
 
   for (const finding of previousFindings) {
+    refreshEvidence(finding);
     const validation = validateEvidence(finding, o.sources);
 
     if (finding.status === "awaiting_artwork") {
@@ -128,7 +159,7 @@ export function applyAnalysis(
     const resolvedValue = finding.resolvedValue?.trim();
     const proposedValue = spec[finding.field]?.trim();
 
-    const specAgrees = !proposedValue || proposedValue === resolvedValue;
+    const specAgrees = !proposedValue || sameValue(finding.field, proposedValue, resolvedValue);
     const numberValue = resolvedValue
       ? parseNumber(resolvedValue, finding.field === "quantity")
       : null;
@@ -145,7 +176,7 @@ export function applyAnalysis(
       finding.status === "resolved" &&
       !finding.requiresArtworkFix &&
       Boolean(resolvedValue) &&
-      sourcesUnchanged &&
+      sourcesUnchanged && textSourcesUnchanged &&
       validation.status === finding.evidenceStatus &&
       specAgrees &&
       pricingAgrees;
@@ -177,25 +208,40 @@ export function applyAnalysis(
   const usedIds = new Set(previousFindings.map((finding) => finding.id));
   let nextId = 1;
 
-  const newFindings: Finding[] = ai.findings.map((finding) => {
+  const newFindings: Finding[] = [];
+  for (const raw of ai.findings) {
+    const finding = structuredClone(raw);
+    refreshEvidence(finding);
+    const validation = validateEvidence(finding, o.sources);
+    const requiresArtworkFix = finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources);
+    const old = retained.find(f => f.field === finding.field);
+    const acceptedValue = old?.status === "resolved" ? old.resolvedValue : order.spec[finding.field];
+    const repeatOfHandled = old && textSourcesUnchanged &&
+      previousAnalysis?.artworkHashes &&
+      validation.status !== "invalid" && !requiresArtworkFix &&
+      sameValue(finding.field, finding.suggestedValue, acceptedValue) &&
+      (old.status === "resolved" || old.status === "awaiting_artwork");
+    if (repeatOfHandled) {
+      log(o, "finding_reconciled", JSON.stringify({ keptId: old.id, field: old.field, freshTitle: finding.title }));
+      continue;
+    }
+    // An open, unhandled field can use the new evidence while keeping its stable ID.
+    // Pending artwork requirements are never overwritten by a new claim.
+    if (old?.status === "open") {
+      Object.assign(old, finding, { requiresArtworkFix, evidenceStatus: validation.status,
+        evidenceValid: validation.status === "verified", evidenceProblems: validation.problems });
+      continue;
+    }
     while (usedIds.has(`f${nextId}`)) nextId++;
     const id = `f${nextId++}`;
     usedIds.add(id);
 
-    const validation = validateEvidence(finding, o.sources);
-
-    return {
-      ...finding,
-      id,
-      status: "open",
-requiresArtworkFix:
-  finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources),
+    newFindings.push({
+      ...finding, id, status: "open", requiresArtworkFix,
       checkGroup: CHECK_GROUP_BY_FIELD[finding.field],
-      evidenceStatus: validation.status,
-      evidenceValid: validation.status === "verified",
-      evidenceProblems: validation.problems,
-    };
-  });
+      evidenceStatus: validation.status, evidenceValid: validation.status === "verified", evidenceProblems: validation.problems,
+    });
+  }
 
   const findings = [...retained, ...newFindings];
 

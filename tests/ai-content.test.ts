@@ -66,3 +66,17 @@ test("buildContent rejects a design with no file", async () => {
     /no file or MIME type/i,
   );
 });
+test("the final model input requests every pending artwork claim after the source files", async () => {
+  const order = makeOrder();
+  order.analysis = {ranAt:"2026-11-03T00:00:00Z",model:"test",demo:false,status:"succeeded",artworkHashes:{"design-front":sha256(bytes)},summary:"Pending",findings:[{
+    id:"f-claim",field:"print_text",severity:"blocking",title:"Wrong year",explanation:"Artwork needs correction",suggestedValue:"2026",customerQuestion:"Please correct it",status:"awaiting_artwork",requiresArtworkFix:true,
+    evidence:[{sourceId:"design-front",value:"2025",quote:"Shows 2025"}],requiredFields:[{field:"year",value:"2026"},{field:"text_line",value:"EXAMPLE CLUB"}],
+  }]};
+  const content = await buildContent(order,async()=>bytes);
+  const last = content.at(-1)!;
+  assert.equal(last.type,"text");
+  if(last.type!=="text")throw new Error("Missing request");
+  assert.match(last.text,/Returning findings: \[\] does not replace artworkClaims/);
+  const claims=JSON.parse(last.text.split("Required claims: ")[1]);
+  assert.deepEqual(claims.map((c:{findingId:string;field:string;expected:string})=>[c.findingId,c.field,c.expected]),[["f-claim","year","2026"],["f-claim","text_line","EXAMPLE CLUB"]]);
+});

@@ -1,3 +1,4 @@
+import { aiConfigured } from "@/lib/ai-config.ts";
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/store.ts";
 import { currentArtworkHashes, paymentGate } from "@/lib/gate.ts";
@@ -17,7 +18,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     <OrderWorkspace
       order={order}
       gate={paymentGate(order)}
-      aiConfigured={Boolean(process.env.ANTHROPIC_API_KEY)}
+      aiConfigured={aiConfigured()}
       paypalConfigured={paypalConfigured()}
       checkStale={checkStale}
     />

@@ -1,0 +1,12 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {auditOrderSizes,parseSizeCounts} from '../lib/order-size-audit.ts';
+import {validateEvidence} from '../lib/evidence.ts';
+import type {AIAnalysis,Source} from '../lib/types.ts';
+const ai=():AIAnalysis=>({summary:'',proposedSpec:[{field:'size_breakdown',value:'S 5 / M 5',confidence:'high'}],findings:[],pricing:{quantity:12,unitPrice:2,currency:'USD'}});
+const sources:Source[]=[{id:'brief',kind:'brief',name:'Brief',text:'Quantity: 12\nSizes: S 5 / M 5'}];
+test('an omitted arithmetic discrepancy is detected without inventing a size allocation',()=>{const result=auditOrderSizes(ai(),sources);assert.equal(result.findings.length,1);assert.equal(result.findings[0].suggestedValue,null);assert.equal(result.findings[0].requiresArtworkFix,false);assert.equal(validateEvidence(result.findings[0],sources).status,'verified');});
+test('matching sizes and already-updated source lists do not create false alarms',()=>{assert.equal(auditOrderSizes(ai(),[{...sources[0],text:'Quantity: 12\nSizes: S 5 / M 7'}]).findings.length,0);});
+test('unknown formats, duplicate size aliases and unsupported counts are refused',()=>{for(const text of ['S 5 / Small 7','S 5 / S 7','XXL 5 / 2XL 7','S -5 / M 17','Youth 12'])assert.equal(parseSizeCounts(text),null,text);assert.equal(auditOrderSizes(ai(),[{...sources[0],text:'Sizes: S 5 / M 5'}]).findings.length,0);});
+test('a current proposed allocation may be suggested only if its counts match the sourced quantity',()=>{const a=ai();a.proposedSpec[0].value='S 5 / M 7';assert.equal(auditOrderSizes(a,sources).findings[0].suggestedValue,'S 5 / M 7');});
+test('an existing size issue is upgraded rather than duplicated',()=>{const a=ai();a.findings=[{field:'size_breakdown',requiresArtworkFix:false,severity:'info',title:'Review',explanation:'Sizes',suggestedValue:null,customerQuestion:'Confirm sizes?',evidence:[]}];const result=auditOrderSizes(a,sources);assert.equal(result.findings.length,1);assert.equal(result.findings[0].severity,'blocking');assert.equal(validateEvidence(result.findings[0],sources).status,'verified');});
