@@ -168,6 +168,9 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
   correct file. Now only 1900 to 2099 (or the expected year) count. The held-out numbers stay as measured, since the
   fix came after the run and can't be re-measured. A number in that range, like a team numbered 2054 or "EST. 2019",
   still fails when a year is required, and the merchant can dismiss it.
+- **UI redesign (Nov 5):** neobrutalist restyle, in-page dialogs instead of browser prompts, a 5-step progress bar, the
+  proof link in the green banner, and a page for lost orders. Gate, payment and API code didn't change. Screenshots 4
+  and 5 still show `MOCK` ids: retake them on a real sandbox payment after deploying.
 - **Hosted app is behind this branch:** auto-deploy is off on Render, so a manual deploy is needed to ship new commits.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).

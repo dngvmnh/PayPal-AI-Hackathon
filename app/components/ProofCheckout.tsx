@@ -25,15 +25,16 @@ export function ProofCheckout({ orderId, versionHash, approved, approvedBy, clie
   if (!approved) {
     return (
       <>
-        <label className="row" style={{ fontWeight: 400, gap: 8 }}>
-          <input type="checkbox" style={{ width: "auto" }} checked={checked} onChange={(e) => setChecked(e.target.checked)} />
-          I&apos;ve checked the specification, the artwork and the amount, and approve this version for printing.
+        <span className="pay-step">Step 1 of 2: approve</span>
+        <label className="check-label">
+          <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} />
+          <span>I&apos;ve checked the specification, the artwork and the amount, and approve this version for printing.</span>
         </label>
         <label htmlFor="approver">Your name</label>
         <input id="approver" value={name} onChange={(e) => setName(e.target.value)} />
         <button
           className="primary"
-          style={{ marginTop: 12 }}
+          style={{ marginTop: 12, width: "100%" }}
           disabled={!checked || !name.trim() || busy}
           onClick={async () => {
             setBusy(true);
@@ -50,19 +51,20 @@ export function ProofCheckout({ orderId, versionHash, approved, approvedBy, clie
         >
           Approve this version
         </button>
-        {error && <p className="error small">{error}</p>}
+        {error && <p className="error" role="alert">{error}</p>}
       </>
     );
   }
 
   if (!clientId) {
-    return <p className="error small">Approved by {approvedBy}. PayPal is not configured (NEXT_PUBLIC_PAYPAL_CLIENT_ID is empty).</p>;
+    return <p className="error" role="alert">Approved by {approvedBy}. PayPal is not configured (NEXT_PUBLIC_PAYPAL_CLIENT_ID is empty).</p>;
   }
 
   return (
     <>
-      <p className="pill ok">Approved by {approvedBy}</p>
-      <div style={{ marginTop: 12 }}>
+      <span className="pay-step">Step 2 of 2: pay</span>
+      <p><span className="pill ok wrap">Approved by {approvedBy}</span></p>
+      <div className="stack-top">
         <PayPalScriptProvider options={{ clientId, currency, intent: "authorize" }}>
           <PayPalButtons
             style={{ layout: "vertical" }}
@@ -79,7 +81,7 @@ export function ProofCheckout({ orderId, versionHash, approved, approvedBy, clie
           />
         </PayPalScriptProvider>
       </div>
-      {error && <p className="error small">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
     </>
   );
 }

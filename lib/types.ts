@@ -238,9 +238,9 @@ const HANDLED_STATUSES: FindingStatus[] = ["resolved", "resolved_by_artwork", "w
 export function runDiff(analysis: Pick<Analysis, "findings" | "newFindingIds">) {
   if (!analysis.newFindingIds) return null;
   const isNew = new Set(analysis.newFindingIds);
-  const earlier = analysis.findings.filter((f) => !isNew.has(f.id));
+  const earlier = analysis.findings.filter((f) => !isNew.has(f.id) && f.severity !== "info");
   return {
-    new: analysis.findings.filter((f) => isNew.has(f.id)),
+    new: analysis.findings.filter((f) => isNew.has(f.id) && f.severity !== "info"),
     stillOpen: earlier.filter((f) => !HANDLED_STATUSES.includes(f.status)),
     resolved: earlier.filter((f) => HANDLED_STATUSES.includes(f.status)),
   };

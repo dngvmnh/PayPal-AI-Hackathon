@@ -21,6 +21,7 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
 
   const payment = currentPayment(order);
   const lastVoided = [...order.payments].reverse().find((p) => p.status === "voided");
+  const paid = order.status === "authorized" || order.status === "captured";
 
   let panel: React.ReactNode;
   if (order.status === "cancelled")
@@ -30,10 +31,10 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
         <p className="small">The PayPal authorization was voided, so no money was taken.</p>
       </div>
     );
-  else if ((order.status === "authorized" || order.status === "captured") && order.approval && payment)
+  else if (paid && order.approval && payment)
     panel = (
       <div className="notice ok">
-        <b>{order.status === "captured" ? "Paid. Your order is in production." : "Approved and paid. Thank you!"}</b>
+        <h3>{order.status === "captured" ? "Paid. Your order is in production." : "Approved and paid. Thank you!"}</h3>
         <table className="receipt">
           <tbody>
             <tr>
@@ -72,7 +73,7 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
         </table>
       </div>
     );
-  else if (!gate.ok) panel = <p className="error small">This proof isn&apos;t ready yet. The shop is still finalizing it.</p>;
+  else if (!gate.ok) panel = <p className="notice warn">This proof isn&apos;t ready yet. The shop is still finalizing it.</p>;
   else
     panel = (
       <ProofCheckout
@@ -87,50 +88,30 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <h1>Proof for {order.title}</h1>
-      <p className="muted">
-        Hi {order.customerName || "there"}, please check the specification, the artwork and the amount below. You
-        approve this exact version; if anything changes later, we&apos;ll ask you to approve again.
-      </p>
+      <div className="page-head">
+        <h1>Proof for {order.title}</h1>
+        <p className="muted">
+          Hi {order.customerName || "there"}, please check the artwork, the specification and the amount below. You
+          approve this exact version; if anything changes later, we&apos;ll ask you to approve again.
+        </p>
+      </div>
       <div className="grid-main">
-        <div className="panel">
-          <h2>Final specification</h2>
-          <table>
-            <tbody>
-              {SPEC_FIELDS.filter((f) => order.spec[f]).map((f) => (
-                <tr key={f}>
-                  <th style={{ width: "38%" }}>{SPEC_LABELS[f]}</th>
-                  <td>{order.spec[f]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {exceptions.length > 0 && (
-            <>
-              <h3 style={{ marginTop: 16 }}>Exceptions you are accepting</h3>
-              <ul className="evidence">
-                {exceptions.map((x) => (
-                  <li key={x.findingId}>
-                    <b>{x.title}</b> — {x.reason}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+        <div>
           {designs.map((d) => {
             const v = d.versions?.at(-1);
             if (!v) return null;
             return (
-              <div key={d.id} style={{ marginTop: 16 }}>
+              <div key={d.id} className="panel">
+                <h2>Artwork to be printed</h2>
                 <h3>
-                  Artwork to be printed: {d.name}{" "}
-                  <span className="small muted">
-                    version {v.version} · {v.sha256.slice(0, 12)}
+                  {d.name}
+                  <span className="artwork-meta">
+                    Version {v.version} · {v.sha256.slice(0, 12)}
                   </span>
                 </h3>
                 {v.mimeType.startsWith("image/") ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={`/api/files/${order.id}/${v.file}`} alt={d.name} className="thumb" />
+                  <img src={`/api/files/${order.id}/${v.file}`} alt={d.name} className="thumb stack-top" />
                 ) : (
                   <a href={`/api/files/${order.id}/${v.file}`} target="_blank" rel="noreferrer">
                     Open {d.name}
@@ -139,13 +120,38 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
               </div>
             );
           })}
+          <div className="panel">
+            <h2>Final specification</h2>
+            <table>
+              <tbody>
+                {SPEC_FIELDS.filter((f) => order.spec[f]).map((f) => (
+                  <tr key={f}>
+                    <th style={{ width: "38%" }}>{SPEC_LABELS[f]}</th>
+                    <td>{order.spec[f]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {exceptions.length > 0 && (
+              <div className="notice warn stack-top">
+                <h3>Exceptions you are accepting</h3>
+                <ul className="evidence">
+                  {exceptions.map((x) => (
+                    <li key={x.findingId}>
+                      <b>{x.title}</b> — {x.reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="panel">
-          <h2>Approve &amp; pay</h2>
+        <div className={`panel sticky-panel ${paid ? "receipt-first" : ""}`}>
+          <h2>{paid ? "Your receipt" : "Approve & pay"}</h2>
           {gate.amount != null && (
-            <p style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px" }}>
+            <div className="pay-amount">
               {gate.amount.toFixed(2)} {order.pricing.currency}
-            </p>
+            </div>
           )}
           <p className="small muted">
             {order.pricing.quantity} × {order.pricing.unitPrice?.toFixed(2)} {order.pricing.currency}. PayPal holds
@@ -156,7 +162,7 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
             {order.iteration > 1 && <> · revision {order.iteration}</>}
           </p>
           {lastVoided && order.iteration > lastVoided.iteration && !payment && (
-            <p className="notice small">
+            <p className="notice warn small">
               The order changed after your earlier payment, so that payment was released. Please check this
               version and approve again.
             </p>

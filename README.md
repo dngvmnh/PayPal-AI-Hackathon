@@ -43,8 +43,9 @@ npm run build && npm start        # http://localhost:3000
    see), or **Dismiss as AI error** (with a logged reason).
 3. The two artwork findings can't be confirmed or waived, because the file itself is wrong. On each, set what the
    corrected artwork must show, then click **Require corrected artwork**:
-   - printed text: `year` = `2026`, `date` = `Sunday, May 17`, `url` = `riverside5k.org`
-   - ink colors: `ink_colors` = `white, safety orange`
+   - printed text: **Year** = `2026`, **Date** = `Sunday, May 17`, **URL** = `riverside5k.org` (**+ Add field** adds a
+     row)
+   - ink colors: **Ink colors** = `white, safety orange`
 
    Download the corrected file from the link in the **Artwork** panel, upload it with **Upload corrected version**,
    and click **Run AI check** again. Each required field then shows expected against what was read. Without an AI key
@@ -103,7 +104,7 @@ npm run e2e                                            # terminal 3: 19 checks, 
 |---|---|
 | ![](docs/screenshots/4-payment-iterations.png) | ![](docs/screenshots/5-receipt-mobile.png) |
 
-_The payment screenshots are from a real PayPal sandbox run on the hosted app, including PayPal's signed webhook events._
+_The two payment screenshots use the local stand-in for the PayPal API, so their ids start with `MOCK`. Real sandbox runs passed on the hosted app, including PayPal's signed webhook events; the log below is from one of them._
 
 The sandbox's API log shows the payment tied to one approved version, through `custom_id` = `order:revision:versionHash`:
 

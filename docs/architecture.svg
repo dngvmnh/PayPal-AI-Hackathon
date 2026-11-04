@@ -1,21 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="560" viewBox="0 0 1040 560" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="560" viewBox="0 0 1040 560" font-family="Space Grotesk, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
   <title>ProofPay architecture</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#44546a"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#000000"/>
     </marker>
+    <filter id="hard" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="4" dy="4" stdDeviation="0" flood-color="#000000"/>
+    </filter>
     <style>
-      .box { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; rx: 10; }
-      .app { fill: #f2f7ff; stroke: #0070e0; }
-      .ai { fill: #fbf3ea; stroke: #c4733a; }
-      .pp { fill: #eef5fb; stroke: #003087; }
-      .h { font-weight: 700; font-size: 14px; fill: #16202c; }
-      .t { fill: #44546a; }
-      .line { stroke: #44546a; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
-      .lbl { fill: #44546a; font-size: 12px; }
+      .box { fill: #ffffff; stroke: #000000; stroke-width: 2; rx: 4; filter: url(#hard); }
+      .app { fill: #ff90e8; }
+      .ai { fill: #ffc900; }
+      .pp { fill: #a5b8ff; }
+      .store { fill: #58d6a7; }
+      .h { font-weight: 700; font-size: 14px; fill: #000000; }
+      .t { fill: #000000; }
+      .line { stroke: #000000; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .lbl { fill: #000000; font-size: 12px; font-weight: 600; }
     </style>
   </defs>
-  <rect width="1040" height="560" fill="#ffffff"/>
+  <rect width="1040" height="560" fill="#f4f4f0"/>
 
   <!-- people -->
   <rect class="box" x="20" y="40" width="190" height="96"/>
@@ -74,17 +78,17 @@
   <text class="t" x="776" y="462">Payments v2: capture, void</text>
   <text class="t" x="776" y="480">Webhooks + signature check</text>
 
-  <rect class="box" x="760" y="210" width="260" height="72"/>
+  <rect class="box store" x="760" y="210" width="260" height="72"/>
   <text class="h" x="776" y="236">Storage</text>
   <text class="t" x="776" y="256">orders.json + uploads in</text>
-  <text class="t" x="776" y="274">DATA_DIR (persistent disk)</text>
+  <text class="t" x="776" y="274">DATA_DIR (resets on the free plan)</text>
 
   <!-- flows -->
   <path class="line" d="M210 88 H300"/>
   <path class="line" d="M654 108 H752"/>
-  <text class="lbl" x="664" y="100">text + images</text>
+  <text class="lbl" x="676" y="100">text + images</text>
   <path class="line" d="M210 448 H300"/>
-  <text class="lbl" x="222" y="438">approve, pay</text>
+  <text class="lbl" x="216" y="438">approve, pay</text>
   <path class="line" d="M654 470 H752"/>
   <text class="lbl" x="676" y="462">REST calls</text>
   <path class="line" d="M752 500 C700 530, 680 530, 660 500"/>

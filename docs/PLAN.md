@@ -318,7 +318,7 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 | DG-7b | Done: receipt for paid orders, cancelled state, "approve again" notice after a reopen, revision label; no horizontal scroll at 375 px |
 | DG-10 | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's free plan (no cost; demo-mode AI; orders reset when the instance sleeps or redeploys, and every push to this branch redeploys) |
 | DG-11 | Done: README rewritten (quickstart, sandbox setup, tools used, §1.5 wording, screenshots); hosted URL added Nov 4 |
-| J-6 | Done: `docs/architecture.svg`, `docs/screenshots/` (payment shots retaken Nov 4 with real sandbox ids; retake the rest on the frozen build) |
+| J-6 | Done: `docs/architecture.svg`, `docs/screenshots/`. All retaken Nov 5 after the UI redesign, except the PayPal log in `6-sandbox-custom-id.png`. Shots 4 and 5 use the mock PayPal API until the redesign is deployed and a sandbox payment can be run on it |
 | J-5 | Prepared: recording checklist and shot list in `docs/VIDEO.md`. Recording is Nov 9–10 |
 | Extra | `npm run mock:paypal` + `npm run e2e`: 19 end-to-end checks of settle and re-check → approve → pay → void & reopen → pay → webhook capture without sandbox keys |
 | Extra | Nov 4, done on Dat's side at Dang's request: AI-7 `npm run eval` (report in `docs/eval/`; held-out only on the `prompt-locked` tag, once) and rate limits on the public host. First results: 10/16 recall (63%) on 5 completed runs, re-check fields 9/9, 8 new blocking findings on re-checks. The gateway key expired during the run, so `school-club` has no result |

@@ -34,8 +34,8 @@ The rate limits cap the damage while the key is set, but the key still shouldn't
       as `configured`. Load the app a few minutes early: a sleeping instance takes about a minute to wake, and waking
       also clears the order list.
 - [ ] Download `front-v2.png` from the link in the **Artwork** panel, ready to upload.
-- [ ] Required values at hand. Printed text: `year` = `2026`, `date` = `Sunday, May 17`, `url` = `riverside5k.org`.
-      Ink colors: `ink_colors` = `white, safety orange`.
+- [ ] Required values at hand. Printed text: **Year** = `2026`, **Date** = `Sunday, May 17`, **URL** = `riverside5k.org`.
+      Ink colors: **Ink colors** = `white, safety orange`.
 - [ ] Sandbox personal account email and password at hand; log out of PayPal in the browser first.
 - [ ] Browser at 1280×800, zoom 110%, bookmarks bar hidden, notifications off. Second browser profile (or private
       window) for the customer view.
