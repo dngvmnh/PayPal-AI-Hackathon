@@ -42,8 +42,8 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 | Task | State |
 |---|---|
 | DG-3 to DG-9, DG-7a, DG-7b, DG-11, DG-12, J-6 | Done |
-| DG-1: PayPal sandbox app + test accounts | **Not done; needs Dang's PayPal developer login** (steps in README → "PayPal sandbox setup") |
-| DG-2: live sandbox run | Code done; `npm run sandbox -- live` does the whole run (Nov 2). Verified only against the local stand-in (`npm run mock:paypal` + `npm run e2e`, 23 checks pass). **Needs DG-1** |
+| DG-1: PayPal sandbox app + test accounts | Done Nov 4; keys in `.env.local` |
+| DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Buyer step used the approval link; the proof page's PayPal button renders but its popup is not yet clicked through |
 | DG-10: deploy | `render.yaml` ready on Render's **free plan** (decided Nov 2, below), health check at `/api/health`. **Not deployed; needs Dang's Render account** |
 | J-5: video | Checklist and shot list in `docs/VIDEO.md`; recording is Nov 9–10 on the frozen build |
 

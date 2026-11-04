@@ -303,14 +303,14 @@ Estimates in days (d). **P**: **M**ust or **S**hould.
 
 | Task | State |
 |---|---|
-| DG-1 | **Waiting on Dang:** create the sandbox app + test accounts and fill in `.env.local` |
-| DG-2 | Code done; tested end to end against a local mock of the PayPal API. `npm run sandbox -- live` runs the live sandbox check (capture + void & reopen, `custom_id`, webhooks); passes against the mock. **Live run pending DG-1** |
+| DG-1 | Done (Nov 4): sandbox app and test accounts; keys in `.env.local` |
+| DG-2 | Code done; tested end to end against a local mock of the PayPal API. Live sandbox run passed Nov 4 with `npm run sandbox -- live`: authorize → capture and authorize → void & reopen, `custom_id` confirmed in PayPal (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`). Buyer step used the PayPal approval link; the proof page's PayPal button renders but its popup is not yet clicked through. **Sandbox dashboard screenshot still to take** |
 | DG-3 | Done: void-and-cancel and void-and-reopen (new iteration, new approval, new PayPal order); tested |
 | DG-4 | Done: artwork versions with sha256 and history; upload route; locked after authorization |
 | DG-5 | Done: approval saved with version hash, spec, artwork hashes, amount, waived exceptions; any change cancels it; authorize refuses a changed version |
 | DG-6 | Done: gate per §4.2 (failed/stale check, warnings, artwork findings, invalid evidence, reasons); waive/dismiss rules; lock |
 | DG-7a | Done: proof page shows spec, current artwork version, amount, exceptions; "Approve this version" before PayPal |
-| DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. `npm run sandbox -- webhook <url>` registers it. **Registering needs DG-1 and the public URL** |
+| DG-8 | Done: `/api/paypal/webhook` with signature verification, idempotent event handling. `npm run sandbox -- webhook <url>` registers it. **Registering needs the public URL (DG-10)** |
 | DG-9 | Done (basic): artwork upload, approval status, iterations with PayPal ids and events, capture / void buttons, history |
 | DG-12 | Done: 3 cases in `samples/heldout/` (format proposal `samples/FORMAT.md`, structural test `tests/samples.test.ts`) |
 | DG-7b | Done: receipt for paid orders, cancelled state, "approve again" notice after a reopen, revision label; no horizontal scroll at 375 px |
