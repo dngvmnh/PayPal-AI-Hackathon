@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/store.ts";
 import { currentArtworkHashes, paymentGate } from "@/lib/gate.ts";
 import { paypalConfigured } from "@/lib/paypal.ts";
+import { liveAiConfigured } from "@/lib/ai.ts";
 import { OrderWorkspace } from "@/app/components/OrderWorkspace.tsx";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     <OrderWorkspace
       order={order}
       gate={paymentGate(order)}
-      aiConfigured={Boolean(process.env.ANTHROPIC_API_KEY)}
+      aiConfigured={liveAiConfigured()}
       paypalConfigured={paypalConfigured()}
       checkStale={checkStale}
     />

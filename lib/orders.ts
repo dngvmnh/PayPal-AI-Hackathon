@@ -1,5 +1,6 @@
 import { hasObviousArtworkMismatch } from "./artwork-rules.ts";
 import { validateEvidence } from "./evidence.ts";
+import { codeCheckFindings } from "./spec-checks.ts";
 import { randomUUID } from "node:crypto";
 import { currentArtworkHashes, isLocked, paymentGate, versionHash, waivedExceptions, sha256 } from "./gate.ts";
 import type {
@@ -181,7 +182,7 @@ export function applyAnalysis(
   const newFindings: Finding[] = [];
   const severityRank = { info: 0, warning: 1, blocking: 2 };
 
-  for (const finding of ai.findings) {
+  for (const finding of [...ai.findings, ...codeCheckFindings(ai, o.sources)]) {
     const validation = validateEvidence(finding, o.sources);
     const requiresArtworkFix =
       finding.requiresArtworkFix === true || hasObviousArtworkMismatch(finding, o.sources);
