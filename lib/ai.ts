@@ -221,6 +221,13 @@ export function parseModelJson(text: string): AIAnalysis {
   // The gateway model leaves out fields it would set to null. "Unknown" must not fail the whole check.
   for (const spec of raw.proposedSpec ?? []) spec.value ??= null;
   for (const finding of raw.findings ?? []) finding.suggestedValue ??= null;
+  // A claim about a field that can't be required proves nothing, so it goes. A required field left without a claim
+  // stays unverified, so this can't pass an artwork check.
+  if (Array.isArray(raw.artworkClaims)) {
+    raw.artworkClaims = raw.artworkClaims.filter((claim: { field?: string }) =>
+      ["year", "date", "name", "url", "text_line", "ink_colors"].includes(claim.field ?? ""),
+    );
+  }
   for (const claim of raw.artworkClaims ?? []) claim.observed ??= null;
   if (raw.pricing) {
     raw.pricing.quantity ??= null;

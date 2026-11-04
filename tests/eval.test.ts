@@ -113,6 +113,21 @@ ${JSON.stringify({
   assert.equal(parsed.pricing.quantity, null);
 });
 
+test("an artwork claim about a field that can't be required is dropped, not fatal", () => {
+  const parsed = parseModelJson(JSON.stringify({
+    summary: "s",
+    proposedSpec: [],
+    findings: [],
+    artworkClaims: [
+      { findingId: "f1", field: "garment_color", expected: "navy", observed: "navy", matches: true },
+      { findingId: "f1", field: "year", expected: "2026", matches: false },
+    ],
+    pricing: { currency: "USD" },
+  }));
+  assert.deepEqual(parsed.artworkClaims?.map((claim) => claim.field), ["year"]);
+  assert.equal(parsed.artworkClaims?.[0].observed, null);
+});
+
 test("a reply missing a required field still fails", () => {
   assert.throws(() => parseModelJson(JSON.stringify({ summary: "s", findings: [] })));
 });
