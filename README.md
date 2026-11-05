@@ -100,11 +100,11 @@ npm run e2e                                            # terminal 3: 19 checks, 
 |---|---|
 | ![](docs/screenshots/2-ready-for-approval.png) | ![](docs/screenshots/3-proof-approve.png) |
 
-| Payment revisions (voided, then captured) | Customer receipt on a phone |
+| Sandbox capture and signed webhook events | Customer receipt on a phone |
 |---|---|
 | ![](docs/screenshots/4-payment-iterations.png) | ![](docs/screenshots/5-receipt-mobile.png) |
 
-_The two payment screenshots use the local stand-in for the PayPal API, so their ids start with `MOCK`. Real sandbox runs passed on the hosted app, including PayPal's signed webhook events; the log below is from one of them._
+_These screenshots show a PayPal sandbox payment on the hosted app on Nov 5, 2026: 1,425.00 USD captured, with signed authorization and capture webhook events recorded. The receipt shows the same approved version and PayPal order. The sample uses labelled saved AI results._
 
 The sandbox's API log shows the payment tied to one approved version, through `custom_id` = `order:revision:versionHash`:
 

@@ -170,8 +170,7 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
   fix came after the run and can't be re-measured. A number in that range, like a team numbered 2054 or "EST. 2019",
   still fails when a year is required, and the merchant can dismiss it.
 - **UI redesign (Nov 5):** neobrutalist restyle, in-page dialogs instead of browser prompts, a 5-step progress bar, the
-  proof link in the green banner, and a page for lost orders. Gate, payment and API code didn't change. Screenshots 4
-  and 5 still show `MOCK` ids: retake them on a real sandbox payment after deploying.
+  proof link in the green banner, and a page for lost orders. Gate, payment and API code didn't change. Screenshots 4 and 5 were retaken on Nov 5 from the hosted sandbox payment on order `18a5fd72`, with signed authorization and capture webhook events recorded.
 - **Hosted app:** runs `v0.9-freeze`. Auto-deploy is off on Render, and a deploy wipes orders, so don't deploy during the video.
 - **Wipes can split the records:** if the instance swaps or sleeps mid-payment, PayPal keeps the capture but the app
   loses the order (seen once, capture `5WT75366S8235982Y`, order `21405ca8`).
