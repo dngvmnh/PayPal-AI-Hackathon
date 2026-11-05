@@ -8,7 +8,7 @@ How the ProofPay demo video was made. Rules and the checklist for any re-recordi
 **Canva design:** [PayPal AI Hackathon](https://www.canva.com/design/DAHaCvWdRVY/c6QIuWS5NVrUii9cepAZDw/edit),
 `DAHaCvWdRVY`: six 1920×1080 pages, one video per page.
 
-**Export:** MP4, 1920×1080, 30 fps, 2:52 (172.01 s), 12.1 MB, with a silent audio track. No voice-over or music.
+**Export:** MP4, 1920×1080, 30 fps, 2:52 (172.01 s), 12.1 MB, with a silent audio track. No music. Voice-over script and steps: [`VOICEOVER.md`](VOICEOVER.md).
 
 ## Scenes
 

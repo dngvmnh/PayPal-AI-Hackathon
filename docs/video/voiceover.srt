@@ -1,0 +1,134 @@
+1
+00:00:00,200 --> 00:00:03,800
+A t-shirt order lives in three places.
+
+2
+00:00:04,200 --> 00:00:08,800
+The brief says 120 shirts.
+
+3
+00:00:09,200 --> 00:00:12,800
+But the customer emailed: we need 150 now.
+
+4
+00:00:13,200 --> 00:00:16,800
+And the artwork still says 2025.
+
+5
+00:00:17,200 --> 00:00:19,800
+Charge now, and it's wrong.
+
+6
+00:00:20,300 --> 00:00:25,800
+ProofPay reads the brief, the messages and the
+artwork together.
+
+7
+00:00:26,100 --> 00:00:33,900
+This run uses a saved AI result for the
+sample, so the demo needs no AI key.
+
+8
+00:00:34,200 --> 00:00:41,800
+Five issues block approval. Until they're
+settled, the customer can't be asked to pay.
+
+9
+00:00:42,200 --> 00:00:49,800
+Every finding quotes its sources: 120 in the
+brief, 150 in the email.
+
+10
+00:00:50,200 --> 00:00:55,800
+For text sources, code checks that each quote
+is really there.
+
+11
+00:00:56,200 --> 00:01:01,800
+On the artwork, it flags the wrong year, date
+and website.
+
+12
+00:01:02,200 --> 00:01:09,800
+The merchant settles every finding: confirm
+the value, waive it, or dismiss it as an AI
+error.
+
+13
+00:01:10,200 --> 00:01:16,800
+For the artwork, the merchant sets what it
+must show: the year, the date, the website.
+
+14
+00:01:17,200 --> 00:01:21,800
+Then uploads the corrected file as a new
+version.
+
+15
+00:01:22,200 --> 00:01:29,800
+The saved re-check compares field by field:
+what was expected, against what was read.
+
+16
+00:01:30,200 --> 00:01:35,800
+Everything is settled, so the order is ready
+for the customer at $1,425.
+
+17
+00:01:36,200 --> 00:01:42,800
+The customer sees the exact artwork version,
+the amount and the version hash.
+
+18
+00:01:43,200 --> 00:01:49,800
+Approving saves a hash of all of it. Any later
+change cancels the approval.
+
+19
+00:01:50,200 --> 00:01:57,800
+Then PayPal, in the sandbox: it authorizes the
+payment, but doesn't take the money yet.
+
+20
+00:01:58,200 --> 00:02:05,800
+The money is held until production starts, and
+the customer gets a receipt for this version.
+
+21
+00:02:06,200 --> 00:02:09,800
+Paid orders are locked.
+
+22
+00:02:10,200 --> 00:02:15,800
+When production starts, the merchant captures,
+and webhooks keep the status in sync.
+
+23
+00:02:16,200 --> 00:02:20,800
+Need a change? Void the hold and reopen the
+order.
+
+24
+00:02:21,200 --> 00:02:25,800
+New version, new approval, new payment.
+
+25
+00:02:26,200 --> 00:02:32,800
+Each payment points at one approved version,
+through the custom ID in PayPal's log.
+
+26
+00:02:33,100 --> 00:02:42,900
+On 3 held-out orders, one run each: 4 of 4 planted issues
+found, 0 false blocking findings, 3 of 4 artwork re-check
+fields as expected.
+
+27
+00:02:43,200 --> 00:02:47,800
+The model is qwen3-vl, with PayPal Orders,
+Payments and webhooks.
+
+28
+00:02:48,100 --> 00:02:51,900
+AI-assisted verification backed by merchant
+and customer confirmation.
