@@ -19,6 +19,8 @@ approves the artwork itself.
 
 > Built for the PayPal AI Hackathon 2026. PayPal **sandbox** only; no real money moves.
 
+**Demo video (2:52):** https://youtu.be/nZE4VfG551E ([MP4 copy](docs/video/ProofPay-demo.mp4))
+
 ![Merchant view: AI findings](docs/screenshots/1-findings.png)
 
 ## Quickstart for judges

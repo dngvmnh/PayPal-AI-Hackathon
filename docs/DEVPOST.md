@@ -111,6 +111,6 @@ sandbox. Add a gateway key to run live checks. The free instance sleeps when idl
 
 ## Before submitting
 
-- [ ] Video link (public, under 3:00) and repo link added; repo public, license visible in About.
+- [ ] Video link (https://youtu.be/nZE4VfG551E, public, under 3:00) and repo link added; repo public, license visible in About.
 - [ ] Model name still matches what the eval ran on.
 - [ ] Dang has reviewed the PayPal parts.

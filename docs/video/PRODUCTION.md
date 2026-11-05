@@ -3,12 +3,13 @@
 How the ProofPay demo video was made. Rules and the checklist for any re-recording are in
 [`docs/VIDEO.md`](../VIDEO.md).
 
-**Status (Nov 5):** cut finished and exported from Canva. Not yet on YouTube.
+**Status (Nov 5):** finished and public on YouTube: https://youtu.be/nZE4VfG551E. Copy with sound in the repo:
+[`ProofPay-demo.mp4`](ProofPay-demo.mp4).
 
 **Canva design:** [PayPal AI Hackathon](https://www.canva.com/design/DAHaCvWdRVY/c6QIuWS5NVrUii9cepAZDw/edit),
 `DAHaCvWdRVY`: six 1920×1080 pages, one video per page.
 
-**Export:** MP4, 1920×1080, 30 fps, 2:52 (172.01 s), 12.1 MB, with a silent audio track. No music. Voice-over script and steps: [`VOICEOVER.md`](VOICEOVER.md).
+**Export:** MP4, 1920×1080, 30 fps, 2:52 (172.01 s), 12.1 MB, with a silent audio track. No music. Voice-over script and steps: [`VOICEOVER.md`](VOICEOVER.md). The repo copy adds an audio track to this picture (15.8 MB, same length, frames match the export).
 
 ## Scenes
 

@@ -54,5 +54,6 @@ The rate limits cap the damage while the key is set, but the key still shouldn't
 
 ## After
 
-- [ ] Export at 1080p, check length < 3:00, upload to YouTube as **Public**, add the link to the README and Devpost.
+- [x] Export at 1080p, check length < 3:00, upload to YouTube as **Public** (https://youtu.be/nZE4VfG551E), add the link to the README.
+- [ ] Add the link to the Devpost form.
 - [ ] If keys were added for recording, confirm they are removed.
