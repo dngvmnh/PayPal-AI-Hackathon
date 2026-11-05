@@ -49,7 +49,7 @@ Read this first, then `docs/PLAN.md` (the agreed plan and task list) and `README
 | DG-2: live sandbox run | Passed Nov 4 with `npm run sandbox -- live` (capture `8CM7659941255383V`; voided authorization `0MK40771N78242326`; `custom_id` confirmed in PayPal). Repeated on the hosted app, plus one payment through the proof page's real PayPal button. Sandbox log screenshot: `docs/screenshots/6-sandbox-custom-id.png` |
 | DG-10: deploy | Done Nov 4: https://proofpay-vpw3.onrender.com on Render's **free plan** (decided Nov 2, below). Webhook `49U87712RS555412A` registered; signed events confirmed. Auto-deploy is off: deploy by hand from the Render dashboard, which wipes demo orders |
 | J-3: freeze | Done Nov 5: tag `v0.9-freeze` at `6531e8a`, deployed on Render |
-| J-5: video | Dat records it on the hosted app. Checklist and shot list in `docs/VIDEO.md`. Don't deploy during recording: it wipes orders |
+| J-5: video | Cut finished Nov 5 (2:52, 1080p, silent) in Canva design `DAHaCvWdRVY`; how it was made is in `docs/video/PRODUCTION.md`. Left: watch it, upload to YouTube as Public, add the link to the README and Devpost |
 
 **What else is in place:**
 - `README.md`: rewritten for judges, with the hosted URL and payment screenshots from a real sandbox run (Nov 4).
@@ -181,5 +181,5 @@ The previous session's network policy blocked `api-m.sandbox.paypal.com`, `api.r
 - **Plan checkpoints:**
   - Nov 3: minimum loop on Riverside;
   - Nov 5: feature freeze, tag `v0.9-freeze`;
-  - Nov 9–10: video, by Dat;
+  - Nov 9–10: watch the video cut, upload it to YouTube;
   - Nov 11: submit.
